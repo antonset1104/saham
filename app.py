@@ -1,4 +1,6 @@
 import io
+import sys
+import subprocess
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -8,10 +10,24 @@ import glob
 import time
 import re
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # IMPORT UNTUK AI OPENROUTER & GOOGLE
 from openai import OpenAI
 import google.generativeai as genai
+from mesin_ai import get_historical_summary, get_forensic_data
+import plotly.graph_objects as go
+from data_multi_aset import (
+    calculate_multi_asset_summary, load_multi_asset_portfolio,
+    save_multi_asset_portfolio, get_usd_idr_rate, get_gold_price_idr,
+    ASSET_CLASS_LABELS
+)
+from mesin_forecast import run_stock_forecast
+from notifikasi_telegram import is_telegram_configured, kirim_pesan_telegram, kirim_ringkasan_pasar
+import tracker_ai
+import scheduler_per_jam
 
 # ==========================================
 # 🧠 FUNGSI HAKIM AI (KLASEMEN GLOBAL DENGAN RADAR & MODE JSON)
@@ -69,85 +85,6 @@ def ai_hakim_klasemen(data_top15, api_key):
             continue 
             
     return f"Error_AI (Semua model aktif gagal eksekusi): {pesan_error_terakhir}"
-
-# ==========================================
-# 🧠 SISTEM ARSIP CERDAS (DATA HARIAN)
-# ==========================================
-def get_historical_summary(ticker):
-    arsip_files = glob.glob("Arsip_Data_Harian/screener_*.csv")
-    if not arsip_files: return None
-    arsip_files.sort(reverse=True)
-    arsip_files = arsip_files[:5]
-    
-    df_list = []
-    for file in arsip_files:
-        try:
-            cols = ["Waktu Update", "Ticker", "Harga (Rp)", "Volume", "Posisi VWAP", "OBV Trend", "Tekanan Bandar", "Fase Siklus Bandar", "Trend MA (5,20,50)"]
-            temp_df = pd.read_csv(file, usecols=lambda c: c in cols)
-            temp_df = temp_df[temp_df["Ticker"] == ticker]
-            if not temp_df.empty:
-                date_str = file.split("_")[-1].replace(".csv", "")
-                temp_df["Tanggal"] = date_str
-                df_list.append(temp_df)
-        except: pass
-    
-    if not df_list: return None
-    df_history = pd.concat(df_list, ignore_index=True)
-    df_history = df_history.sort_values(by=["Tanggal", "Waktu Update"])
-    
-    summary_text = f"REKAM JEJAK ARSIP HARIAN SAHAM {ticker}:\n\n"
-    for date, group in df_history.groupby("Tanggal"):
-        open_price = group.iloc[0]["Harga (Rp)"]
-        close_price = group.iloc[-1]["Harga (Rp)"]
-        max_vol = group["Volume"].max()
-        tekanan_akhir = group.iloc[-1]["Tekanan Bandar"]
-        siklus = group.iloc[-1]["Fase Siklus Bandar"]
-        summary_text += f"📅 {date} | Buka: {open_price} | Tutup: {close_price} | Max Vol Harian: {max_vol} | Tekanan Akhir: {tekanan_akhir} | Siklus Wyckoff: {siklus}\n"
-    return summary_text
-
-def get_forensic_data(ticker):
-    arsip_files = glob.glob("Arsip_Data_Harian/screener_*.csv")
-    if not arsip_files: return None
-    arsip_files.sort(reverse=True)
-    arsip_files = arsip_files[:5] 
-    
-    df_list = []
-    for file in arsip_files:
-        try:
-            cols = ["Waktu Update", "Ticker", "Harga (Rp)", "Volume", "Posisi VWAP", "OBV Trend", "Tekanan Bandar", "Fase Siklus Bandar", "Trend MA (5,20,50)", "Status BB", "RVOL (Anomali Vol)"]
-            temp_df = pd.read_csv(file, usecols=lambda c: c in cols)
-            temp_df = temp_df[temp_df["Ticker"] == ticker]
-            if not temp_df.empty:
-                date_str = file.split("_")[-1].replace(".csv", "")
-                temp_df["Tanggal"] = date_str
-                df_list.append(temp_df)
-        except: pass
-    
-    if not df_list: return None
-    df_history = pd.concat(df_list, ignore_index=True)
-    df_history = df_history.sort_values(by=["Tanggal", "Waktu Update"])
-    
-    tanggal_unik = sorted(df_history["Tanggal"].unique())
-    if len(tanggal_unik) > 1:
-        tanggal_unik = tanggal_unik[:-1] 
-        tanggal_unik = tanggal_unik[-3:] 
-    else:
-        return "Data historis sebelum hari ini belum tersedia di arsip."
-        
-    df_history = df_history[df_history["Tanggal"].isin(tanggal_unik)]
-    
-    summary_text = f"REKAM JEJAK H-3 SEBELUM MELEDAK SAHAM {ticker}:\n"
-    for date, group in df_history.groupby("Tanggal"):
-        close_price = group.iloc[-1]["Harga (Rp)"]
-        max_vol = group["Volume"].max()
-        tekanan_akhir = group.iloc[-1]["Tekanan Bandar"]
-        siklus = group.iloc[-1]["Fase Siklus Bandar"]
-        obv = group.iloc[-1]["OBV Trend"] if "OBV Trend" in group.columns else "N/A"
-        rvol = group.iloc[-1]["RVOL (Anomali Vol)"] if "RVOL (Anomali Vol)" in group.columns else "N/A"
-        bb = group.iloc[-1]["Status BB"] if "Status BB" in group.columns else "N/A"
-        
-        summary_text += f"📅 {date} | Tutup: {close_price} | Vol: {max_vol} | Tekanan: {tekanan_akhir} | Siklus: {siklus} | OBV: {obv} | RVOL: {rvol} | BB: {bb}\n"
-    return summary_text
 
 # ==========================================
 # 🤖 OTAK KECERDASAN BUATAN (OPENROUTER)
@@ -388,6 +325,30 @@ st.markdown("""
     .stTabs [data-baseweb="tab-list"] { gap: 24px; }
     .stTabs [data-baseweb="tab"] { height: 50px; font-weight: 600; }
     .view-mode-container { background-color: #0f172a; padding: 10px 20px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #334155; }
+    @keyframes pulse-radar {
+        0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7); border-color: #06b6d4; }
+        50% { box-shadow: 0 0 0 12px rgba(6, 182, 212, 0); border-color: #38bdf8; }
+        100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); border-color: #06b6d4; }
+    }
+    @keyframes spin-slow {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .update-anim-box {
+        border: 2px solid #06b6d4;
+        background: linear-gradient(135deg, #082f49 0%, #0f172a 100%);
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 15px;
+        text-align: center;
+        animation: pulse-radar 2s infinite;
+    }
+    .radar-icon {
+        display: inline-block;
+        font-size: 28px;
+        animation: spin-slow 3s linear infinite;
+        margin-bottom: 6px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -489,12 +450,19 @@ def manual_override(): st.session_state.preset_selector = "Matikan Preset (Manua
 @st.cache_data(ttl=10)
 def load_data_saham():
     if not os.path.exists(FILE_HASIL): return pd.DataFrame()
-    df = pd.read_csv(FILE_HASIL)
+    try:
+        df = pd.read_csv(FILE_HASIL)
+    except Exception:
+        return pd.DataFrame()
+        
     if os.path.exists(FILE_AKUISISI):
-        df_akuisisi = pd.read_csv(FILE_AKUISISI)
-        if "Status Akuisisi" in df.columns: df = df.drop(columns=["Status Akuisisi"])
-        df = pd.merge(df, df_akuisisi, on="Ticker", how="left")
-        df["Status Akuisisi"] = df["Status Akuisisi"].fillna("TIDAK ADA")
+        try:
+            df_akuisisi = pd.read_csv(FILE_AKUISISI)
+            if "Status Akuisisi" in df.columns: df = df.drop(columns=["Status Akuisisi"])
+            df = pd.merge(df, df_akuisisi, on="Ticker", how="left")
+            df["Status Akuisisi"] = df["Status Akuisisi"].fillna("TIDAK ADA")
+        except Exception:
+            df["Status Akuisisi"] = "TIDAK ADA"
     else: df["Status Akuisisi"] = "TIDAK ADA"
     return df
 
@@ -517,15 +485,177 @@ if not df_hasil.empty and "Terakhir Update" in df_hasil.columns:
         </div>
     """, unsafe_allow_html=True)
 
-if st.sidebar.button("🔃 Sync & Muat Ulang Data Server", use_container_width=True):
-    with st.spinner("Menarik data terbaru dari GitHub Server..."):
-        try:
-            os.system("git pull origin main") 
-            time.sleep(2) 
-        except Exception as e:
-            st.sidebar.error(f"Gagal Sync: {e}")
+LOCK_UPDATE_FILE = "sedang_update.lock"
+is_updating = os.path.exists(LOCK_UPDATE_FILE)
+
+# Deteksi transisi: sebelumnya update aktif tapi lock file sudah dihapus -> BERHASIL SELESAI
+if st.session_state.get("is_updating_saham") and not is_updating:
+    st.session_state["is_updating_saham"] = False
+    st.session_state["just_completed_update"] = True
     st.cache_data.clear()
-    st.rerun()
+
+if is_updating:
+    st.session_state["is_updating_saham"] = True
+    st.session_state["just_completed_update"] = False
+
+# --- AUTO-TRIGGER KETIKA GANTI HARI & JAM BURSA AKTIF ---
+now_dt = datetime.now()
+tgl_sekarang_str = now_dt.strftime("%Y-%m-%d")
+is_hari_bursa = now_dt.weekday() < 5 # Senin-Jumat (0-4)
+is_jam_bursa = (now_dt.hour >= 9) and (now_dt.hour <= 16)
+
+tgl_data_terakhir = None
+if not df_hasil.empty and "Terakhir Update" in df_hasil.columns:
+    try:
+        raw_tgl = str(df_hasil["Terakhir Update"].iloc[0]).split()[0]
+        tgl_data_terakhir = raw_tgl
+    except:
+        pass
+
+perlu_update_hari_baru = (
+    is_hari_bursa and 
+    is_jam_bursa and 
+    tgl_data_terakhir is not None and 
+    tgl_data_terakhir < tgl_sekarang_str and 
+    not is_updating and
+    not st.session_state.get("auto_triggered_today")
+)
+
+if perlu_update_hari_baru:
+    st.session_state["auto_triggered_today"] = True
+    py_bin = sys.executable or "./.venv/bin/python"
+    try:
+        subprocess.Popen(
+            [py_bin, "update_data.py"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True
+        )
+        st.session_state["is_updating_saham"] = True
+        st.session_state["just_completed_update"] = False
+        st.toast("🌅 Hari baru terdeteksi! Memulai sinkronisasi data IHSG hari ini...", icon="🚀")
+        time.sleep(1)
+        st.rerun()
+    except Exception as err_auto:
+        pass
+
+# --- AUTO-SYNC MONITOR DATA BARU DI WEB (SETIAP 15 DETIK) ---
+@st.fragment(run_every="15s")
+def sync_otomatis_data_web():
+    current_mtime = os.path.getmtime(FILE_HASIL) if os.path.exists(FILE_HASIL) else 0
+    if "cached_file_mtime" not in st.session_state:
+        st.session_state["cached_file_mtime"] = current_mtime
+    elif current_mtime > st.session_state["cached_file_mtime"]:
+        st.session_state["cached_file_mtime"] = current_mtime
+        st.cache_data.clear()
+        st.rerun(scope="app")
+
+sync_otomatis_data_web()
+
+with st.sidebar.expander("⚡ Update Data Pasar (Stockbit & Yahoo)", expanded=True):
+    if is_updating:
+        st.markdown("""
+            <div class="update-anim-box">
+                <div class="radar-icon">📡</div>
+                <h4 style="margin:0; color:#38bdf8; font-size:14px; font-weight:700;">PROSES SEDANG BERJALAN</h4>
+                <p style="margin:6px 0 0 0; color:#94a3b8; font-size:11px;">Menyedot data Stockbit, menghitung 45+ indikator, dan machine learning...</p>
+            </div>
+        """, unsafe_allow_html=True)
+        st.caption("🔄 Halaman akan refresh otomatis hingga data selesai diproses.")
+        
+        # Reset darurat jika lock file tertinggal > 10 menit
+        if os.path.exists(LOCK_UPDATE_FILE):
+            lock_age = time.time() - os.path.getmtime(LOCK_UPDATE_FILE)
+            if lock_age > 600:
+                if st.button("⚠️ Batalkan / Hapus Kunci", use_container_width=True):
+                    try: os.remove(LOCK_UPDATE_FILE)
+                    except: pass
+                    st.session_state["is_updating_saham"] = False
+                    st.rerun()
+    else:
+        if st.session_state.get("just_completed_update"):
+            st.success("✅ **Data Saham Selesai Diperbarui!**")
+            
+        mode_opsi = st.radio(
+            "Cakupan Update:",
+            ["Uji Cepat (15 Saham)", "Seluruh IHSG (900+ Saham)"],
+            index=0,
+            key="pilihan_mode_update"
+        )
+        
+        btn_run_update = st.button("🚀 Tarik Data Stockbit Sekarang", use_container_width=True, type="primary", key="btn_tarik_data_sb")
+        if btn_run_update:
+            py_bin = sys.executable or "./.venv/bin/python"
+            cmd = [py_bin, "update_data.py"]
+            if "15 Saham" in mode_opsi:
+                cmd.extend(["--limit", "15"])
+            
+            try:
+                # Jalankan skrip di background secara asinkron
+                subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    start_new_session=True
+                )
+                st.session_state["is_updating_saham"] = True
+                st.session_state["just_completed_update"] = False
+                st.rerun()
+            except Exception as err:
+                st.error(f"Gagal memulai update: {err}")
+
+col_sync1, col_sync2 = st.sidebar.columns(2)
+with col_sync1:
+    if st.button("🔄 Refresh Web", use_container_width=True, help="Bersihkan cache dan muat ulang database CSV lokal"):
+        st.cache_data.clear()
+        st.rerun()
+with col_sync2:
+    if st.button("🌐 Pull GitHub", use_container_width=True, help="Tarik perubahan data terbaru dari repository GitHub"):
+        with st.spinner("Git pull..."):
+            try:
+                os.system("git pull origin main")
+                time.sleep(1)
+            except Exception as e:
+                st.error(f"Error: {e}")
+        st.cache_data.clear()
+        st.rerun()
+
+# --- KONTROL SCHEDULER OTOMATIS PER JAM ---
+sched_status = scheduler_per_jam.get_scheduler_status()
+is_sched_active = sched_status.get("is_running", False)
+
+with st.sidebar.expander("🔁 Scheduler Otomatis Per Jam", expanded=is_sched_active):
+    if is_sched_active:
+        st.markdown("""
+            <div style="background-color: #064e3b; border: 1px solid #10b981; border-radius: 6px; padding: 10px; text-align: center; margin-bottom: 10px;">
+                <span style="color: #34d399; font-weight: 700; font-size: 13px;">🟢 STATUS: AKTIF BERJALAN</span><br>
+                <span style="color: #a7f3d0; font-size: 11px;">Update seluruh IHSG otomatis setiap jam bursa</span>
+            </div>
+        """, unsafe_allow_html=True)
+        st.caption(f"🕒 Terakhir Jalan: **{sched_status.get('last_run', '-')}**")
+        st.caption(f"⏳ Jadwal Berikutnya: **{sched_status.get('next_run', '-')}**")
+        st.caption(f"📝 Status: {sched_status.get('last_status', '-')}")
+        if st.button("⏹️ Hentikan Scheduler", use_container_width=True, type="secondary", key="btn_stop_sched"):
+            scheduler_per_jam.stop_scheduler_daemon()
+            st.success("Scheduler dihentikan.")
+            time.sleep(1)
+            st.rerun()
+    else:
+        st.markdown("""
+            <div style="background-color: #1e293b; border: 1px solid #475569; border-radius: 6px; padding: 10px; text-align: center; margin-bottom: 10px;">
+                <span style="color: #94a3b8; font-weight: 700; font-size: 13px;">⚪ STATUS: NONAKTIF</span><br>
+                <span style="color: #cbd5e1; font-size: 11px;">Otomatisasi per jam sedang mati</span>
+            </div>
+        """, unsafe_allow_html=True)
+        st.caption("Pemicu pembaruan data seluruh IHSG setiap 1 jam pada jam perdagangan bursa IDX (09:00 - 16:00 WIB).")
+        if st.button("▶️ Aktifkan Scheduler Per Jam", use_container_width=True, type="primary", key="btn_start_sched"):
+            sukses, msg = scheduler_per_jam.start_scheduler_daemon()
+            if sukses:
+                st.success(msg)
+            else:
+                st.info(msg)
+            time.sleep(1)
+            st.rerun()
 
 st.sidebar.title("⚙️ Preset Filter Cepat")
 st.sidebar.info("Gunakan **'BSJP (Beli Sore 15:30)'** untuk mencari saham yang mantap dibeli sebelum penutupan bursa!")
@@ -576,6 +706,74 @@ with st.sidebar.expander("🛠️ Manajemen Preset Kustom"):
                 st.success("Preset dihapus!")
                 st.rerun()
         else: st.info("Belum ada preset kustom.")
+
+with st.sidebar.expander("📲 Notifikasi Telegram Bot"):
+    from notifikasi_telegram import get_telegram_config, simpan_konfigurasi_telegram
+    tok_curr, cid_curr = get_telegram_config()
+    is_cfg = is_telegram_configured()
+    
+    if is_cfg:
+        st.success("✅ Bot Telegram Terhubung")
+    else:
+        st.info("💡 Hubungkan Telegram untuk menerima alert real-time ke Android.")
+        
+    input_token = st.text_input("Bot Token:", value=tok_curr, type="password", placeholder="Contoh: 123456:ABC-DEF...", help="Dapatkan dari @BotFather di aplikasi Telegram Android")
+    input_cid = st.text_input("Chat ID:", value=cid_curr, placeholder="Contoh: 123456789", help="Dapatkan dari @userinfobot di aplikasi Telegram Android")
+    
+    col_tg1, col_tg2 = st.columns(2)
+    with col_tg1:
+        if st.button("💾 Simpan", use_container_width=True, key="btn_save_tg_config"):
+            if input_token.strip() and input_cid.strip():
+                if simpan_konfigurasi_telegram(input_token.strip(), input_cid.strip()):
+                    st.success("Tersimpan!")
+                    time.sleep(0.5)
+                    st.rerun()
+                else:
+                    st.error("Gagal simpan ke .env")
+            else:
+                st.warning("Isi Token & Chat ID!")
+                
+    with col_tg2:
+        if st.button("🔔 Tes Kirim", use_container_width=True, key="btn_test_tg"):
+            t_pakai = input_token.strip() or tok_curr
+            c_pakai = input_cid.strip() or cid_curr
+            if t_pakai and c_pakai:
+                with st.spinner("Mengirim pesan tes..."):
+                    berhasil = kirim_pesan_telegram(
+                        "🔔 <b>Tes Notifikasi AlgoTrade Screener IHSG</b>\nKoneksi bot Telegram Anda aktif dan siap mengirim alert!",
+                        token=t_pakai,
+                        chat_id=c_pakai
+                    )
+                    if berhasil:
+                        st.toast("Notifikasi Telegram terkirim ke Android!", icon="📲")
+                        st.success("Pesan terkirim ke Telegram!")
+                    else:
+                        st.error("Gagal kirim. Pastikan sudah klik START di bot Anda.")
+            else:
+                st.warning("Konfigurasi belum lengkap.")
+                
+    if is_cfg:
+        st.markdown("---")
+        st.caption("⏰ **Jadwal BSJP Sore:** Otomatis dikirim ke Telegram setiap hari bursa pukul **15:30 WIB**.")
+        from notifikasi_telegram import kirim_rekomendasi_rumus_2_dan_9, kirim_update_realtime_pagi_1000
+        if st.button("🦅 Kirim Alert BSJP Sore Sekarang", use_container_width=True, key="btn_kirim_bsjp_manual"):
+            with st.spinner("Menyaring saham Rumus 2 & 9..."):
+                sukses_b, msg_b = kirim_rekomendasi_rumus_2_dan_9(df_screener=df_hasil, force=True)
+                if sukses_b:
+                    st.success("Rekomendasi terkirim ke Telegram!")
+                    st.toast("Rekomendasi BSJP terkirim ke Telegram!", icon="🦅")
+                else:
+                    st.error(f"Gagal kirim: {msg_b}")
+
+        st.caption("🌅 **Jadwal Evaluasi Pagi:** Otomatis dikirim ke Telegram setiap hari bursa pukul **10:00 WIB**.")
+        if st.button("🌅 Kirim Update Realtime Pagi Sekarang", use_container_width=True, key="btn_kirim_pagi_manual"):
+            with st.spinner("Memeriksa harga realtime saham BSJP..."):
+                sukses_p, msg_p = kirim_update_realtime_pagi_1000(df_screener=df_hasil, force=True)
+                if sukses_p:
+                    st.success("Update realtime pagi terkirim ke Telegram!")
+                    st.toast("Update realtime BSJP terkirim ke Telegram!", icon="🌅")
+                else:
+                    st.error(f"Gagal kirim: {msg_p}")
 
 st.title("⚡ AlgoTrade Screener - IHSG Ultimate")
 st.markdown("Detektor Jejak Bandar, Anomali Volume, & Strategi BSJP.")
@@ -648,14 +846,44 @@ def render_strategy_table(df_subset, file_name):
     else: st.info("🔍 Belum ada pergerakan saham yang memenuhi kriteria strategi ini pada sesi saat ini.")
 
 # ==============================================================================
+# BANNER STATUS UPDATE AKTIF & NOTIFIKASI SELESAI
+# ==============================================================================
+if is_updating:
+    st.markdown("""
+        <div class="update-anim-box" style="margin-top: 10px; margin-bottom: 20px;">
+            <div class="radar-icon">📡</div>
+            <h3 style="margin: 0; color: #38bdf8; font-size: 17px; font-weight: 800;">PROSES SINKRONISASI DATA PASAR SEDANG BERJALAN</h3>
+            <p style="margin: 8px 0 0 0; color: #94a3b8; font-size: 13px;">
+                Mesin sedang menyedot data live dari <b>Stockbit & Yahoo Finance</b>, menganalisis bandarmologi, dan mendeteksi anomali volume.<br>
+                <span style="color: #06b6d4; font-size: 12px; font-weight: 600;">🔄 Halaman web akan memuat ulang hasil secara otomatis begitu proses tuntas.</span>
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+elif st.session_state.get("just_completed_update"):
+    c_notif1, c_notif2 = st.columns([5, 1])
+    with c_notif1:
+        st.balloons()
+        st.success("🎉 **Pembaruan Data Pasar Berhasil Selesai!** Seluruh indikator teknikal, broker summary Stockbit, dan Machine Learning telah diperbarui.")
+    with c_notif2:
+        if st.button("Tutup ✕", key="btn_close_notif_done"):
+            st.session_state["just_completed_update"] = False
+            st.rerun()
+
+# Polling loop otomatis saat update berjalan: jeda 2.5 detik lalu rerun
+if is_updating:
+    time.sleep(2.5)
+    st.rerun()
+
+# ==============================================================================
 # RENDER 4 TABS UTAMA (VERSI BERSIH 100%)
 # ==============================================================================
 if not df_hasil.empty:
-    tab1, tab2, tab3, tab4 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📊 Market Overview", 
         "📌 Screener Utama", 
         "🤖 Asisten AI Spesial", 
-        "💼 Portofolio Bot"
+        "💼 Portofolio Bot",
+        "🌐 Multi-Aset & Forecast AI"
     ])
     
     # ==========================================================================
@@ -894,7 +1122,11 @@ if not df_hasil.empty:
             cond_v9 = (cond_squeeze & (df_hasil.get('Risk/Reward Ratio', '') == 'Sangat Menarik (> 1:3)'))
             df_v9 = df_hasil[cond_v9].copy() if not df_hasil.empty else pd.DataFrame()
 
-            tab_screener, tab_ai = st.tabs(["🎯 Screener Spesial", "🧠 Asisten AI"])
+            tab_screener, tab_ai, tab_tracker = st.tabs([
+                "🎯 Screener Spesial", 
+                "🧠 Asisten AI", 
+                "📈 Tracker Akurasi 9 Rumus (Per Jam & Harian)"
+            ])
             
             with tab_screener:
                 pilihan_v = st.selectbox(
@@ -1198,107 +1430,179 @@ if not df_hasil.empty:
                                     st.info("💡 **TUGAS ANDA:** Salin nama model yang berstatus '✅ Lulus & Patuh', dan kita gunakan nama pasti itu untuk skrip turnamen!")
 
                 elif "Pemburu ARA" in pilihan_ai:
-                    st.subheader("🎯 Pemburu ARA (Sistem Kualifikasi Lama)")
-                    st.info("💡 **Fitur Auto-Pilot 9 Rumus (Klasemen Global) telah dipindahkan ke menu '🤖 AI Bandar'.** Silakan buka menu tersebut untuk menggunakan mode pencetak Tabel Spreadsheet secara otomatis!")
+                    st.subheader("🎯 Pemburu ARA (Sistem Kualifikasi)")
+                    st.info("💡 **Fitur Auto-Pilot 9 Rumus (Klasemen Global & AI) telah dipusatkan pada menu '🤖 AI Bandar'.**")
+                    st.markdown("""
+                    Silakan pilih mode **'🤖 AI Bandar (Persiapan BSJP)'** pada menu dropdown di atas untuk:
+                    - Menjalankan **Auto-Pilot 9 Rumus** dengan seleksi Top 15 data keras dan Hakim AI.
+                    - Mencetak **Tabel Master Portofolio** siap salin ke Spreadsheet.
+                    - Menghasilkan file sinyal otomatis untuk eksekusi bot simulator.
+                    """)
 
-                    # ==============================================================
-                    # 🛸 TOMBOL AUTO-PILOT ULTIMATE (KLASEMEN GLOBAL)
-                    # ==============================================================
-                    st.markdown("### 🛸 Mode Auto-Pilot (Super AI & Klasemen)")
-                    st.markdown("Sistem akan menyeleksi 15 saham terbaik per rumus secara global, lalu AI akan memilih Top 5 untuk dicetak ke tabel Spreadsheet.")
+            with tab_tracker:
+                st.markdown("### 📈 Evaluasi & Validasi Akurasi Prediksi 9 Rumus AI")
+                st.markdown("<div class='bandar-box-green'><b>💡 CARA KERJA TRACKER:</b> Sistem otomatis menyimpan snapshot setiap saham yang masuk ke dalam 9 Rumus BSJP pada jam bursa (per jam), merekam jejak harga hari H, dan memverifikasi realisasi harga di keesokan harinya (T+1) untuk membuktikan apakah rekomendasi akurat menghasilkan cuan (Hit TP) atau meleset.</div>", unsafe_allow_html=True)
+                
+                col_trk1, col_trk2 = st.columns([3, 1])
+                with col_trk1:
+                    st.caption("Data di bawah ini mencatat histori rekomendasi per jam dan memvalidasi kenaikan harga T+1.")
+                with col_trk2:
+                    if st.button("🔄 Evaluasi Akurasi Sekarang", use_container_width=True, key="btn_eval_tracker_now", help="Periksa harga pasar terkini untuk mengevaluasi rekomendasi kemarin"):
+                        with st.spinner("Mengevaluasi realisasi harga saham..."):
+                            jml_eval = tracker_ai.evaluasi_akurasi_rekomendasi(df_hasil)
+                            st.cache_data.clear()
+                            st.success(f"Berhasil mengevaluasi {jml_eval} saham!")
+                            time.sleep(1)
+                            st.rerun()
+
+                # Hitung Statistik Ringkasan
+                stat_data = tracker_ai.hitung_ringkasan_statistik()
+                
+                # Metric Cards
+                m1, m2, m3, m4 = st.columns(4)
+                with m1:
+                    st.markdown(f"""
+                        <div class="metric-container">
+                            <span style="font-size:12px; color:#94a3b8; font-weight:600;">🎯 AKURASI TOTAL (WIN RATE)</span>
+                            <h2 style="margin:5px 0; color:#10b981; font-size:28px;">{stat_data['win_rate_total']}%</h2>
+                            <span style="font-size:11px; color:#6ee7b7;">{stat_data['total_akurat']} Akurat / {stat_data['total_evaluasi']} Terevaluasi</span>
+                        </div>
+                    """, unsafe_allow_html=True)
+                with m2:
+                    st.markdown(f"""
+                        <div class="metric-container">
+                            <span style="font-size:12px; color:#94a3b8; font-weight:600;">📈 RATA-RATA MAX GAIN BESOK</span>
+                            <h2 style="margin:5px 0; color:#38bdf8; font-size:28px;">+{stat_data['avg_max_gain']}%</h2>
+                            <span style="font-size:11px; color:#bae6fd;">Potensi Cuan Maksimal T+1</span>
+                        </div>
+                    """, unsafe_allow_html=True)
+                with m3:
+                    st.markdown(f"""
+                        <div class="metric-container">
+                            <span style="font-size:12px; color:#94a3b8; font-weight:600;">🏆 RUMUS PALING AKURAT (#1)</span>
+                            <h2 style="margin:5px 0; color:#facc15; font-size:20px;">{stat_data['rumus_terbaik']}</h2>
+                            <span style="font-size:11px; color:#fef08a;">Berdasarkan Tingkat Keberhasilan</span>
+                        </div>
+                    """, unsafe_allow_html=True)
+                with m4:
+                    st.markdown(f"""
+                        <div class="metric-container">
+                            <span style="font-size:12px; color:#94a3b8; font-weight:600;">📦 TOTAL SAHAM TERPANTAU</span>
+                            <h2 style="margin:5px 0; color:#f8fafc; font-size:28px;">{stat_data['total_rekomendasi']}</h2>
+                            <span style="font-size:11px; color:#94a3b8;">Saham Masuk Radar AI</span>
+                        </div>
+                    """, unsafe_allow_html=True)
+
+                # Grafik Perbandingan Akurasi Antar Rumus (Plotly Bar Chart)
+                if stat_data["stat_per_rumus"]:
+                    st.markdown("#### 📊 Perbandingan Tingkat Kemenangan (*Win Rate %*) Antar 9 Rumus")
                     
-                    if st.button("🛸 Jalankan Auto-Pilot Ultimate", type="primary"):
-                        if not GEMINI_API_KEY:
-                            st.error("❌ Kunci API GEMINI belum dipasang!")
-                        else:
-                            daftar_rumus = {
-                                1: df_v1, 2: df_v2, 3: df_v3, 
-                                4: df_v4, 5: df_v5, 6: df_v6, 
-                                7: df_v7, 8: df_v8, 9: df_v9
-                            }
-                            
-                            progress_bar = st.progress(0)
-                            status_teks = st.empty()
-                            
-                            # Siapkan keranjang untuk membuat tabel spreadsheet di akhir
-                            keranjang_spreadsheet = {f"RUMUS {i}": [] for i in range(1, 10)}
-                            
-                            for i in range(1, 10):
-                                df_target = daftar_rumus[i]
-                                progress_bar.progress(i / 9.0)
-                                
-                                if len(df_target) == 0:
-                                    status_teks.warning(f"⏭️ Rumus {i} kosong. Dilewati.")
-                                    time.sleep(1)
-                                    continue
-                                    
-                                status_teks.info(f"🔄 **Algojo Python bekerja pada Rumus {i}**... (Mengekstrak data global)")
-                                
-                                saham_valid = df_target['Ticker'].tolist()
-                                df_seleksi = df_hasil[df_hasil['Ticker'].isin(saham_valid)].copy()
-                                
-                                df_seleksi['Score_Num'] = pd.to_numeric(df_seleksi['Total Score'], errors='coerce').fillna(0)
-                                
-                                # TAHAP 1: KLASEMEN GLOBAL (Pilih Top 15 berdasarkan Data Keras)
-                                df_sorted = df_seleksi.sort_values(by=['Score_Num', 'Volume', 'Change (%)'], ascending=[False, False, False])
-                                top_15 = df_sorted.head(15)
-                                
-                                data_kirim_ai = {}
-                                for _, row in top_15.iterrows():
-                                    data_kirim_ai[row['Ticker']] = {
-                                        'Harga': row.get('Harga (Rp)', 0),
-                                        'Volume': row.get('Volume', 0),
-                                        'Score': row.get('Score_Num', 0),
-                                        'Change_Pct': row.get('Change (%)', 0),
-                                        'Tekanan_Bandar': row.get('Tekanan Bandar', 'Normal'),
-                                        'Broksum': row.get('Broksum', 'Normal')
-                                    }
-                                    
-                                status_teks.warning(f"🧠 Rumus {i} - Sidang Grand Final AI... (Menyaring 5 Jawara dari Top 15)")
-                                
-                                # TAHAP 2: HAKIM AI (Pilih Top 5 Mutlak)
-                                try:
-                                    hasil_mentah = ai_hakim_klasemen(data_kirim_ai, GEMINI_API_KEY)
-                                    teks_bersih = hasil_mentah.replace('```json', '').replace('```', '').strip()
-                                    pencarian_json = re.search(r'\[\s*\{.*?\}\s*\]', teks_bersih, re.DOTALL)
-                                    
-                                    if pencarian_json:
-                                        hasil_json = json.loads(pencarian_json.group(0))
-                                        df_tampil = pd.DataFrame(hasil_json)
-                                        
-                                        # Ambil ticker untuk masuk ke tabel spreadsheet
-                                        if 'Ticker' in df_tampil.columns:
-                                            jawara_tickers = df_tampil['Ticker'].tolist()
-                                        else:
-                                            jawara_tickers = []
-                                            
-                                        # Batasi maksimal 5, jika kurang tambahkan string kosong "" agar tabel rata
-                                        jawara_tickers = (jawara_tickers + ["", "", "", "", ""])[:5] 
-                                        keranjang_spreadsheet[f"RUMUS {i}"] = jawara_tickers
-                                        
-                                        # Simpan sinyal untuk dieksekusi bot malam ini
-                                        if 'Target_TP' in df_tampil.columns and 'Target_CL' in df_tampil.columns:
-                                            df_sinyal = df_tampil[['Ticker', 'Target_TP', 'Target_CL']]
-                                            df_sinyal.to_csv(f"Database/sinyal_ai_rumus_{i}.csv", index=False)
-                                            
-                                    else:
-                                        st.error(f"❌ Rumus {i} Gagal (AI tidak merespon JSON yang benar).")
-                                        keranjang_spreadsheet[f"RUMUS {i}"] = ["", "", "", "", ""]
-                                        
-                                except Exception as e:
-                                    st.error(f"❌ Error pada Rumus {i}: {e}")
-                                    keranjang_spreadsheet[f"RUMUS {i}"] = ["", "", "", "", ""]
-                                
-                                time.sleep(2) # Nafas untuk API Google
-                            
-                            status_teks.success("🎉 MISSION ACCOMPLISHED! SELURUH RUMUS BERHASIL DISARING!")
-                            st.balloons()
-                            
-                            # TAHAP 3: CETAK TABEL SPREADSHEET (Siap Copy-Paste)
-                            st.markdown("### 📋 Tabel Master Portofolio (Siap Salin)")
-                            df_spreadsheet = pd.DataFrame(keranjang_spreadsheet)
-                            
-                            st.data_editor(df_spreadsheet, use_container_width=True, hide_index=True)
+                    df_chart_stat = pd.DataFrame([
+                        {
+                            "Rumus": v["nama"],
+                            "Judul": v["judul"],
+                            "Win Rate (%)": v["win_rate"],
+                            "Avg Max Gain (%)": v["avg_max_gain"],
+                            "Total Saham": v["total"]
+                        }
+                        for k, v in stat_data["stat_per_rumus"].items()
+                    ])
+                    
+                    fig_winrate = go.Figure()
+                    fig_winrate.add_trace(go.Bar(
+                        x=df_chart_stat["Rumus"],
+                        y=df_chart_stat["Win Rate (%)"],
+                        text=[f"{val}%" if tot > 0 else "0" for val, tot in zip(df_chart_stat["Win Rate (%)"], df_chart_stat["Total Saham"])],
+                        textposition='auto',
+                        marker=dict(
+                            color=df_chart_stat["Win Rate (%)"],
+                            colorscale='Viridis',
+                            showscale=True,
+                            colorbar=dict(title="Win Rate %")
+                        ),
+                        hovertext=[f"{r}: {j}<br>Win Rate: {w}%<br>Avg Gain: +{g}% ({t} saham)" for r, j, w, g, t in zip(df_chart_stat["Rumus"], df_chart_stat["Judul"], df_chart_stat["Win Rate (%)"], df_chart_stat["Avg Max Gain (%)"], df_chart_stat["Total Saham"])],
+                        hoverinfo="text"
+                    ))
+                    fig_winrate.update_layout(
+                        height=350,
+                        margin=dict(l=20, r=20, t=30, b=20),
+                        paper_bgcolor="rgba(0,0,0,0)",
+                        plot_bgcolor="rgba(15,23,42,0.6)",
+                        yaxis=dict(title="Win Rate (%)", range=[0, 105], gridcolor="#334155"),
+                        xaxis=dict(title="Kategori Rumus BSJP", gridcolor="#334155"),
+                        font=dict(color="#f8fafc")
+                    )
+                    st.plotly_chart(fig_winrate, use_container_width=True)
+
+                # Tabel Rincian Tracker
+                st.markdown("#### 📋 Tabel Riwayat Rekomendasi Per Jam & Hasil Realisasi Besok")
+                df_tracker_view = tracker_ai.get_tracker_dataframe()
+                
+                if not df_tracker_view.empty:
+                    col_f1, col_f2, col_f3 = st.columns([2, 2, 2])
+                    with col_f1:
+                        pilih_rumus_filter = st.selectbox(
+                            "Filter Rumus:",
+                            ["Semua Rumus"] + [f"{info['nama']} - {info['judul']}" for info in tracker_ai.DAFTAR_RUMUS.values()],
+                            key="filter_rumus_tracker"
+                        )
+                    with col_f2:
+                        pilih_status_filter = st.selectbox(
+                            "Filter Status Akurasi:",
+                            ["Semua Status", "🎯 AKURAT (HIT TP)", "⚖️ NETRAL (BEP)", "❌ MELESET (CL)", "⏳ MENUNGGU T+1"],
+                            key="filter_status_tracker"
+                        )
+                    with col_f3:
+                        cari_ticker = st.text_input("Cari Saham (Ticker):", placeholder="Contoh: BBRI", key="cari_ticker_tracker").strip().upper()
+
+                    # Terapkan filter
+                    df_filtered = df_tracker_view.copy()
+                    if pilih_rumus_filter != "Semua Rumus":
+                        df_filtered = df_filtered[df_filtered["Rumus"] == pilih_rumus_filter]
+                    if pilih_status_filter != "Semua Status":
+                        df_filtered = df_filtered[df_filtered["Status Akurasi"] == pilih_status_filter]
+                    if cari_ticker:
+                        df_filtered = df_filtered[df_filtered["Ticker"].str.contains(cari_ticker, na=False)]
+
+                    def warnai_status_akurasi(val):
+                        if "AKURAT" in str(val):
+                            return 'background-color: #166534; color: #f0fdf4; font-weight: 700;'
+                        elif "NETRAL" in str(val):
+                            return 'background-color: #854d0e; color: #fefce8; font-weight: 700;'
+                        elif "MELESET" in str(val):
+                            return 'background-color: #991b1b; color: #fef2f2; font-weight: 700;'
+                        return 'color: #94a3b8;'
+
+                    def warnai_gain(val):
+                        if isinstance(val, (int, float)):
+                            if val >= 1.5:
+                                return 'background-color: #166534; color: #f0fdf4; font-weight: bold;'
+                            elif val > 0:
+                                return 'background-color: #065f46; color: #ecfdf5;'
+                            elif val < 0:
+                                return 'background-color: #991b1b; color: #fef2f2;'
+                        return ''
+
+                    styler_trk = df_filtered.style
+                    tabel_trk = styler_trk.map(warnai_status_akurasi, subset=["Status Akurasi"]) if hasattr(styler_trk, 'map') else styler_trk.applymap(warnai_status_akurasi, subset=["Status Akurasi"])
+                    tabel_trk = tabel_trk.map(warnai_gain, subset=["Max Gain T+1 (%)", "Open Gain T+1 (%)"]) if hasattr(tabel_trk, 'map') else tabel_trk.applymap(warnai_gain, subset=["Max Gain T+1 (%)", "Open Gain T+1 (%)"])
+
+                    st.dataframe(
+                        tabel_trk.format({
+                            "Harga Masuk (Rp)": "Rp {:,.0f}",
+                            "T+1 Open (Rp)": lambda x: f"Rp {x:,.0f}" if pd.notnull(x) else "-",
+                            "T+1 High (Rp)": lambda x: f"Rp {x:,.0f}" if pd.notnull(x) else "-",
+                            "T+1 Close (Rp)": lambda x: f"Rp {x:,.0f}" if pd.notnull(x) else "-",
+                            "Max Gain T+1 (%)": lambda x: f"{x:+.2f}%" if pd.notnull(x) else "-",
+                            "Open Gain T+1 (%)": lambda x: f"{x:+.2f}%" if pd.notnull(x) else "-"
+                        }),
+                        use_container_width=True,
+                        hide_index=True
+                    )
+                    
+                    st.caption(f"Menampilkan {len(df_filtered)} data rekomendasi. Kriteria Akurat: Max Gain besok >= +1.5% (Target Standar Cuan BSJP).")
+                else:
+                    st.info("Belum ada data tracker yang tercatat. Jalankan update data pasar untuk mulai mencatat.")
 
     # ==========================================
     # TAB 4: PORTOFOLIO & BOT
@@ -1409,8 +1713,10 @@ if not df_hasil.empty:
                 else:
                     df_hist_tampil = df_hist.copy()
                     
+                styler_hist = df_hist_tampil.style
+                tabel_hist = styler_hist.map(warnai_profit, subset=['Total_Return_Rp', 'Return_%']) if hasattr(styler_hist, 'map') else styler_hist.applymap(warnai_profit, subset=['Total_Return_Rp', 'Return_%'])
                 st.dataframe(
-                    df_hist_tampil.style.applymap(warnai_profit, subset=['Total_Return_Rp', 'Return_%']).format({
+                    tabel_hist.format({
                         'Harga_Beli': "Rp {:,.0f}",
                         'Harga_Jual': "Rp {:,.0f}",
                         'Total_Return_Rp': "Rp {:,.0f}",
@@ -1421,3 +1727,215 @@ if not df_hasil.empty:
                 )
             else:
                 st.info(f"📭 Belum ada riwayat penjualan saham untuk {pilihan_arena}.")
+
+    # ==========================================================================
+    # [TAB 5] 🌐 MULTI-ASET & FORECAST AI (DARI SAHAM-IDX)
+    # ==========================================================================
+    with tab5:
+        st.markdown("## 🌐 Multi-Aset Tracker & Mesin Prediksi AI")
+        st.markdown("<div class='bandar-box-green'><b>💡 FITUR MULTI-ASET & FORECAST:</b> Pantau portofolio terdiversifikasi lintas kelas aset (Saham IHSG, Emas Fisik/Digital, Cryptocurrency, Saham US) serta analisis proyeksi harga saham masa depan berbasis machine learning.</div>", unsafe_allow_html=True)
+        
+        tab_sub_multi, tab_sub_forecast = st.tabs([
+            "🥇 Multi-Aset Portfolio Tracker",
+            "🔮 AI Price Forecaster (XGBoost)"
+        ])
+        
+        # --- SUBTAB 1: MULTI-ASET PORTFOLIO ---
+        with tab_sub_multi:
+            st.markdown("### 📊 Ringkasan Portofolio Multi-Aset")
+            
+            with st.spinner("Mengambil data valuasi pasar terkini..."):
+                multi_summary = calculate_multi_asset_summary()
+            
+            usd_rate = multi_summary.get("usd_idr", 16350.0)
+            gold_data = get_gold_price_idr(usd_rate)
+            
+            # Kartu Metrik Valuta & Emas
+            col_k1, col_k2, col_k3, col_k4 = st.columns(4)
+            with col_k1:
+                st.metric("💱 Kurs USD / IDR", f"Rp {usd_rate:,.0f}".replace(",", "."))
+            with col_k2:
+                st.metric("🥇 Harga Emas / Gram", f"Rp {gold_data.get('idr_per_gram', 0):,.0f}".replace(",", "."))
+            with col_k3:
+                st.metric("💰 Total Modal Multi-Aset", f"Rp {multi_summary.get('total_modal', 0):,.0f}".replace(",", "."))
+            with col_k4:
+                pl_tot = multi_summary.get('total_pl_rp', 0)
+                pl_tot_pct = multi_summary.get('total_pl_pct', 0)
+                st.metric(
+                    "📈 Floating Profit / Loss",
+                    f"Rp {pl_tot:+,.0f}".replace(",", "."),
+                    f"{pl_tot_pct:+.2f}%"
+                )
+            
+            st.markdown("---")
+            
+            # Tabel Aset
+            asset_rows = multi_summary.get("assets", [])
+            if asset_rows:
+                df_multi = pd.DataFrame(asset_rows)
+                df_multi_view = df_multi[[
+                    "Ticker", "Nama", "Kelas Aset", "Jumlah", 
+                    "Harga Rata-rata Beli (Rp)", "Harga Saat Ini (Rp)", 
+                    "Total Modal (Rp)", "Nilai Pasar (Rp)", 
+                    "Floating P/L (Rp)", "Floating P/L (%)", "Catatan"
+                ]].copy()
+                
+                def warnai_pl(val):
+                    if isinstance(val, (int, float)):
+                        color = '#166534' if val > 0 else '#991b1b' if val < 0 else ''
+                        return f'background-color: {color}'
+                    return ''
+                
+                styler_mv = df_multi_view.style
+                tabel_mv = styler_mv.map(warnai_pl, subset=["Floating P/L (Rp)", "Floating P/L (%)"]) if hasattr(styler_mv, 'map') else styler_mv.applymap(warnai_pl, subset=["Floating P/L (Rp)", "Floating P/L (%)"])
+                st.dataframe(
+                    tabel_mv.format({
+                        "Jumlah": "{:,.4f}" if any(df_multi_view["Jumlah"] < 1) else "{:,.0f}",
+                        "Harga Rata-rata Beli (Rp)": "Rp {:,.0f}",
+                        "Harga Saat Ini (Rp)": "Rp {:,.0f}",
+                        "Total Modal (Rp)": "Rp {:,.0f}",
+                        "Nilai Pasar (Rp)": "Rp {:,.0f}",
+                        "Floating P/L (Rp)": "Rp {:+,.0f}",
+                        "Floating P/L (%)": "{:+.2f}%"
+                    }),
+                    use_container_width=True,
+                    hide_index=True
+                )
+            else:
+                st.info("Portofolio multi-aset kosong. Tambahkan aset baru di bawah ini.")
+            
+            # Form Tambah Aset
+            with st.expander("➕ Tambah Aset ke Portofolio"):
+                with st.form("form_tambah_aset"):
+                    col_f1, col_f2, col_f3 = st.columns(3)
+                    with col_f1:
+                        f_ticker = st.text_input("Ticker / Kode Aset:", placeholder="Contoh: BBCA, BTC, GOLD, AAPL").upper().strip()
+                        f_nama = st.text_input("Nama Aset:", placeholder="Contoh: Bank BCA, Bitcoin")
+                    with col_f2:
+                        f_kelas = st.selectbox("Kelas Aset:", list(ASSET_CLASS_LABELS.keys()), format_func=lambda x: ASSET_CLASS_LABELS[x])
+                        f_qty = st.number_input("Jumlah Kepemilikan (Qty):", min_value=0.0001, value=1.0, step=0.1, format="%.4f")
+                    with col_f3:
+                        f_harga = st.number_input("Harga Beli Rata-rata (IDR):", min_value=1.0, value=10000.0, step=1000.0)
+                        f_catatan = st.text_input("Catatan Investasi:", placeholder="Contoh: Tabungan jangka panjang")
+                    
+                    submit_aset = st.form_submit_button("💾 Simpan Aset ke Portofolio")
+                    if submit_aset:
+                        if f_ticker:
+                            current_holdings = load_multi_asset_portfolio()
+                            current_holdings.append({
+                                "ticker": f_ticker,
+                                "nama": f_nama or f_ticker,
+                                "asset_class": f_kelas,
+                                "quantity": float(f_qty),
+                                "avg_buy_price_idr": float(f_harga),
+                                "catatan": f_catatan
+                            })
+                            save_multi_asset_portfolio(current_holdings)
+                            st.success(f"Aset {f_ticker} berhasil ditambahkan!")
+                            st.rerun()
+                        else:
+                            st.error("Ticker aset tidak boleh kosong.")
+        
+        # --- SUBTAB 2: AI PRICE FORECASTER ---
+        with tab_sub_forecast:
+            st.markdown("### 🔮 Mesin Prediksi Tren Harga Saham (Machine Learning)")
+            st.caption("Memproyeksikan estimasi pergerakan harga 7–30 hari ke depan menggunakan regresi multi-langkah dan rentang volatilitas ketidakpastian.")
+            
+            col_fc1, col_fc2, col_fc3 = st.columns([2, 1, 1])
+            with col_fc1:
+                daftar_pilihan_ticker = df_hasil['Ticker'].tolist() if 'Ticker' in df_hasil.columns else ['BBCA', 'TLKM', 'BBRI', 'ASII', 'BMRI']
+                pilih_ticker_fc = st.selectbox(
+                    "Pilih Emiten untuk Diprediksi:",
+                    daftar_pilihan_ticker,
+                    index=0,
+                    key="fc_ticker_pilih"
+                )
+            with col_fc2:
+                pilih_hari_fc = st.slider("Horizon Prediksi (Hari):", min_value=7, max_value=30, value=14, step=7)
+            with col_fc3:
+                st.markdown("<br>", unsafe_allow_html=True)
+                btn_prediksi = st.button("🚀 Jalankan Prediksi AI", use_container_width=True, type="primary")
+            
+            if btn_prediksi or f"prediksi_{pilih_ticker_fc}" in st.session_state:
+                st.session_state[f"prediksi_{pilih_ticker_fc}"] = True
+                with st.spinner(f"Melatih model machine learning & memproyeksikan harga {pilih_ticker_fc}..."):
+                    hasil_fc = run_stock_forecast(pilih_ticker_fc, periods=pilih_hari_fc)
+                
+                if hasil_fc.get("status") == "success":
+                    st.success(f"Prediksi untuk **{pilih_ticker_fc}** berhasil diselesaikan!")
+                    
+                    # Metrik Hasil Prediksi
+                    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+                    with col_m1:
+                        st.metric("Harga Terakhir", f"Rp {hasil_fc['current_price']:,.0f}".replace(",", "."))
+                    with col_m2:
+                        st.metric(
+                            f"Target Prediksi ({pilih_hari_fc} Hari)",
+                            f"Rp {hasil_fc['predicted_price']:,.0f}".replace(",", "."),
+                            f"{hasil_fc['expected_return_pct']:+.2f}%"
+                        )
+                    with col_m3:
+                        st.metric("Estimasi Error (MAPE)", f"{hasil_fc['mape']:.2f}%")
+                    with col_m4:
+                        arah = "BULLISH 🚀" if hasil_fc['expected_return_pct'] > 0 else "BEARISH 📉"
+                        st.metric("Arah Tren Model", arah)
+                    
+                    # Visualisasi Plotly Interaktif
+                    df_hist_fc = hasil_fc["history_df"]
+                    df_future_fc = hasil_fc["forecast_df"]
+                    
+                    fig = go.Figure()
+                    
+                    # 1. Garis Riwayat Harga Aktual
+                    fig.add_trace(go.Scatter(
+                        x=df_hist_fc["ds"],
+                        y=df_hist_fc["y"],
+                        mode="lines",
+                        name="Harga Aktual (60 Hari)",
+                        line=dict(color="#3b82f6", width=2)
+                    ))
+                    
+                    # 2. Area Rentang Ketidakpastian (Upper & Lower Band)
+                    fig.add_trace(go.Scatter(
+                        x=list(df_future_fc["ds"]) + list(df_future_fc["ds"])[::-1],
+                        y=list(df_future_fc["yhat_upper"]) + list(df_future_fc["yhat_lower"])[::-1],
+                        fill="toself",
+                        fillcolor="rgba(245, 158, 11, 0.15)",
+                        line=dict(color="rgba(255,255,255,0)"),
+                        name="Rentang Ketidakpastian (Confidence Band)",
+                        showlegend=True
+                    ))
+                    
+                    # 3. Garis Prediksi Proyeksi Masa Depan
+                    fig.add_trace(go.Scatter(
+                        x=df_future_fc["ds"],
+                        y=df_future_fc["yhat"],
+                        mode="lines+markers",
+                        name=f"Estimasi Model ({pilih_hari_fc} Hari)",
+                        line=dict(color="#f59e0b", width=3, dash="dash")
+                    ))
+                    
+                    fig.update_layout(
+                        title=f"Grafik Proyeksi Harga {pilih_ticker_fc} Masa Depan",
+                        xaxis_title="Tanggal",
+                        yaxis_title="Harga (Rp)",
+                        template="plotly_dark",
+                        hovermode="x unified",
+                        margin=dict(l=20, r=20, t=50, b=20),
+                        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+                    )
+                    
+                    st.plotly_chart(fig, use_container_width=True)
+                    
+                    # Faktor Penggerak (Feature Importance)
+                    feat_imp = hasil_fc.get("feature_importance", {})
+                    if feat_imp:
+                        st.markdown("**🧠 Faktor Penggerak Model (Feature Importance):**")
+                        cols_fi = st.columns(len(feat_imp))
+                        for idx_fi, (k_fi, v_fi) in enumerate(feat_imp.items()):
+                            with cols_fi[idx_fi]:
+                                st.caption(f"**{k_fi}**")
+                                st.progress(min(1.0, max(0.0, v_fi / 100)))
+                                st.caption(f"{v_fi:.1f}%")
+                else:
+                    st.error(hasil_fc.get("message", "Gagal memproses prediksi."))

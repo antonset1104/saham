@@ -1,500 +1,512 @@
-selesai konsolidasi
-resmi integrasi
-rampung kepemilikan
-resmi kepemilikan
-resmi kepemilikan
-resmi integrasi
-tuntas kepemilikan
-rampung integrasi
-sepakat kepemilikan
-tuntas pengambilalihan
-resmi pembelian
-sepakat transaksi
-tuntas pembelian
-tuntas akuisisi
-selesai akuisisi
-sah pengambilalihan
-rampung integrasi
-resmi pembelian
-resmi akuisisi
-sah akuisisi
-resmi transaksi
-tuntas merger
-resmi kepemilikan
-resmi kepemilikan
-sah kepemilikan
-selesai pengambilalihan
-sepakat akuisisi
-sah konsolidasi
-sah akuisisi
-sepakat kepemilikan
-rampung pengambilalihan
-resmi merger
-rampung integrasi
-selesai integrasi
-sah pembelian
-selesai konsolidasi
-tuntas akuisisi
-resmi kepemilikan
-sepakat merger
-resmi pengambilalihan
-resmi akuisisi
-sepakat transaksi
-rampung pengambilalihan
-selesai pembelian
-sepakat kepemilikan
-resmi kepemilikan
-sah pembelian
-rampung transaksi
-rampung integrasi
-resmi transaksi
-rampung transaksi
-rampung transaksi
-resmi pengambilalihan
-selesai transaksi
-resmi merger
-selesai merger
-selesai pengambilalihan
-rampung konsolidasi
-tuntas pembelian
-sah akuisisi
-rampung merger
-tuntas pengambilalihan
-tuntas konsolidasi
-tuntas transaksi
-selesai akuisisi
-selesai konsolidasi
+eksekusi akuisisi
+eksekusi akuisisi aset
+eksekusi akuisisi bisnis
+eksekusi akuisisi entitas
+eksekusi akuisisi pangsa pasar
+eksekusi akuisisi perusahaan
+eksekusi akuisisi saham
+eksekusi akuisisi unit usaha
+eksekusi integrasi
+eksekusi integrasi aset
+eksekusi integrasi bisnis
+eksekusi integrasi entitas
+eksekusi integrasi pangsa pasar
+eksekusi integrasi perusahaan
+eksekusi integrasi saham
+eksekusi integrasi unit usaha
+eksekusi kepemilikan
+eksekusi kepemilikan aset
+eksekusi kepemilikan bisnis
+eksekusi kepemilikan entitas
+eksekusi kepemilikan pangsa pasar
+eksekusi kepemilikan perusahaan
+eksekusi kepemilikan saham
+eksekusi kepemilikan unit usaha
+eksekusi konsolidasi
+eksekusi konsolidasi aset
+eksekusi konsolidasi bisnis
+eksekusi konsolidasi entitas
+eksekusi konsolidasi pangsa pasar
+eksekusi konsolidasi perusahaan
+eksekusi konsolidasi saham
+eksekusi konsolidasi unit usaha
+eksekusi merger
+eksekusi merger aset
+eksekusi merger bisnis
+eksekusi merger entitas
+eksekusi merger pangsa pasar
+eksekusi merger perusahaan
+eksekusi merger saham
+eksekusi merger unit usaha
+eksekusi pembelian
+eksekusi pembelian aset
+eksekusi pembelian bisnis
+eksekusi pembelian entitas
+eksekusi pembelian pangsa pasar
+eksekusi pembelian perusahaan
+eksekusi pembelian saham
+eksekusi pembelian unit usaha
+eksekusi pengambilalihan
+eksekusi pengambilalihan aset
+eksekusi pengambilalihan bisnis
+eksekusi pengambilalihan entitas
+eksekusi pengambilalihan pangsa pasar
+eksekusi pengambilalihan perusahaan
+eksekusi pengambilalihan saham
+eksekusi pengambilalihan unit usaha
+eksekusi transaksi
+eksekusi transaksi aset
+eksekusi transaksi bisnis
+eksekusi transaksi entitas
+eksekusi transaksi pangsa pasar
+eksekusi transaksi perusahaan
+eksekusi transaksi saham
+eksekusi transaksi unit usaha
 rampung akuisisi
-selesai kepemilikan
-rampung integrasi
-sah transaksi
-sah merger
-rampung konsolidasi
-sepakat transaksi
-rampung pembelian
-sah pembelian
-resmi transaksi
-tuntas konsolidasi
-resmi merger
-selesai pengambilalihan
-selesai transaksi
-selesai konsolidasi
-sepakat pembelian
-sah konsolidasi
-sah pembelian
-rampung transaksi
-tuntas kepemilikan
-sah akuisisi
-sah pembelian
-resmi akuisisi
-rampung kepemilikan
-rampung transaksi
-selesai kepemilikan
-selesai merger
-selesai pengambilalihan
-tuntas pengambilalihan
-sah transaksi
-sepakat transaksi
-sah transaksi
-sah konsolidasi
-tuntas akuisisi
-tuntas pengambilalihan
-rampung transaksi
-sepakat pembelian
-resmi pengambilalihan
-rampung kepemilikan
-resmi pengambilalihan
-selesai integrasi
-tuntas akuisisi
-tuntas transaksi
-sepakat kepemilikan
-resmi pembelian
-sah integrasi
-tuntas integrasi
-resmi pembelian
-resmi integrasi
-sepakat integrasi
-resmi merger
-resmi pengambilalihan
-rampung pembelian
-tuntas transaksi
-selesai pengambilalihan
-selesai akuisisi
-resmi kepemilikan
-tuntas transaksi
-selesai pengambilalihan
-rampung integrasi
-sepakat konsolidasi
-rampung integrasi
-sepakat konsolidasi
-resmi pengambilalihan
-selesai akuisisi
-selesai konsolidasi
-sepakat integrasi
-tuntas integrasi
-tuntas kepemilikan
-rampung integrasi
-resmi integrasi
-tuntas merger
-sepakat akuisisi
-resmi pembelian
-rampung transaksi
-rampung merger
-sepakat pembelian
-tuntas pembelian
-tuntas pengambilalihan
-sah akuisisi
-resmi pengambilalihan
-selesai pembelian
-sepakat kepemilikan
-resmi transaksi
-resmi transaksi
-rampung pembelian
-sah merger
-rampung konsolidasi
-selesai pengambilalihan
-tuntas pembelian
-selesai pengambilalihan
-sepakat transaksi
-selesai akuisisi
-rampung integrasi
-resmi integrasi
-tuntas konsolidasi
-tuntas integrasi
-rampung pengambilalihan
-rampung pengambilalihan
-rampung pembelian
-resmi transaksi
-rampung integrasi
-rampung kepemilikan
-sah kepemilikan
-resmi integrasi
-tuntas konsolidasi
-sah akuisisi
-tuntas konsolidasi
-resmi pengambilalihan
-tuntas pengambilalihan
-selesai konsolidasi
-rampung akuisisi
-rampung merger
-selesai integrasi
-selesai kepemilikan
-rampung kepemilikan
-tuntas konsolidasi
-sepakat integrasi
-sah akuisisi
-sah merger
-rampung pengambilalihan
-rampung transaksi
-selesai konsolidasi
-tuntas transaksi
-rampung integrasi
-selesai kepemilikan
-tuntas kepemilikan
-selesai konsolidasi
-resmi transaksi
-resmi integrasi
-selesai pembelian
-selesai transaksi
-selesai kepemilikan
-tuntas kepemilikan
-tuntas akuisisi
-selesai pengambilalihan
-sah merger
-sah pengambilalihan
-tuntas akuisisi
-selesai konsolidasi
-selesai konsolidasi
-resmi merger
-selesai konsolidasi
-resmi integrasi
-tuntas konsolidasi
-selesai pembelian
-rampung pengambilalihan
-resmi integrasi
-tuntas kepemilikan
-rampung kepemilikan
-sah kepemilikan
-sah pembelian
-sepakat integrasi
-rampung pengambilalihan
-resmi merger
-rampung akuisisi
-resmi konsolidasi
-tuntas pembelian
-rampung kepemilikan
-rampung konsolidasi
-sah merger
-rampung pengambilalihan
-tuntas transaksi
-resmi pengambilalihan
-sah konsolidasi
-tuntas transaksi
-sepakat merger
-sepakat transaksi
-rampung pengambilalihan
-selesai integrasi
-selesai integrasi
-rampung kepemilikan
-rampung transaksi
-rampung transaksi
-rampung transaksi
-resmi pengambilalihan
-selesai kepemilikan
-resmi pengambilalihan
-resmi kepemilikan
-tuntas kepemilikan
-resmi merger
-sah pengambilalihan
-sah akuisisi
-selesai kepemilikan
-sepakat akuisisi aset
-sah integrasi aset
-rampung konsolidasi bisnis
-rampung pembelian unit usaha
-selesai konsolidasi entitas
-sepakat pengambilalihan unit usaha
-selesai pengambilalihan perusahaan
-resmi akuisisi perusahaan
-sah merger entitas
-resmi transaksi unit usaha
-sah pembelian aset
-sah integrasi entitas
-rampung konsolidasi pangsa pasar
-sah konsolidasi pangsa pasar
-rampung konsolidasi perusahaan
-rampung merger unit usaha
-sepakat konsolidasi unit usaha
-tuntas akuisisi perusahaan
-sepakat pembelian perusahaan
-tuntas akuisisi pangsa pasar
-resmi integrasi aset
-sepakat pengambilalihan unit usaha
-sah merger entitas
-selesai integrasi aset
-selesai konsolidasi perusahaan
-selesai konsolidasi entitas
-resmi pengambilalihan entitas
-sah integrasi unit usaha
-sah transaksi perusahaan
-sah akuisisi aset
-tuntas pengambilalihan aset
-resmi merger unit usaha
-resmi akuisisi unit usaha
-resmi pembelian entitas
-sah integrasi pangsa pasar
-selesai pembelian aset
-sepakat integrasi aset
-selesai pengambilalihan unit usaha
-resmi pembelian saham
-resmi kepemilikan perusahaan
-selesai konsolidasi aset
-resmi merger perusahaan
-resmi kepemilikan perusahaan
-sah pengambilalihan aset
-sah pengambilalihan perusahaan
-resmi transaksi unit usaha
-rampung pembelian aset
-selesai kepemilikan bisnis
-selesai pembelian unit usaha
-resmi konsolidasi pangsa pasar
-sepakat pengambilalihan perusahaan
-selesai kepemilikan saham
-sah akuisisi entitas
-tuntas transaksi bisnis
-sepakat integrasi aset
-selesai transaksi bisnis
-resmi transaksi bisnis
-sepakat transaksi entitas
-selesai merger pangsa pasar
-sah akuisisi bisnis
-selesai integrasi aset
-sah kepemilikan perusahaan
-rampung integrasi unit usaha
-selesai merger aset
-sah pengambilalihan aset
-selesai pembelian saham
-sepakat merger bisnis
-rampung kepemilikan perusahaan
-selesai transaksi aset
-selesai pengambilalihan perusahaan
-selesai kepemilikan aset
-rampung integrasi bisnis
-tuntas merger saham
-sah transaksi saham
-resmi transaksi aset
-sah transaksi bisnis
-sepakat akuisisi saham
-rampung merger perusahaan
-tuntas merger aset
-rampung integrasi bisnis
-resmi merger unit usaha
-sepakat kepemilikan aset
-rampung konsolidasi bisnis
-resmi akuisisi aset
-selesai kepemilikan perusahaan
-sah pengambilalihan saham
-sepakat akuisisi aset
-sepakat konsolidasi saham
-rampung transaksi aset
-tuntas pengambilalihan aset
-sepakat akuisisi saham
-selesai merger unit usaha
-selesai pengambilalihan aset
-resmi transaksi aset
-tuntas kepemilikan perusahaan
-sepakat integrasi unit usaha
-rampung integrasi saham
-selesai pengambilalihan perusahaan
-selesai pengambilalihan bisnis
-sah akuisisi perusahaan
-sepakat pengambilalihan entitas
-rampung kepemilikan unit usaha
-tuntas akuisisi bisnis
-tuntas pengambilalihan pangsa pasar
-rampung transaksi bisnis
-tuntas integrasi saham
-resmi konsolidasi bisnis
-sah kepemilikan pangsa pasar
-sah pembelian entitas
-sepakat merger saham
-selesai integrasi bisnis
-rampung pengambilalihan bisnis
-sepakat kepemilikan aset
-sah akuisisi bisnis
-sah konsolidasi pangsa pasar
-selesai akuisisi aset
-rampung pengambilalihan aset
-resmi merger perusahaan
-sah transaksi pangsa pasar
-resmi kepemilikan unit usaha
-rampung integrasi unit usaha
-tuntas kepemilikan perusahaan
-resmi akuisisi aset
-rampung integrasi saham
-resmi kepemilikan unit usaha
-selesai merger aset
-resmi integrasi saham
-sah merger entitas
-resmi pengambilalihan entitas
-resmi merger pangsa pasar
-selesai pengambilalihan perusahaan
-selesai pembelian saham
-sah konsolidasi perusahaan
-selesai pengambilalihan aset
-resmi konsolidasi bisnis
-tuntas transaksi aset
-sepakat transaksi aset
-rampung transaksi saham
-sepakat kepemilikan pangsa pasar
-selesai merger entitas
-sah transaksi pangsa pasar
-sah kepemilikan unit usaha
-rampung integrasi entitas
-resmi pengambilalihan unit usaha
-sepakat kepemilikan saham
-rampung konsolidasi unit usaha
-sepakat kepemilikan aset
-rampung pembelian perusahaan
-selesai integrasi aset
-sah pembelian entitas
-sepakat transaksi saham
-sah akuisisi perusahaan
-resmi transaksi aset
-tuntas pembelian aset
-sepakat akuisisi perusahaan
-selesai akuisisi aset
-resmi pembelian aset
-tuntas akuisisi saham
-sepakat kepemilikan pangsa pasar
-sepakat konsolidasi entitas
-rampung pengambilalihan aset
-rampung konsolidasi bisnis
-tuntas merger perusahaan
-tuntas integrasi saham
-sah konsolidasi saham
-sepakat transaksi saham
-rampung merger perusahaan
-tuntas akuisisi perusahaan
-resmi integrasi pangsa pasar
-sepakat akuisisi entitas
-tuntas merger unit usaha
-sepakat pembelian saham
-tuntas kepemilikan bisnis
-rampung pengambilalihan saham
-rampung pembelian saham
-resmi akuisisi bisnis
-rampung transaksi saham
-sah transaksi pangsa pasar
-tuntas merger saham
-tuntas transaksi entitas
-rampung transaksi entitas
-selesai transaksi bisnis
-resmi pembelian pangsa pasar
-resmi transaksi saham
-sah transaksi saham
-sepakat pembelian pangsa pasar
-sepakat pengambilalihan unit usaha
-tuntas kepemilikan unit usaha
-sepakat pembelian perusahaan
-sah kepemilikan bisnis
-tuntas transaksi perusahaan
-resmi akuisisi unit usaha
-sepakat merger perusahaan
-sepakat konsolidasi pangsa pasar
+rampung akuisisi aset
 rampung akuisisi bisnis
-selesai akuisisi bisnis
-rampung transaksi perusahaan
+rampung akuisisi entitas
+rampung akuisisi pangsa pasar
+rampung akuisisi perusahaan
+rampung akuisisi saham
+rampung akuisisi unit usaha
+rampung integrasi
+rampung integrasi aset
+rampung integrasi bisnis
+rampung integrasi entitas
+rampung integrasi pangsa pasar
+rampung integrasi perusahaan
 rampung integrasi saham
-selesai pembelian unit usaha
-sepakat akuisisi entitas
-sepakat merger unit usaha
-selesai integrasi pangsa pasar
-sepakat kepemilikan bisnis
-resmi transaksi perusahaan
-rampung merger unit usaha
-selesai konsolidasi bisnis
-tuntas pembelian saham
-sah pengambilalihan entitas
-resmi pengambilalihan entitas
-rampung transaksi unit usaha
-sepakat akuisisi bisnis
-tuntas akuisisi saham
-sepakat konsolidasi entitas
-selesai akuisisi bisnis
-tuntas pembelian pangsa pasar
-rampung merger pangsa pasar
-rampung pembelian perusahaan
-selesai konsolidasi perusahaan
-selesai pengambilalihan pangsa pasar
-tuntas konsolidasi unit usaha
-rampung transaksi aset
-selesai merger perusahaan
-tuntas konsolidasi unit usaha
-selesai pengambilalihan bisnis
-resmi pembelian saham
-sah pembelian aset
-resmi pengambilalihan entitas
+rampung integrasi unit usaha
+rampung kepemilikan
+rampung kepemilikan aset
+rampung kepemilikan bisnis
+rampung kepemilikan entitas
+rampung kepemilikan pangsa pasar
+rampung kepemilikan perusahaan
+rampung kepemilikan saham
 rampung kepemilikan unit usaha
-selesai transaksi perusahaan
-rampung pengambilalihan unit usaha
-sah akuisisi aset
-sah akuisisi saham
-tuntas kepemilikan bisnis
-sepakat akuisisi pangsa pasar
-rampung transaksi perusahaan
-selesai akuisisi pangsa pasar
+rampung konsolidasi
+rampung konsolidasi aset
+rampung konsolidasi bisnis
+rampung konsolidasi entitas
+rampung konsolidasi pangsa pasar
+rampung konsolidasi perusahaan
+rampung konsolidasi saham
+rampung konsolidasi unit usaha
+rampung merger
 rampung merger aset
-selesai pembelian bisnis
-sepakat transaksi bisnis
+rampung merger bisnis
+rampung merger entitas
+rampung merger pangsa pasar
+rampung merger perusahaan
+rampung merger saham
+rampung merger unit usaha
+rampung pembelian
+rampung pembelian aset
+rampung pembelian bisnis
+rampung pembelian entitas
+rampung pembelian pangsa pasar
+rampung pembelian perusahaan
+rampung pembelian saham
+rampung pembelian unit usaha
+rampung pengambilalihan
+rampung pengambilalihan aset
+rampung pengambilalihan bisnis
+rampung pengambilalihan entitas
+rampung pengambilalihan pangsa pasar
+rampung pengambilalihan perusahaan
+rampung pengambilalihan saham
+rampung pengambilalihan unit usaha
+rampung transaksi
+rampung transaksi aset
+rampung transaksi bisnis
+rampung transaksi entitas
+rampung transaksi pangsa pasar
+rampung transaksi perusahaan
+rampung transaksi saham
+rampung transaksi unit usaha
+resmi akuisisi
+resmi akuisisi aset
+resmi akuisisi bisnis
+resmi akuisisi entitas
+resmi akuisisi pangsa pasar
+resmi akuisisi perusahaan
+resmi akuisisi saham
+resmi akuisisi unit usaha
+resmi integrasi
+resmi integrasi aset
+resmi integrasi bisnis
+resmi integrasi entitas
+resmi integrasi pangsa pasar
+resmi integrasi perusahaan
+resmi integrasi saham
+resmi integrasi unit usaha
+resmi kepemilikan
+resmi kepemilikan aset
+resmi kepemilikan bisnis
+resmi kepemilikan entitas
+resmi kepemilikan pangsa pasar
+resmi kepemilikan perusahaan
+resmi kepemilikan saham
+resmi kepemilikan unit usaha
+resmi konsolidasi
+resmi konsolidasi aset
+resmi konsolidasi bisnis
+resmi konsolidasi entitas
+resmi konsolidasi pangsa pasar
+resmi konsolidasi perusahaan
+resmi konsolidasi saham
+resmi konsolidasi unit usaha
+resmi merger
+resmi merger aset
+resmi merger bisnis
+resmi merger entitas
+resmi merger pangsa pasar
+resmi merger perusahaan
+resmi merger saham
+resmi merger unit usaha
+resmi pembelian
+resmi pembelian aset
+resmi pembelian bisnis
+resmi pembelian entitas
+resmi pembelian pangsa pasar
+resmi pembelian perusahaan
+resmi pembelian saham
+resmi pembelian unit usaha
+resmi pengambilalihan
+resmi pengambilalihan aset
+resmi pengambilalihan bisnis
+resmi pengambilalihan entitas
+resmi pengambilalihan pangsa pasar
+resmi pengambilalihan perusahaan
+resmi pengambilalihan saham
+resmi pengambilalihan unit usaha
+resmi transaksi
+resmi transaksi aset
+resmi transaksi bisnis
+resmi transaksi entitas
+resmi transaksi pangsa pasar
+resmi transaksi perusahaan
+resmi transaksi saham
+resmi transaksi unit usaha
+sah akuisisi
+sah akuisisi aset
+sah akuisisi bisnis
+sah akuisisi entitas
+sah akuisisi pangsa pasar
+sah akuisisi perusahaan
 sah akuisisi saham
-sah konsolidasi entitas
-selesai merger unit usaha
-sah konsolidasi bisnis
+sah akuisisi unit usaha
+sah integrasi
+sah integrasi aset
+sah integrasi bisnis
+sah integrasi entitas
+sah integrasi pangsa pasar
+sah integrasi perusahaan
+sah integrasi saham
+sah integrasi unit usaha
+sah kepemilikan
+sah kepemilikan aset
+sah kepemilikan bisnis
+sah kepemilikan entitas
+sah kepemilikan pangsa pasar
 sah kepemilikan perusahaan
-tuntas kepemilikan pangsa pasar
 sah kepemilikan saham
-selesai akuisisi unit usaha
-sepakat pembelian perusahaan
-sepakat konsolidasi saham
+sah kepemilikan unit usaha
+sah konsolidasi
+sah konsolidasi aset
+sah konsolidasi bisnis
+sah konsolidasi entitas
+sah konsolidasi pangsa pasar
+sah konsolidasi perusahaan
+sah konsolidasi saham
+sah konsolidasi unit usaha
+sah merger
+sah merger aset
+sah merger bisnis
+sah merger entitas
+sah merger pangsa pasar
+sah merger perusahaan
+sah merger saham
+sah merger unit usaha
+sah pembelian
+sah pembelian aset
+sah pembelian bisnis
+sah pembelian entitas
+sah pembelian pangsa pasar
+sah pembelian perusahaan
+sah pembelian saham
+sah pembelian unit usaha
+sah pengambilalihan
+sah pengambilalihan aset
+sah pengambilalihan bisnis
+sah pengambilalihan entitas
+sah pengambilalihan pangsa pasar
+sah pengambilalihan perusahaan
+sah pengambilalihan saham
+sah pengambilalihan unit usaha
+sah transaksi
 sah transaksi aset
+sah transaksi bisnis
+sah transaksi entitas
+sah transaksi pangsa pasar
+sah transaksi perusahaan
+sah transaksi saham
+sah transaksi unit usaha
+selesai akuisisi
+selesai akuisisi aset
+selesai akuisisi bisnis
+selesai akuisisi entitas
+selesai akuisisi pangsa pasar
+selesai akuisisi perusahaan
+selesai akuisisi saham
+selesai akuisisi unit usaha
+selesai integrasi
+selesai integrasi aset
+selesai integrasi bisnis
+selesai integrasi entitas
+selesai integrasi pangsa pasar
+selesai integrasi perusahaan
+selesai integrasi saham
+selesai integrasi unit usaha
+selesai kepemilikan
+selesai kepemilikan aset
+selesai kepemilikan bisnis
+selesai kepemilikan entitas
+selesai kepemilikan pangsa pasar
+selesai kepemilikan perusahaan
+selesai kepemilikan saham
+selesai kepemilikan unit usaha
+selesai konsolidasi
+selesai konsolidasi aset
+selesai konsolidasi bisnis
+selesai konsolidasi entitas
+selesai konsolidasi pangsa pasar
+selesai konsolidasi perusahaan
+selesai konsolidasi saham
+selesai konsolidasi unit usaha
+selesai merger
+selesai merger aset
+selesai merger bisnis
+selesai merger entitas
+selesai merger pangsa pasar
+selesai merger perusahaan
+selesai merger saham
+selesai merger unit usaha
+selesai pembelian
+selesai pembelian aset
+selesai pembelian bisnis
+selesai pembelian entitas
+selesai pembelian pangsa pasar
+selesai pembelian perusahaan
+selesai pembelian saham
+selesai pembelian unit usaha
+selesai pengambilalihan
+selesai pengambilalihan aset
+selesai pengambilalihan bisnis
+selesai pengambilalihan entitas
+selesai pengambilalihan pangsa pasar
+selesai pengambilalihan perusahaan
+selesai pengambilalihan saham
+selesai pengambilalihan unit usaha
+selesai transaksi
+selesai transaksi aset
+selesai transaksi bisnis
+selesai transaksi entitas
+selesai transaksi pangsa pasar
+selesai transaksi perusahaan
+selesai transaksi saham
+selesai transaksi unit usaha
+sepakat akuisisi
+sepakat akuisisi aset
+sepakat akuisisi bisnis
+sepakat akuisisi entitas
+sepakat akuisisi pangsa pasar
+sepakat akuisisi perusahaan
+sepakat akuisisi saham
+sepakat akuisisi unit usaha
+sepakat integrasi
+sepakat integrasi aset
+sepakat integrasi bisnis
+sepakat integrasi entitas
+sepakat integrasi pangsa pasar
+sepakat integrasi perusahaan
+sepakat integrasi saham
+sepakat integrasi unit usaha
+sepakat kepemilikan
+sepakat kepemilikan aset
+sepakat kepemilikan bisnis
+sepakat kepemilikan entitas
+sepakat kepemilikan pangsa pasar
+sepakat kepemilikan perusahaan
+sepakat kepemilikan saham
+sepakat kepemilikan unit usaha
+sepakat konsolidasi
+sepakat konsolidasi aset
+sepakat konsolidasi bisnis
+sepakat konsolidasi entitas
+sepakat konsolidasi pangsa pasar
+sepakat konsolidasi perusahaan
+sepakat konsolidasi saham
+sepakat konsolidasi unit usaha
+sepakat merger
+sepakat merger aset
+sepakat merger bisnis
+sepakat merger entitas
+sepakat merger pangsa pasar
+sepakat merger perusahaan
+sepakat merger saham
+sepakat merger unit usaha
+sepakat pembelian
+sepakat pembelian aset
+sepakat pembelian bisnis
+sepakat pembelian entitas
+sepakat pembelian pangsa pasar
+sepakat pembelian perusahaan
+sepakat pembelian saham
+sepakat pembelian unit usaha
+sepakat pengambilalihan
+sepakat pengambilalihan aset
+sepakat pengambilalihan bisnis
+sepakat pengambilalihan entitas
+sepakat pengambilalihan pangsa pasar
+sepakat pengambilalihan perusahaan
+sepakat pengambilalihan saham
+sepakat pengambilalihan unit usaha
+sepakat transaksi
+sepakat transaksi aset
+sepakat transaksi bisnis
+sepakat transaksi entitas
+sepakat transaksi pangsa pasar
+sepakat transaksi perusahaan
+sepakat transaksi saham
+sepakat transaksi unit usaha
+sukses akuisisi
+sukses akuisisi aset
+sukses akuisisi bisnis
+sukses akuisisi entitas
+sukses akuisisi pangsa pasar
+sukses akuisisi perusahaan
+sukses akuisisi saham
+sukses akuisisi unit usaha
+sukses integrasi
+sukses integrasi aset
+sukses integrasi bisnis
+sukses integrasi entitas
+sukses integrasi pangsa pasar
+sukses integrasi perusahaan
+sukses integrasi saham
+sukses integrasi unit usaha
+sukses kepemilikan
+sukses kepemilikan aset
+sukses kepemilikan bisnis
+sukses kepemilikan entitas
+sukses kepemilikan pangsa pasar
+sukses kepemilikan perusahaan
+sukses kepemilikan saham
+sukses kepemilikan unit usaha
+sukses konsolidasi
+sukses konsolidasi aset
+sukses konsolidasi bisnis
+sukses konsolidasi entitas
+sukses konsolidasi pangsa pasar
+sukses konsolidasi perusahaan
+sukses konsolidasi saham
+sukses konsolidasi unit usaha
+sukses merger
+sukses merger aset
+sukses merger bisnis
+sukses merger entitas
+sukses merger pangsa pasar
+sukses merger perusahaan
+sukses merger saham
+sukses merger unit usaha
+sukses pembelian
+sukses pembelian aset
+sukses pembelian bisnis
+sukses pembelian entitas
+sukses pembelian pangsa pasar
+sukses pembelian perusahaan
+sukses pembelian saham
+sukses pembelian unit usaha
+sukses pengambilalihan
+sukses pengambilalihan aset
+sukses pengambilalihan bisnis
+sukses pengambilalihan entitas
+sukses pengambilalihan pangsa pasar
+sukses pengambilalihan perusahaan
+sukses pengambilalihan saham
+sukses pengambilalihan unit usaha
+sukses transaksi
+sukses transaksi aset
+sukses transaksi bisnis
+sukses transaksi entitas
+sukses transaksi pangsa pasar
+sukses transaksi perusahaan
+sukses transaksi saham
+sukses transaksi unit usaha
+tuntas akuisisi
+tuntas akuisisi aset
+tuntas akuisisi bisnis
+tuntas akuisisi entitas
+tuntas akuisisi pangsa pasar
+tuntas akuisisi perusahaan
+tuntas akuisisi saham
+tuntas akuisisi unit usaha
+tuntas integrasi
+tuntas integrasi aset
+tuntas integrasi bisnis
+tuntas integrasi entitas
+tuntas integrasi pangsa pasar
+tuntas integrasi perusahaan
+tuntas integrasi saham
+tuntas integrasi unit usaha
+tuntas kepemilikan
+tuntas kepemilikan aset
+tuntas kepemilikan bisnis
+tuntas kepemilikan entitas
+tuntas kepemilikan pangsa pasar
+tuntas kepemilikan perusahaan
+tuntas kepemilikan saham
+tuntas kepemilikan unit usaha
+tuntas konsolidasi
+tuntas konsolidasi aset
+tuntas konsolidasi bisnis
+tuntas konsolidasi entitas
+tuntas konsolidasi pangsa pasar
+tuntas konsolidasi perusahaan
+tuntas konsolidasi saham
+tuntas konsolidasi unit usaha
+tuntas merger
+tuntas merger aset
+tuntas merger bisnis
+tuntas merger entitas
+tuntas merger pangsa pasar
+tuntas merger perusahaan
+tuntas merger saham
+tuntas merger unit usaha
+tuntas pembelian
+tuntas pembelian aset
+tuntas pembelian bisnis
+tuntas pembelian entitas
+tuntas pembelian pangsa pasar
+tuntas pembelian perusahaan
+tuntas pembelian saham
+tuntas pembelian unit usaha
+tuntas pengambilalihan
+tuntas pengambilalihan aset
+tuntas pengambilalihan bisnis
+tuntas pengambilalihan entitas
+tuntas pengambilalihan pangsa pasar
+tuntas pengambilalihan perusahaan
+tuntas pengambilalihan saham
+tuntas pengambilalihan unit usaha
+tuntas transaksi
+tuntas transaksi aset
+tuntas transaksi bisnis
+tuntas transaksi entitas
+tuntas transaksi pangsa pasar
+tuntas transaksi perusahaan
+tuntas transaksi saham
+tuntas transaksi unit usaha

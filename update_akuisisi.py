@@ -1,9 +1,17 @@
-import pandas as pd
 import os
-from urllib.parse import quote_plus
-from urllib.request import urlopen
-from xml.etree import ElementTree
-import feedparser
+import pandas as pd
+
+try:
+    import feedparser
+except ImportError:
+    feedparser = None
+
+DIR_CONFIG = "Konfigurasi"
+DIR_DATABASE = "Database"
+FILE_SAHAM = os.path.join(DIR_CONFIG, "saham.txt") if os.path.exists(os.path.join(DIR_CONFIG, "saham.txt")) else "saham.txt"
+FILE_RENCANA = os.path.join(DIR_CONFIG, "RENCANA_AKUISISI.txt") if os.path.exists(os.path.join(DIR_CONFIG, "RENCANA_AKUISISI.txt")) else "RENCANA_AKUISISI.txt"
+FILE_DALAM = os.path.join(DIR_CONFIG, "DALAM_AKUISISI.txt") if os.path.exists(os.path.join(DIR_CONFIG, "DALAM_AKUISISI.txt")) else "DALAM_AKUISISI.txt"
+FILE_OUTPUT = os.path.join(DIR_DATABASE, "data_akuisisi.csv")
 
 def load_keywords(filename):
     """Memuat daftar kata kunci dari file txt."""
@@ -14,12 +22,17 @@ def load_keywords(filename):
         return [line.strip().lower() for line in file if line.strip()]
 
 def get_news_titles(ticker):
-    """Menarik judul berita terbaru dari Google News RSS"""
+    """Menarik judul berita terbaru dari Google News RSS secara aman"""
+    if feedparser is None:
+        return "Tidak ada berita terbaru."
     query = f"saham+{ticker}+akuisisi"
     url = f"https://news.google.com/rss/search?q={query}&hl=id&gl=ID&ceid=ID:id"
-    feed = feedparser.parse(url)
-    titles = [entry.title for entry in feed.entries[:5]]
-    return " | ".join(titles) if titles else "Tidak ada berita terbaru."
+    try:
+        feed = feedparser.parse(url)
+        titles = [entry.title for entry in feed.entries[:5]]
+        return " | ".join(titles) if titles else "Tidak ada berita terbaru."
+    except Exception as e:
+        return "Tidak ada berita terbaru."
 
 def analyze_acquisition_status(news_text, kata_rencana, kata_dalam):
     if news_text == "Tidak ada berita terbaru.":
@@ -42,23 +55,22 @@ def analyze_acquisition_status(news_text, kata_rencana, kata_dalam):
     return "TIDAK ADA"
 
 def main():
-    print("🔍 Memulai pemindaian berita dengan logika prioritas (3 kata -> 1 kata)...")
+    print("🔍 Memulai pemindaian berita sentimen akuisisi...")
     
-    if not os.path.exists("saham.txt"):
-        print("❌ Error: File 'saham.txt' tidak ditemukan!")
+    if not os.path.exists(FILE_SAHAM):
+        print(f"❌ Error: File saham '{FILE_SAHAM}' tidak ditemukan!")
         return
 
     # Memuat kata kunci dari file eksternal
-    kata_rencana = load_keywords("RENCANA_AKUISISI.txt")
-    kata_dalam = load_keywords("DALAM_AKUISISI.txt")
+    kata_rencana = load_keywords(FILE_RENCANA)
+    kata_dalam = load_keywords(FILE_DALAM)
 
-    with open("saham.txt", "r") as file:
+    with open(FILE_SAHAM, "r", encoding="utf-8") as file:
         daftar_saham = [baris.strip().upper() for baris in file if baris.strip()]
         
     hasil_akuisisi = []
     
     for ticker in daftar_saham:
-        print(f"Memindai berita untuk {ticker}...")
         berita = get_news_titles(ticker)
         status = analyze_acquisition_status(berita, kata_rencana, kata_dalam)
         
@@ -68,9 +80,13 @@ def main():
         })
         
     if hasil_akuisisi:
+        os.makedirs(DIR_DATABASE, exist_ok=True)
         df = pd.DataFrame(hasil_akuisisi)
-        df.to_csv("data_akuisisi.csv", index=False)
-        print("✅ Selesai! File 'data_akuisisi.csv' berhasil diperbarui.")
+        # Tulis secara atomik
+        tmp_file = f"{FILE_OUTPUT}.tmp"
+        df.to_csv(tmp_file, index=False)
+        os.replace(tmp_file, FILE_OUTPUT)
+        print(f"✅ Selesai! File '{FILE_OUTPUT}' berhasil diperbarui.")
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,34 @@
+[
+  {
+    "ticker": "BBCA",
+    "nama": "Bank Central Asia",
+    "asset_class": "idx",
+    "quantity": 1000,
+    "avg_buy_price_idr": 9800,
+    "catatan": "Core Banking"
+  },
+  {
+    "ticker": "GOLD",
+    "nama": "Emas Fisik/Digital",
+    "asset_class": "gold",
+    "quantity": 10.0,
+    "avg_buy_price_idr": 1350000,
+    "catatan": "Hedging Inflasi"
+  },
+  {
+    "ticker": "BTC",
+    "nama": "Bitcoin",
+    "asset_class": "crypto",
+    "quantity": 0.015,
+    "avg_buy_price_idr": 1050000000,
+    "catatan": "Aset Digital"
+  },
+  {
+    "ticker": "NVDA",
+    "nama": "NVIDIA Corp",
+    "asset_class": "us_stock",
+    "quantity": 2,
+    "avg_buy_price_idr": 2000000,
+    "catatan": "AI Sector"
+  }
+]

@@ -1,0 +1,578 @@
+import os
+import json
+import requests
+from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
+
+def get_telegram_config():
+    """Mengambil konfigurasi Telegram dinamis dari env."""
+    tok = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+    cid = os.getenv("TELEGRAM_CHAT_ID", "").strip()
+    return tok, cid
+
+def is_telegram_configured() -> bool:
+    """Memeriksa apakah konfigurasi bot Telegram telah terisi."""
+    tok, cid = get_telegram_config()
+    return bool(tok and cid and "ISI_" not in tok)
+
+def simpan_konfigurasi_telegram(token: str, chat_id: str) -> bool:
+    """Menyimpan token dan chat ID Telegram langsung ke file .env."""
+    env_file = ".env"
+    lines = []
+    if os.path.exists(env_file):
+        with open(env_file, "r") as f:
+            lines = f.readlines()
+            
+    token_found = False
+    chat_found = False
+    new_lines = []
+    for line in lines:
+        if line.startswith("TELEGRAM_BOT_TOKEN="):
+            new_lines.append(f"TELEGRAM_BOT_TOKEN={token.strip()}\n")
+            token_found = True
+        elif line.startswith("TELEGRAM_CHAT_ID="):
+            new_lines.append(f"TELEGRAM_CHAT_ID={chat_id.strip()}\n")
+            chat_found = True
+        else:
+            new_lines.append(line)
+            
+    if not token_found:
+        new_lines.append(f"TELEGRAM_BOT_TOKEN={token.strip()}\n")
+    if not chat_found:
+        new_lines.append(f"TELEGRAM_CHAT_ID={chat_id.strip()}\n")
+        
+    try:
+        with open(env_file, "w") as f:
+            f.writelines(new_lines)
+        os.environ["TELEGRAM_BOT_TOKEN"] = token.strip()
+        os.environ["TELEGRAM_CHAT_ID"] = chat_id.strip()
+        return True
+    except Exception as e:
+        print(f"Gagal menyimpan ke .env: {e}")
+        return False
+
+def kirim_pesan_telegram(pesan: str, token: str = None, chat_id: str = None) -> bool:
+    """
+    Mengirim pesan teks dengan format HTML ke Telegram.
+    Returns: True jika sukses, False jika gagal/belum terkonfigurasi.
+    """
+    tok = token or os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+    cid = chat_id or os.getenv("TELEGRAM_CHAT_ID", "").strip()
+
+    if not tok or not cid:
+        return False
+
+    url = f"https://api.telegram.org/bot{tok}/sendMessage"
+    payload = {
+        "chat_id": cid,
+        "text": pesan,
+        "parse_mode": "HTML",
+        "disable_web_page_preview": True
+    }
+
+    try:
+        resp = requests.post(url, json=payload, timeout=10)
+        if resp.status_code == 200:
+            return True
+        print(f"⚠️ [Telegram] Gagal kirim (HTTP {resp.status_code}): {resp.text[:200]}")
+        return False
+    except Exception as e:
+        print(f"⚠️ [Telegram] Error koneksi: {e}")
+        return False
+
+def kirim_alert_transaksi_bot(arena: str, ticker: str, aksi: str, harga: float, lot: int, profit_rp: float = 0, profit_pct: float = 0) -> bool:
+    """Mengirim notifikasi instan saat bot trading mengeksekusi beli/jual."""
+    if not is_telegram_configured():
+        return False
+
+    waktu_str = datetime.now().strftime("%d/%m/%Y %H:%M WIB")
+    nilai_rp = harga * lot * 100
+
+    if aksi.upper() == "BELI":
+        header = f"🟢 <b>[BOT EKSEKUSI BELI] — {ticker}</b>"
+        detail_profit = ""
+    else:
+        status_cuan = "PROFIT 🚀" if profit_rp >= 0 else "CUT LOSS 🩸"
+        header = f"🔴 <b>[BOT EKSEKUSI JUAL - {status_cuan}] — {ticker}</b>"
+        detail_profit = f"\n💵 <b>P/L Realisasi:</b> Rp {profit_rp:+,.0f} ({profit_pct:+.2f}%)"
+
+    pesan = (
+        f"{header}\n"
+        f"🏛️ <b>Arena:</b> {arena}\n"
+        f"💰 <b>Harga:</b> Rp {harga:,.0f}\n"
+        f"📦 <b>Volume:</b> {lot:,} lot (~Rp {nilai_rp:,.0f})"
+        f"{detail_profit}\n"
+        f"⏰ <i>{waktu_str}</i>"
+    )
+    return kirim_pesan_telegram(pesan)
+
+def kirim_alert_bsjp(top_saham: list) -> bool:
+    """Mengirim ringkasan rekomendasi saham BSJP sore hari."""
+    if not is_telegram_configured() or not top_saham:
+        return False
+
+    waktu_str = datetime.now().strftime("%d/%m/%Y %H:%M WIB")
+    lines = [
+        "🦅 <b>RADAR BSJP — REKOMENDASI BELI SORE</b>",
+        f"📅 {waktu_str}",
+        ""
+    ]
+
+    for idx, s in enumerate(top_saham[:5], 1):
+        ticker = s.get("Ticker", "")
+        harga = s.get("Harga (Rp)", 0)
+        tp_cl = s.get("Auto Trading Plan", "-")
+        bintang = s.get("Total Score", "⭐")
+        lines.append(f"<b>{idx}. {ticker}</b> — Rp {harga:,.0f} ({bintang})")
+        lines.append(f"   🎯 Plan: <code>{tp_cl}</code>")
+
+    lines.append("\n⚠️ <i>Beli sore 15:30, jual pagi 09:00. Bukan ajakan finansial resmi.</i>")
+    return kirim_pesan_telegram("\n".join(lines))
+
+def kirim_ringkasan_pasar(ringkasan: dict) -> bool:
+    """Mengirim ringkasan harian IHSG."""
+    if not is_telegram_configured():
+        return False
+
+    waktu_str = datetime.now().strftime("%d/%m/%Y %H:%M WIB")
+    pesan = (
+        f"📊 <b>RINGKASAN PASAR IHSG</b>\n"
+        f"📅 {waktu_str}\n\n"
+        f"🔍 Total Saham : {ringkasan.get('total', 0)}\n"
+        f"🟢 Menguat     : {ringkasan.get('menguat', 0)}\n"
+        f"🔴 Melemah     : {ringkasan.get('melemah', 0)}\n"
+        f"⚪ Stagnan     : {ringkasan.get('stagnan', 0)}\n"
+        f"🧭 Sentimen    : <b>{ringkasan.get('sentimen', '-')}</b>\n"
+    )
+    return kirim_pesan_telegram(pesan)
+
+FILE_LAST_SENT_1530 = "Database/telegram_1530_sent.json"
+FILE_LAST_SENT_1000 = "Database/telegram_1000_sent.json"
+
+def kirim_rekomendasi_rumus_2_dan_9(df_screener=None, force=False) -> tuple[bool, str]:
+    """
+    Mengirimkan daftar rekomendasi saham Beli Sore (BSJP) khusus Rumus 2 & Rumus 9
+    ke Telegram bot secara otomatis pada jam 15:30 WIB.
+    """
+    if not is_telegram_configured():
+        return False, "Bot Telegram belum terkonfigurasi (Token/Chat ID kosong)."
+
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    
+    # Cek agar tidak mengirim dobel di hari yang sama (kecuali force=True)
+    if not force and os.path.exists(FILE_LAST_SENT_1530):
+        try:
+            with open(FILE_LAST_SENT_1530, "r") as f:
+                last_data = json.load(f)
+                if last_data.get("last_sent_date") == today_str:
+                    return False, f"Alert 15:30 untuk hari ini ({today_str}) sudah pernah terkirim."
+        except Exception:
+            pass
+
+    import pandas as pd
+    import tracker_ai
+    
+    if df_screener is None or df_screener.empty:
+        file_hasil = "Database/hasil_screener.csv"
+        if os.path.exists(file_hasil):
+            try:
+                df_screener = pd.read_csv(file_hasil)
+            except Exception as e:
+                return False, f"Gagal membaca database: {e}"
+        else:
+            return False, "Database hasil screener belum tersedia."
+
+    hasil_rumus = tracker_ai.filter_saham_9_rumus(df_screener)
+    df_r2 = hasil_rumus.get("R2", pd.DataFrame())
+    df_r9 = hasil_rumus.get("R9", pd.DataFrame())
+
+    waktu_str = datetime.now().strftime("%d/%m/%Y %H:%M WIB")
+
+    lines = [
+        "🦅 <b>REKOMENDASI BELI SORE (BSJP) 15:30 WIB</b>",
+        "🎯 <i>Strategi Terakurat: Rumus 2 & Rumus 9</i>",
+        f"📅 <i>{waktu_str}</i>",
+        "━━━━━━━━━━━━━━━━━━━━"
+    ]
+
+    total_emiten = 0
+    rekomendasi_list = []
+
+    # Bagian Rumus 2
+    lines.append("🔥 <b>RUMUS 2: SQUEEZE + ANOMALI ML + OBV NAIK</b>")
+    lines.append("🏆 <i>Win Rate Historis: 100.0%</i>")
+    if not df_r2.empty:
+        sort_r2 = df_r2.sort_values(by=["Total Score", "Volume"], ascending=[False, False]) if "Total Score" in df_r2.columns else df_r2
+        for idx, (_, row) in enumerate(sort_r2.head(5).iterrows(), 1):
+            t = str(row.get("Ticker", "")).strip().upper()
+            p = float(row.get("Harga (Rp)", 0))
+            score = int(row.get("Total Score", 0)) if pd.notnull(row.get("Total Score")) else 0
+            tp = round(p * 1.05)
+            cl = round(p * 0.97)
+            bintang = "⭐" * min(score, 8)
+            plan = row.get("Auto Trading Plan", f"TP Rp {tp:,} (+5%) | CL Rp {cl:,} (-3%)")
+            lines.append(f"<b>{idx}. #{t}</b> — Rp {p:,.0f} ({bintang})")
+            lines.append(f"   🎯 <code>{plan}</code>")
+            total_emiten += 1
+            rekomendasi_list.append({
+                "ticker": t,
+                "rumus_id": "R2",
+                "rumus_nama": "Rumus 2 (Anomali ML)",
+                "harga_entry": p,
+                "target_tp": tp,
+                "stop_loss": cl,
+                "score": score,
+                "plan": plan
+            })
+        if len(df_r2) > 5:
+            lines.append(f"   <i>(+{len(df_r2) - 5} emiten lainnya di dashboard)</i>")
+    else:
+        lines.append("   <i>(Tidak ada emiten lolos filter ketat Rumus 2 sore ini)</i>")
+
+    lines.append("\n━━━━━━━━━━━━━━━━━━━━")
+
+    # Bagian Rumus 9
+    lines.append("🎯 <b>RUMUS 9: SQUEEZE + RISK/REWARD > 1:3</b>")
+    lines.append("🏆 <i>Win Rate Historis: 100.0% (5 dari 5 Teruji)</i>")
+    if not df_r9.empty:
+        sort_r9 = df_r9.sort_values(by=["Total Score", "Volume"], ascending=[False, False]) if "Total Score" in df_r9.columns else df_r9
+        for idx, (_, row) in enumerate(sort_r9.head(5).iterrows(), 1):
+            t = str(row.get("Ticker", "")).strip().upper()
+            p = float(row.get("Harga (Rp)", 0))
+            score = int(row.get("Total Score", 0)) if pd.notnull(row.get("Total Score")) else 0
+            tp = round(p * 1.05)
+            cl = round(p * 0.97)
+            bintang = "⭐" * min(score, 8)
+            plan = row.get("Auto Trading Plan", f"TP Rp {tp:,} (+5%) | CL Rp {cl:,} (-3%)")
+            lines.append(f"<b>{idx}. #{t}</b> — Rp {p:,.0f} ({bintang})")
+            lines.append(f"   🎯 <code>{plan}</code>")
+            total_emiten += 1
+            rekomendasi_list.append({
+                "ticker": t,
+                "rumus_id": "R9",
+                "rumus_nama": "Rumus 9 (Risk/Reward > 1:3)",
+                "harga_entry": p,
+                "target_tp": tp,
+                "stop_loss": cl,
+                "score": score,
+                "plan": plan
+            })
+        if len(df_r9) > 5:
+            lines.append(f"   <i>(+{len(df_r9) - 5} emiten lainnya di dashboard)</i>")
+    else:
+        lines.append("   <i>(Tidak ada emiten lolos filter ketat Rumus 9 sore ini)</i>")
+
+    lines.append("\n━━━━━━━━━━━━━━━━━━━━")
+    lines.append("⏰ <i>Beli sore 15:30-15:50 WIB sebelum bursa tutup. Pasang jual/TP besok pagi saat open market 09:00 WIB. Disiplin CL jika tembus batas risiko.</i>")
+
+    pesan_final = "\n".join(lines)
+    berhasil = kirim_pesan_telegram(pesan_final)
+    
+    if berhasil:
+        try:
+            os.makedirs(os.path.dirname(FILE_LAST_SENT_1530), exist_ok=True)
+            with open(FILE_LAST_SENT_1530, "w") as f:
+                json.dump({
+                    "last_sent_date": today_str,
+                    "waktu": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "total_emiten": total_emiten,
+                    "rekomendasi": rekomendasi_list
+                }, f, indent=2)
+        except Exception:
+            pass
+        return True, f"Berhasil mengirim alert rekomendasi Rumus 2 & 9 ({total_emiten} saham)."
+    else:
+        return False, "Gagal mengirim pesan ke Telegram API."
+
+def cek_dan_kirim_jadwal_1530(df_screener=None, now=None):
+    """
+    Pemeriksaan berkala yang dipanggil oleh scheduler:
+    Jika hari bursa (Senin-Jumat) dan waktu sudah mencapai >= 15:30 WIB (dan belum lewat 16:05 WIB),
+    serta belum pernah kirim hari ini -> kirim otomatis!
+    """
+    if now is None:
+        now = datetime.now()
+        
+    if now.weekday() >= 5:
+        return False, "Bukan hari bursa (Weekend)"
+        
+    total_minutes = now.hour * 60 + now.minute
+    target_start = 15 * 60 + 30 # 15:30 WIB
+    target_end = 16 * 60 + 5   # 16:05 WIB
+    
+    if target_start <= total_minutes <= target_end:
+        return kirim_rekomendasi_rumus_2_dan_9(df_screener=df_screener, force=False)
+    return False, "Belum / Lewat jam 15:30 WIB"
+
+def _ambil_data_realtime_emiten(tickers: list, df_screener=None) -> dict:
+    """
+    Mengambil harga real-time, Open, High, dan Low untuk daftar ticker.
+    Menggunakan kombinasi screener database lokal dan Yahoo Finance (yfinance).
+    """
+    import numpy as np
+    import pandas as pd
+    
+    data_lookup = {}
+    
+    # 1. Dari df_screener atau file lokal hasil_screener.csv
+    if df_screener is None or df_screener.empty:
+        file_hasil = "Database/hasil_screener.csv"
+        if os.path.exists(file_hasil):
+            try:
+                df_screener = pd.read_csv(file_hasil)
+            except Exception:
+                pass
+
+    if df_screener is not None and not df_screener.empty and "Ticker" in df_screener.columns:
+        for _, row in df_screener.iterrows():
+            tkr = str(row.get("Ticker", "")).strip().upper()
+            if tkr in tickers:
+                p = float(row.get("Harga (Rp)", 0))
+                h = float(row.get("High", row.get("Resistance", p)))
+                o = float(row.get("Open", p))
+                l = float(row.get("Low", row.get("Support", p)))
+                data_lookup[tkr] = {
+                    "price": p,
+                    "open": o,
+                    "high": max(h, p),
+                    "low": l if l > 0 else p
+                }
+
+    # 2. Ambil update live intraday via yfinance (satu kali batch download cepat)
+    if tickers:
+        try:
+            import yfinance as yf
+            symbols = [f"{t}.JK" for t in tickers]
+            df_yf = yf.download(symbols, period="2d", progress=False)
+            if not df_yf.empty:
+                for t in tickers:
+                    sym = f"{t}.JK"
+                    try:
+                        if len(symbols) == 1:
+                            c = float(df_yf["Close"].iloc[-1])
+                            h = float(df_yf["High"].iloc[-1])
+                            o = float(df_yf["Open"].iloc[-1])
+                            l = float(df_yf["Low"].iloc[-1])
+                        else:
+                            c = float(df_yf["Close"][sym].iloc[-1])
+                            h = float(df_yf["High"][sym].iloc[-1])
+                            o = float(df_yf["Open"][sym].iloc[-1])
+                            l = float(df_yf["Low"][sym].iloc[-1])
+                        
+                        if not np.isnan(c) and c > 0:
+                            prev_high = data_lookup.get(t, {}).get("high", 0)
+                            data_lookup[t] = {
+                                "price": c,
+                                "open": o,
+                                "high": max(h, prev_high, c),
+                                "low": l if (not np.isnan(l) and l > 0) else c
+                            }
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+    return data_lookup
+
+def kirim_update_realtime_pagi_1000(df_screener=None, force=False) -> tuple[bool, str]:
+    """
+    Mengirimkan update harga realtime daftar saham BSJP (Rumus 2 & Rumus 9)
+    yang dikirim pada hari/sore sebelumnya ke bot Telegram pada jam 10:00 WIB.
+    """
+    if not is_telegram_configured():
+        return False, "Bot Telegram belum terkonfigurasi (Token/Chat ID kosong)."
+
+    today_str = datetime.now().strftime("%Y-%m-%d")
+
+    # Cek apakah sudah pernah kirim update pagi hari ini
+    if not force and os.path.exists(FILE_LAST_SENT_1000):
+        try:
+            with open(FILE_LAST_SENT_1000, "r") as f:
+                last_data = json.load(f)
+                if last_data.get("last_sent_date") == today_str:
+                    return False, f"Update realtime 10:00 WIB hari ini ({today_str}) sudah pernah terkirim."
+        except Exception:
+            pass
+
+    import pandas as pd
+    import tracker_ai
+
+    rekomendasi = []
+    tgl_rekomendasi = "Kemarin Sore"
+
+    # 1. Ambil dari catatan pengiriman 15:30 WIB terakhir
+    if os.path.exists(FILE_LAST_SENT_1530):
+        try:
+            with open(FILE_LAST_SENT_1530, "r") as f:
+                data_1530 = json.load(f)
+                rekomendasi = data_1530.get("rekomendasi", [])
+                if data_1530.get("last_sent_date"):
+                    tgl_rekomendasi = data_1530["last_sent_date"]
+        except Exception:
+            pass
+
+    # 2. Fallback: Ambil dari tracker_rekomendasi_ai.json jika file 15:30 belum memuat list
+    if not rekomendasi:
+        try:
+            tracker_data = tracker_ai.load_tracker_data()
+            dates = sorted(list(set(x.get("tanggal", "") for x in tracker_data if x.get("tanggal"))))
+            past_dates = [d for d in dates if d < today_str]
+            target_date = past_dates[-1] if past_dates else (dates[-1] if dates else None)
+            
+            if target_date:
+                tgl_rekomendasi = target_date
+                for item in tracker_data:
+                    if item.get("tanggal") == target_date and item.get("rumus_id") in ["R2", "R9"]:
+                        p = float(item.get("harga_entry", 0))
+                        tp = round(p * 1.05)
+                        cl = round(p * 0.97)
+                        rekomendasi.append({
+                            "ticker": item.get("ticker"),
+                            "rumus_id": item.get("rumus_id"),
+                            "rumus_nama": "Rumus 2 (Anomali ML)" if item.get("rumus_id") == "R2" else "Rumus 9 (Risk/Reward > 1:3)",
+                            "harga_entry": p,
+                            "target_tp": tp,
+                            "stop_loss": cl,
+                            "score": item.get("skor_quant", 0),
+                            "plan": f"TP Rp {tp:,} (+5%) | CL Rp {cl:,} (-3%)"
+                        })
+        except Exception:
+            pass
+
+    # 3. Fallback kedua: Jika masih kosong (misal database baru direset), ambil dari screener aktif
+    if not rekomendasi:
+        if df_screener is None or df_screener.empty:
+            file_hasil = "Database/hasil_screener.csv"
+            if os.path.exists(file_hasil):
+                try:
+                    df_screener = pd.read_csv(file_hasil)
+                except Exception:
+                    pass
+        if df_screener is not None and not df_screener.empty:
+            hasil_rumus = tracker_ai.filter_saham_9_rumus(df_screener)
+            for rid, rnama in [("R2", "Rumus 2 (Anomali ML)"), ("R9", "Rumus 9 (Risk/Reward > 1:3)")]:
+                df_sub = hasil_rumus.get(rid, pd.DataFrame())
+                for _, r in df_sub.head(3).iterrows():
+                    t = str(r.get("Ticker", "")).strip().upper()
+                    p = float(r.get("Harga (Rp)", 0))
+                    tp = round(p * 1.05)
+                    cl = round(p * 0.97)
+                    rekomendasi.append({
+                        "ticker": t,
+                        "rumus_id": rid,
+                        "rumus_nama": rnama,
+                        "harga_entry": p,
+                        "target_tp": tp,
+                        "stop_loss": cl,
+                        "score": int(r.get("Total Score", 0)) if pd.notnull(r.get("Total Score")) else 0,
+                        "plan": r.get("Auto Trading Plan", f"TP Rp {tp:,} (+5%) | CL Rp {cl:,} (-3%)")
+                    })
+
+    if not rekomendasi:
+        return False, "Tidak ditemukan daftar saham BSJP yang direkomendasikan pada sesi sebelumnya."
+
+    # Ambil data harga realtime terkini
+    tickers = list(set(item["ticker"] for item in rekomendasi if item.get("ticker")))
+    market_data = _ambil_data_realtime_emiten(tickers, df_screener=df_screener)
+
+    waktu_str = datetime.now().strftime("%d/%m/%Y %H:%M WIB")
+    lines = [
+        "🌅 <b>UPDATE REALTIME BSJP PAGI (10:00 WIB)</b>",
+        f"📊 <i>Realisasi Saham Rekomendasi Sore ({tgl_rekomendasi})</i>",
+        f"📅 <i>{waktu_str}</i>",
+        "━━━━━━━━━━━━━━━━━━━━"
+    ]
+
+    r2_items = [x for x in rekomendasi if x.get("rumus_id") == "R2"]
+    r9_items = [x for x in rekomendasi if x.get("rumus_id") == "R9"]
+    lain_items = [x for x in rekomendasi if x.get("rumus_id") not in ["R2", "R9"]]
+
+    def _render_kelompok(judul: str, items: list):
+        if not items:
+            return
+        lines.append(f"\n{judul}")
+        for idx, item in enumerate(items, 1):
+            tkr = item["ticker"]
+            entry = float(item.get("harga_entry", 0))
+            quote = market_data.get(tkr, {})
+            
+            cur_price = quote.get("price", entry)
+            high_price = max(quote.get("high", cur_price), cur_price)
+            
+            # Hitung gain
+            if entry > 0:
+                cur_gain = ((cur_price - entry) / entry) * 100
+                max_gain = ((high_price - entry) / entry) * 100
+            else:
+                cur_gain = 0.0
+                max_gain = 0.0
+
+            # Badge status performa pagi
+            if max_gain >= 1.5 or cur_gain >= 1.5:
+                status_str = f"🚀 <b>CUAN (Peak High: {max_gain:+.2f}%)</b>"
+            elif cur_gain >= -1.0:
+                status_str = f"⚖️ <b>STABIL / BEP ({cur_gain:+.2f}%)</b>"
+            else:
+                status_str = f"🩸 <b>WASPADA CL ({cur_gain:+.2f}%)</b>"
+
+            tp_target = item.get("target_tp", round(entry * 1.05))
+            cl_target = item.get("stop_loss", round(entry * 0.97))
+
+            lines.append(f"<b>{idx}. #{tkr}</b> (Beli: Rp {entry:,.0f})")
+            lines.append(f"   💰 <b>Sekarang:</b> Rp {cur_price:,.0f} ({cur_gain:+.2f}%)")
+            lines.append(f"   🏔️ <b>High Sesi 1:</b> Rp {high_price:,.0f} ({max_gain:+.2f}%)")
+            lines.append(f"   🎯 <code>Target: TP Rp {tp_target:,} | CL Rp {cl_target:,}</code>")
+            lines.append(f"   📊 <b>Status:</b> {status_str}")
+
+    if r2_items:
+        _render_kelompok("🔥 <b>RUMUS 2: SQUEEZE + ANOMALI ML + OBV</b>", r2_items)
+    if r9_items:
+        _render_kelompok("🎯 <b>RUMUS 9: SQUEEZE + RISK/REWARD > 1:3</b>", r9_items)
+    if lain_items:
+        _render_kelompok("⚡ <b>REKOMENDASI BSJP LAINNYA</b>", lain_items)
+
+    lines.append("\n━━━━━━━━━━━━━━━━━━━━")
+    lines.append("💡 <i>Panduan Sesi 1: Jika sudah mencapai target TP (+1.5% s/d +5.0%), amankan profit bertahap (taking profit). Pasang trailing stop atau disiplin cut loss bila harga tembus batas risiko.</i>")
+
+    pesan_final = "\n".join(lines)
+    berhasil = kirim_pesan_telegram(pesan_final)
+
+    if berhasil:
+        try:
+            os.makedirs(os.path.dirname(FILE_LAST_SENT_1000), exist_ok=True)
+            with open(FILE_LAST_SENT_1000, "w") as f:
+                json.dump({
+                    "last_sent_date": today_str,
+                    "waktu": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "total_emiten": len(rekomendasi),
+                    "tgl_rekomendasi_asal": tgl_rekomendasi
+                }, f, indent=2)
+        except Exception:
+            pass
+        return True, f"Berhasil mengirim update realtime 10:00 WIB ({len(rekomendasi)} saham dipantau)."
+    else:
+        return False, "Gagal mengirim pesan ke Telegram API."
+
+def cek_dan_kirim_jadwal_1000(df_screener=None, now=None):
+    """
+    Pemeriksaan berkala yang dipanggil oleh scheduler:
+    Jika hari bursa (Senin-Jumat) dan waktu sudah mencapai 10:00 WIB (s/d 10:15 WIB),
+    serta belum pernah kirim update pagi hari ini -> kirim otomatis!
+    """
+    if now is None:
+        now = datetime.now()
+
+    if now.weekday() >= 5:
+        return False, "Bukan hari bursa (Weekend)"
+
+    total_minutes = now.hour * 60 + now.minute
+    target_start = 10 * 60      # 10:00 WIB
+    target_end = 10 * 60 + 15   # 10:15 WIB
+
+    if target_start <= total_minutes <= target_end:
+        return kirim_update_realtime_pagi_1000(df_screener=df_screener, force=False)
+    return False, "Belum / Lewat jam 10:00 WIB"
+
+

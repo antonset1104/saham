@@ -1,0 +1,2 @@
+0 9,10,11,14,15,16 * * 1-5 /Users/antonsetiawan/Documents/website/saham/jalankan_scheduler_cron.sh
+30 15 * * 1-5 /Users/antonsetiawan/Documents/website/saham/jalankan_scheduler_cron.sh

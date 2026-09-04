@@ -8,6 +8,11 @@ import xml.etree.ElementTree as ET # <-- Modul untuk membaca berita RSS
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from datetime import datetime
+from dotenv import load_dotenv
+from analysis_signal import calculate_signal_score
+from notifikasi_telegram import kirim_alert_bsjp, is_telegram_configured
+
+load_dotenv()
 
 # ==========================================
 # SECTION 1: KONFIGURASI & TOKEN CURIAN BROKSUM
@@ -17,16 +22,18 @@ FILE_HASIL = "Database/hasil_screener.csv"
 LOCK_FILE = "sedang_update.lock"
 DIR_ARSIP = "Arsip_Data_Harian"
 
-# --- KONFIGURASI STOCKBIT DARI FILE TERPISAH ---
-import os
-
-# Membaca token dari file token_stockbit.txt
-try:
-    with open("token_stockbit.txt", "r") as file:
-        TOKEN_CURIAN = file.read().strip()
-except FileNotFoundError:
-    print("⚠️ File 'token_stockbit.txt' tidak ditemukan! Pastikan Anda sudah membuat filenya.")
-    TOKEN_CURIAN = "" # Kosongkan jika file tidak ada
+# --- KONFIGURASI STOCKBIT DARI .ENV ATAU FILE TERPISAH ---
+TOKEN_CURIAN = os.getenv("STOCKBIT_TOKEN", "").strip()
+if not TOKEN_CURIAN:
+    try:
+        with open("token_stockbit.txt", "r") as file:
+            for baris in file:
+                baris_clean = baris.strip()
+                if baris_clean and not baris_clean.startswith("#") and "PASTE_TOKEN" not in baris_clean:
+                    TOKEN_CURIAN = baris_clean
+                    break
+    except FileNotFoundError:
+        TOKEN_CURIAN = ""
 
 if not os.path.exists(DIR_ARSIP):
     os.makedirs(DIR_ARSIP)
@@ -450,6 +457,7 @@ def hitung_semua_indikator(df_saham, ticker, aman_session):
         status_fibo = "Normal / Sideways"
 
     return {
+        "Open": open_today, "High": high_today, "Low": low_today,
         "Harga (Rp)": close_today, "Harga MA20": int(ma_20), "Support": int(support_20), "Resistance": int(resist_20),
         "Change (%)": change_pct, "Volume": vol_today, "Vol Breakout": vol_breakout, "RSI (14D)": rsi,
         "Momentum": momentum, "MA Signal": ma_signal, "MA Cross": ma_cross, "MACD": status_macd,
@@ -468,10 +476,21 @@ def hitung_semua_indikator(df_saham, ticker, aman_session):
         "Status Fibonacci": status_fibo
     }
 
+import argparse
+
 # ==========================================
 # SECTION 4: EKSEKUSI UTAMA (MULTITHREADING AMAN)
 # ==========================================
+def parse_args():
+    parser = argparse.ArgumentParser(description="AlgoTrade Screener IHSG - Data Ingestion & Technical Engine")
+    parser.add_argument("--limit", type=int, default=None, help="Batasi jumlah saham yang diproses (untuk pengujian cepat)")
+    parser.add_argument("--tickers", type=str, default=None, help="Daftar ticker tertentu yang diproses (pisahkan koma, contoh: BBCA,TLKM,ASII)")
+    parser.add_argument("--dry-run", action="store_true", help="Jalankan kalkulasi tanpa menyimpan hasil ke disk")
+    return parser.parse_args()
+
 def main():
+    args = parse_args()
+
     if os.path.exists(LOCK_FILE): os.remove(LOCK_FILE)
     with open(LOCK_FILE, "w") as f: f.write("SEDANG PROSES")
 
@@ -483,8 +502,19 @@ def main():
         file_arsip_harian = os.path.join(DIR_ARSIP, f"screener_{tanggal_hari_ini}.csv")
 
         print("⏳ Memulai pembaruan data saham (Ultimate Diagnostic Mode)...")
-        daftar_saham = load_tickers()
-        if not daftar_saham: return
+        if args.tickers:
+            daftar_saham = [t.strip().upper() for t in args.tickers.split(",") if t.strip()]
+            print(f"🎯 Target spesifik ({len(daftar_saham)} emiten): {', '.join(daftar_saham)}")
+        else:
+            daftar_saham = load_tickers()
+            
+        if not daftar_saham:
+            print("⚠️ Tidak ada daftar saham untuk diproses.")
+            return
+
+        if args.limit and args.limit > 0:
+            daftar_saham = daftar_saham[:args.limit]
+            print(f"🔬 Mode Uji Coba Cepat (Limit: {args.limit} emiten)...")
         
         tickers_jk = [f"{t}.JK" for t in daftar_saham]
         tickers_str = " ".join(tickers_jk)
@@ -561,9 +591,15 @@ def main():
                             "PBV (x)": pbv
                         }
                         data_akhir.update(ind)
+                        sig_res = calculate_signal_score(df_saham)
                         data_akhir.update({
-                            "Total Score": score, "Rekomendasi": rekomendasi, 
-                            "Status Akuisisi": "TIDAK ADA", "Terakhir Update": now.strftime("%Y-%m-%d %H:%M:%S")
+                            "Total Score": score, 
+                            "Rekomendasi": rekomendasi, 
+                            "Signal Quant": sig_res["signal"],
+                            "Score Quant": sig_res["score"],
+                            "Alasan Sinyal": sig_res["reason_str"],
+                            "Status Akuisisi": "TIDAK ADA", 
+                            "Terakhir Update": now.strftime("%Y-%m-%d %H:%M:%S")
                         })
                         return data_akhir
             except Exception as e:
@@ -608,20 +644,47 @@ def main():
                 print(f"⚠️ Machine Learning Error: {e}")
                 df_hasil['Prediksi Machine Learning'] = "Biasa / Mengikuti Pasar"
 
-            # 1. SELALU Simpan Data Utama (Overwrite untuk Web)
-            df_hasil.to_csv(FILE_HASIL, index=False)
+            if args.dry_run:
+                print(f"🔬 [Dry-Run] Kalkulasi sukses untuk {len(df_hasil)} saham! (Mode simulasi: data tidak disimpan).")
+                return
+
+            # 1. SELALU Simpan Data Utama secara Atomik (Mencegah Corrupt saat dibaca Web)
+            os.makedirs(os.path.dirname(FILE_HASIL), exist_ok=True)
+            tmp_hasil = f"{FILE_HASIL}.tmp"
+            df_hasil.to_csv(tmp_hasil, index=False)
+            os.replace(tmp_hasil, FILE_HASIL)
             
-            # 2. LOGIKA JAM & HARI PINTAR (DENGAN PEMBAGIAN 3 FOLDER)
+            # Pemicu Tracker Evaluasi Akurasi Prediksi AI 9 Rumus
+            try:
+                import tracker_ai
+                tot_baru = tracker_ai.catat_rekomendasi_per_jam(df_hasil, timestamp=now)
+                tot_eval = tracker_ai.evaluasi_akurasi_rekomendasi(df_hasil)
+                print(f"🎯 [Tracker AI] Berhasil mencatat {tot_baru} rekomendasi baru & mengevaluasi {tot_eval} saham T+1.")
+            except Exception as e_track:
+                print(f"⚠️ Gagal memperbarui Tracker AI: {e_track}")
+            
+            # 2. LOGIKA JAM & HARI PINTAR (DENGAN DEDUPLIKASI TIMESTAMP)
             hari_ini = now.weekday() # 0 = Senin, 1=Selasa ... 4=Jumat
             
             # Jika hari kerja (Senin-Jumat) DAN antara jam 09:00 - 17:00
             if hari_ini < 5 and 9 <= jam_sekarang < 17:
+                # Simpan Backup Harian dengan deduplikasi agar file tidak membengkak puluhan MB
+                if os.path.isfile(file_arsip_harian):
+                    try:
+                        df_lama = pd.read_csv(file_arsip_harian)
+                        df_gabung = pd.concat([df_lama, df_hasil], ignore_index=True)
+                        if "Ticker" in df_gabung.columns and "Waktu Update" in df_gabung.columns:
+                            df_gabung = df_gabung.drop_duplicates(subset=["Ticker", "Waktu Update"], keep="last")
+                    except Exception:
+                        df_gabung = df_hasil
+                else:
+                    df_gabung = df_hasil
+                    
+                tmp_arsip = f"{file_arsip_harian}.tmp"
+                df_gabung.to_csv(tmp_arsip, index=False)
+                os.replace(tmp_arsip, file_arsip_harian)
                 
-                # 1b. Simpan Backup Harian (HANYA SENIN - JUMAT) dengan metode Append
-                file_exists = os.path.isfile(file_arsip_harian)
-                df_hasil.to_csv(file_arsip_harian, mode='a', header=not file_exists, index=False)
-                
-                print(f"✅ Selesai! Data Web diperbarui & Diarsipkan ke sistem 3 Folder (Arsip_Data_Harian).")
+                print(f"✅ Selesai! Data Web diperbarui & Diarsipkan ke {file_arsip_harian} (Dedup Mode).")
                 
             # Jika hari Sabtu atau Minggu
             elif hari_ini >= 5:

@@ -1,0 +1,35 @@
+# Environments & Virtual Envs
+.venv/
+venv/
+env/
+ENV/
+.env
+
+# Sensitive Credentials & Tokens
+token_stockbit.txt
+*.pem
+*.key
+
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Runtime Logs & Locks
+*.log
+bot.log
+Logs/*.log
+*.lock
+sedang_update.lock
+
+# Streamlit & IDE configs
+.streamlit/secrets.toml
+.vscode/
+.idea/
+.DS_Store
+
+# Temporary files
+*.tmp
+Database/*.tmp

@@ -1,0 +1,316 @@
+{
+    "MASTER_FILTERS": {
+        "Kategori": {
+            "label": "\ud83c\udfe2 Kategori Saham",
+            "options": [
+                "Semua",
+                "Big Cap (Lapis 1)",
+                "Mid Cap (Lapis 2)",
+                "Small Cap (Lapis 3)",
+                "Mid Cap (Lapis 2) + Small Cap (Lapis 3)"
+            ]
+        },
+        "Status Open": {
+            "label": "\ud83c\udf05 Sinyal Open",
+            "options": [
+                "Semua",
+                "Open = Low (Bullish Kuat)",
+                "Open = High (Tekanan Jual)",
+                "Normal"
+            ]
+        },
+        "Risk/Reward Ratio": {
+            "label": "\u2696\ufe0f Risk/Reward",
+            "options": [
+                "Semua",
+                "Sangat Menarik (> 1:3)",
+                "Ideal (1:2)",
+                "Menengah (1:1)",
+                "Tidak Ideal (< 1:1)",
+                "Di Area Support"
+            ]
+        },
+        "Kelas Transaksi": {
+            "label": "\ud83d\udcb8 Kelas Transaksi",
+            "options": [
+                "Semua",
+                "Sultan (> 50M/hari)",
+                "Ritel Aktif (5M - 50M)",
+                "Gorengan Sepi (< 5M)"
+            ]
+        },
+        "Sinyal Cuci Barang": {
+            "label": "\ud83e\uddf9 Sinyal Shakeout",
+            "options": [
+                "Semua",
+                "Jarum Bawah (Sinyal Pantulan Kuat)",
+                "Normal"
+            ]
+        },
+        "Valuasi": {
+            "label": "\ud83d\udc8e Valuasi Fundamental",
+            "options": [
+                "Semua",
+                "Undervalued (Murah)",
+                "Fair Value (Wajar)",
+                "Overvalued (Mahal)"
+            ]
+        },
+        "Posisi VWAP": {
+            "label": "\u2696\ufe0f Posisi thd VWAP",
+            "options": [
+                "Semua",
+                "Di Atas VWAP (Kuat)",
+                "Di Bawah VWAP (Lemah)",
+                "Persis di VWAP"
+            ]
+        },
+        "Fase Siklus Bandar": {
+            "label": "\ud83d\udd04 Siklus Wyckoff",
+            "options": [
+                "Semua",
+                "Accumulation (Kumpul Barang)",
+                "Mark-Up (Fase Pesta)",
+                "Distribution (Fase Jualan)",
+                "Mark-Down (Fase Runtuh)",
+                "Sideways"
+            ]
+        },
+        "RVOL (Anomali Vol)": {
+            "label": "\ud83c\udf0b Ledakan Volume",
+            "options": [
+                "Semua",
+                "Ledakan Ekstrem (> 300%)",
+                "Anomali Tinggi (150-300%)",
+                "Normal (50-150%)",
+                "Sepi (< 50%)"
+            ]
+        },
+        "Karakter Gorengan": {
+            "label": "\ud83d\udd75\ufe0f Karakter Saham",
+            "options": [
+                "Semua",
+                "Spesialis Tiang Jemuran (Banting Pucuk)",
+                "Solid (Jarang Dibanting)",
+                "Normal"
+            ]
+        },
+        "Status Bandar": {
+            "label": "\ud83d\udd75\ufe0f Status Bandar",
+            "options": [
+                "Semua",
+                "Akumulasi Kuat",
+                "Distribusi Kuat",
+                "Normal"
+            ]
+        },
+        "Tekanan Bandar": {
+            "label": "\u2694\ufe0f Tekanan Harian",
+            "options": [
+                "Semua",
+                "Dominan Beli (Hajar Kanan)",
+                "Dominan Jual (Guyur)",
+                "Seimbang / Adu Mekanik"
+            ]
+        },
+        "Kekuatan A/D": {
+            "label": "\ud83e\udde0 Smart Money (A/D)",
+            "options": [
+                "Semua",
+                "Akumulasi Pro (Smart Money)",
+                "Distribusi Pro (Guyuran)",
+                "Netral"
+            ]
+        },
+        "OBV Trend": {
+            "label": "\ud83c\udf0a Tren Uang (OBV)",
+            "options": [
+                "Semua",
+                "Akumulasi (Naik)",
+                "Distribusi (Turun)",
+                "Netral"
+            ]
+        },
+        "Pola Candle": {
+            "label": "\ud83d\udd6f\ufe0f Price Action",
+            "options": [
+                "Semua",
+                "Marubozu (Strong Bullish)",
+                "Hammer (Potensi Reversal)",
+                "Doji (Ragu-ragu)",
+                "Normal"
+            ]
+        },
+        "Posisi Entry": {
+            "label": "\ud83c\udfaf Jarak ke Support",
+            "options": [
+                "Semua",
+                "Dekat Support (Low Risk)",
+                "Area Tengah",
+                "Rawan Pucuk (High Risk)"
+            ]
+        },
+        "Vol Breakout": {
+            "label": "\ud83d\udd0a Volume",
+            "options": [
+                "Semua",
+                "Tembus MA20",
+                "Normal"
+            ]
+        },
+        "RSI (14D)": {
+            "label": "\ud83d\udcca RSI (14D)",
+            "options": [
+                "Semua",
+                "> 50 (Bullish)",
+                "<= 50 (Bearish)"
+            ]
+        },
+        "MA Signal": {
+            "label": "\ud83d\udcc8 Tren (MA20)",
+            "options": [
+                "Semua",
+                "Uptrend",
+                "Downtrend"
+            ]
+        },
+        "Momentum": {
+            "label": "\u26a1 Momentum",
+            "options": [
+                "Semua",
+                "Positif",
+                "Negatif"
+            ]
+        },
+        "Total Score": {
+            "label": "\u2b50 Total Score",
+            "options": [
+                "Semua",
+                10,
+                9,
+                8,
+                7,
+                6,
+                5,
+                4,
+                3,
+                2,
+                1,
+                0
+            ]
+        },
+        "Rekomendasi": {
+            "label": "\ud83c\udfaf Rekomendasi",
+            "options": [
+                "Semua",
+                "BELI",
+                "WAIT & SEE"
+            ]
+        },
+        "Likuiditas": {
+            "label": "\ud83d\udca7 Likuiditas",
+            "options": [
+                "Semua",
+                "> 1 Miliar",
+                "< 1 Miliar"
+            ]
+        },
+        "Status BB": {
+            "label": "\ud83c\udf10 Bollinger Bands",
+            "options": [
+                "Semua",
+                "Squeeze",
+                "Bottom Rebound",
+                "Breakout Upper",
+                "Normal"
+            ]
+        },
+        "MA Cross": {
+            "label": "\ud83d\udd00 MA Cross (5/20)",
+            "options": [
+                "Semua",
+                "Golden Cross",
+                "Bullish",
+                "Death Cross",
+                "Bearish"
+            ]
+        },
+        "Risiko": {
+            "label": "\u26a0\ufe0f Risiko Volatilitas",
+            "options": [
+                "Semua",
+                "Tinggi",
+                "Sedang",
+                "Rendah"
+            ]
+        },
+        "Status Akuisisi": {
+            "label": "\ud83e\udd1d Sentimen Akuisisi",
+            "options": [
+                "Semua",
+                "TIDAK ADA",
+                "RENCANA AKUISISI",
+                "DALAM AKUISISI"
+            ]
+        },
+        "MACD": {
+            "label": "\ud83d\udcc8 MACD",
+            "options": [
+                "Semua",
+                "Strong Bullish",
+                "Bullish MACD",
+                "Strong Bearish",
+                "Bearish MACD"
+            ]
+        },
+        "Status Stochastic": {
+            "label": "\ud83c\udf0a Stochastic",
+            "options": [
+                "Semua",
+                "Oversold (Jenuh Jual - Peluang)",
+                "Golden Cross (Awal Bullish)",
+                "Overbought (Jenuh Beli - Rawan)",
+                "Death Cross (Awal Bearish)",
+                "Netral / Sideways"
+            ]
+        },
+        "Status Sentimen": {
+            "label": "\ud83d\udcf0 Sentimen Berita",
+            "options": [
+                "Semua",
+                "Sentimen Positif \ud83d\udcf0",
+                "Sentimen Negatif \u26a0\ufe0f",
+                "Netral / Sepi Berita"
+            ]
+        },
+        "Prediksi Machine Learning": {
+            "label": "\ud83e\udde0 AI Machine Learning",
+            "options": [
+                "Semua",
+                "\ud83d\udd25 ANOMALI BANDAR (Siap Ledakan)",
+                "\u26a0\ufe0f Anomali (Sudah Terbang)",
+                "Biasa / Mengikuti Pasar"
+            ]
+        },
+        "Kondisi Supply": {
+            "label": "\ud83c\udfdc\ufe0f Supply & Demand",
+            "options": [
+                "Semua",
+                "Supply Kering (Siap Pump) \ud83c\udfdc\ufe0f",
+                "Supply Banjir (Distribusi) \ud83c\udf0a",
+                "Normal / Sedang Transisi"
+            ]
+        },
+        "Status Fibonacci": {
+            "label": "\ud83d\udccf Level Fibonacci",
+            "options": [
+                "Semua",
+                "Golden Rebound Fibo 61.8% (Golden Ratio) \ud83c\udfaf",
+                "Dekat Support Fibo 61.8% (Golden Ratio)",
+                "Golden Rebound Fibo 50.0% \ud83c\udfaf",
+                "Golden Rebound Fibo 38.2% \ud83c\udfaf",
+                "Mengambang (Jauh dari Fibo)"
+            ]
+        }
+    }
+}

@@ -2,6 +2,7 @@ import pandas as pd
 import os
 from datetime import datetime
 import subprocess
+from notifikasi_telegram import kirim_alert_transaksi_bot
 
 # ==========================================
 # ⚙️ KONFIGURASI BOT SIMULATOR BSJP (9 ARENA)
@@ -13,20 +14,37 @@ FILE_MARKET = "Database/hasil_screener.csv"
 DIR_DB = "Database"       
 
 # ==========================================
-# 🛠️ FUNGSI AUTO-SAVE KE GITHUB (ABADI)
+# 🛠️ FUNGSI HELPER ATOMIC SAVE & GIT
 # ==========================================
+def simpan_csv_aman(df, filepath):
+    """Menyimpan dataframe secara atomik agar tidak korup saat dibaca bersamaan"""
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    tmp_path = f"{filepath}.tmp"
+    df.to_csv(tmp_path, index=False)
+    os.replace(tmp_path, filepath)
+
 def auto_save_github():
     print("\n🔄 Memulai pencadangan (Auto-Save) permanen ke GitHub...")
     try:
-        subprocess.run(["git", "add", "Database/*.csv"], check=True)
+        # Cek apakah repositori git valid
+        cek_git = subprocess.run(["git", "rev-parse", "--is-inside-work-tree"], capture_output=True, text=True)
+        if cek_git.returncode != 0:
+            print("ℹ️ Bukan repositori Git, lewati auto-save GitHub.")
+            return
+
+        subprocess.run(["git", "add", "Database/*.csv"], check=False)
         waktu_sekarang = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         pesan_komit = f"🤖 Bot Update Portofolio: {waktu_sekarang}"
         commit_process = subprocess.run(["git", "commit", "-m", pesan_komit], capture_output=True, text=True)
         if "nothing to commit" in commit_process.stdout or "nothing to commit" in commit_process.stderr:
             print("✅ Data aman. Tidak ada transaksi baru.")
             return
-        subprocess.run(["git", "push", "origin", "main"], check=True)
-        print("🚀 Pencadangan berhasil! Data portofolio Anda abadi.")
+        
+        push_proc = subprocess.run(["git", "push", "origin", "main"], capture_output=True, text=True)
+        if push_proc.returncode == 0:
+            print("🚀 Pencadangan berhasil! Data portofolio Anda tersimpan di GitHub.")
+        else:
+            print(f"⚠️ Git push dilewati / tidak berhasil: {push_proc.stderr.strip()}")
     except Exception as e:
         print(f"❌ Gagal melakukan Auto-Save. Error: {e}")
 
@@ -151,6 +169,7 @@ def jalankan_bot():
                     'Return_%': round(profit_pct, 2)
                 })
                 print(f"💰 [RUMUS {i}] JUAL: {ticker} @ Rp {harga_jual} | {status_jual} | {profit_pct:.2f}%")
+                kirim_alert_transaksi_bot(f"Rumus {i}", ticker, "JUAL", harga_jual, int(posisi['Lot']), profit_rp, profit_pct)
             else:
                 porto_baru.append(posisi) # Jika tidak dijual, kembalikan ke Gudang (Lapis 1)
 
@@ -200,6 +219,7 @@ def jalankan_bot():
                         }])], ignore_index=True)
                         saldo_sekarang -= total_modal_dikeluarkan
                         print(f"🛒 [RUMUS {i}] BELI: {ticker} @ Rp {harga_beli} | {jumlah_lot} Lot")
+                        kirim_alert_transaksi_bot(f"Rumus {i}", ticker, "BELI", harga_beli, jumlah_lot)
 
                 # WAJIB: Hapus kertas belanja agar besok tidak dibeli lagi
                 os.remove(file_sinyal)
@@ -207,10 +227,10 @@ def jalankan_bot():
                 print(f"⚠️ Gagal membaca sinyal Rumus {i}: {e}")
 
         # ----------------------------------------------------
-        # 💾 SIMPAN SEMUA KE DALAM FILE CSV MASING-MASING
+        # 💾 SIMPAN SEMUA KE DALAM FILE CSV MASING-MASING SECARA ATOMIK
         # ----------------------------------------------------
-        df_porto.to_csv(file_porto, index=False)
-        df_history.to_csv(file_hist, index=False)
+        simpan_csv_aman(df_porto, file_porto)
+        simpan_csv_aman(df_history, file_hist)
 
     print("✅ Inspeksi 9 Arena selesai.")
     
