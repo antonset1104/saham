@@ -391,8 +391,19 @@ def kirim_update_realtime_pagi_1000(df_screener=None, force=False) -> tuple[bool
         try:
             with open(FILE_LAST_SENT_1000, "r") as f:
                 last_data = json.load(f)
-                if last_data.get("last_sent_date") == today_str:
-                    return False, f"Update realtime 10:00 WIB hari ini ({today_str}) sudah pernah terkirim."
+                last_sent_date = last_data.get("last_sent_date")
+                last_waktu = last_data.get("waktu", "")
+                if last_sent_date == today_str:
+                    # Alert 10:00 WIB bursa hanya dianggap 'sudah terkirim' jika dikirim pada jam bursa (>= 09:50 WIB)
+                    if last_waktu:
+                        try:
+                            dt_sent = datetime.strptime(last_waktu, "%Y-%m-%d %H:%M:%S")
+                            if (dt_sent.hour * 60 + dt_sent.minute) >= (9 * 60 + 50):
+                                return False, f"Update realtime 10:00 WIB hari ini ({today_str}) sudah pernah terkirim pukul {dt_sent.strftime('%H:%M')} WIB."
+                        except Exception:
+                            return False, f"Update realtime 10:00 WIB hari ini ({today_str}) sudah pernah terkirim."
+                    else:
+                        return False, f"Update realtime 10:00 WIB hari ini ({today_str}) sudah pernah terkirim."
         except Exception:
             pass
 
@@ -402,18 +413,32 @@ def kirim_update_realtime_pagi_1000(df_screener=None, force=False) -> tuple[bool
     rekomendasi = []
     tgl_rekomendasi = "Kemarin Sore"
 
-    # 1. Ambil dari catatan pengiriman 15:30 WIB terakhir
+    # 1. Ambil dari catatan pengiriman 15:30 WIB terakhir (pastikan dari sesi sore kemarin/sebelumnya)
     if os.path.exists(FILE_LAST_SENT_1530):
         try:
             with open(FILE_LAST_SENT_1530, "r") as f:
                 data_1530 = json.load(f)
-                rekomendasi = data_1530.get("rekomendasi", [])
-                if data_1530.get("last_sent_date"):
-                    tgl_rekomendasi = data_1530["last_sent_date"]
+                tgl_sent = data_1530.get("last_sent_date", "")
+                wkt_sent = data_1530.get("waktu", "")
+                is_valid_kemarin = False
+                if tgl_sent and tgl_sent < today_str:
+                    is_valid_kemarin = True
+                elif wkt_sent:
+                    try:
+                        dt_w = datetime.strptime(wkt_sent, "%Y-%m-%d %H:%M:%S")
+                        # Jika dikirim sebelum jam 09:00 hari ini, berarti itu emiten sesi sore sebelumnya
+                        if dt_w.date() < datetime.now().date() or dt_w.hour < 9:
+                            is_valid_kemarin = True
+                    except Exception:
+                        pass
+                
+                if (is_valid_kemarin or force) and data_1530.get("rekomendasi"):
+                    rekomendasi = data_1530["rekomendasi"]
+                    tgl_rekomendasi = tgl_sent if tgl_sent and tgl_sent < today_str else "Kemarin Sore"
         except Exception:
             pass
 
-    # 2. Fallback: Ambil dari tracker_rekomendasi_ai.json jika file 15:30 belum memuat list
+    # 2. Fallback: Ambil dari tracker_rekomendasi_ai.json untuk tanggal trading terakhir (< today_str)
     if not rekomendasi:
         try:
             tracker_data = tracker_ai.load_tracker_data()
@@ -423,15 +448,27 @@ def kirim_update_realtime_pagi_1000(df_screener=None, force=False) -> tuple[bool
             
             if target_date:
                 tgl_rekomendasi = target_date
-                for item in tracker_data:
-                    if item.get("tanggal") == target_date and item.get("rumus_id") in ["R2", "R9"]:
+                items_hari_itu = [x for x in tracker_data if x.get("tanggal") == target_date and x.get("rumus_id") in ["R2", "R9"]]
+                jam_tersedia = sorted(list(set(x.get("jam", "") for x in items_hari_itu)), reverse=True)
+                jam_sore = [j for j in jam_tersedia if j >= "14:00"]
+                jam_target = jam_sore[0] if jam_sore else (jam_tersedia[0] if jam_tersedia else "")
+                
+                sudah_ada = set()
+                for item in items_hari_itu:
+                    if jam_target and item.get("jam") != jam_target and len(sudah_ada) >= 5:
+                        continue
+                    tkr = str(item.get("ticker", "")).strip().upper()
+                    if tkr and tkr not in sudah_ada:
+                        sudah_ada.add(tkr)
                         p = float(item.get("harga_entry", 0))
                         tp = round(p * 1.05)
                         cl = round(p * 0.97)
+                        rid = item.get("rumus_id", "R9")
+                        rnama = "Rumus 2 (Anomali ML)" if rid == "R2" else "Rumus 9 (Risk/Reward > 1:3)"
                         rekomendasi.append({
-                            "ticker": item.get("ticker"),
-                            "rumus_id": item.get("rumus_id"),
-                            "rumus_nama": "Rumus 2 (Anomali ML)" if item.get("rumus_id") == "R2" else "Rumus 9 (Risk/Reward > 1:3)",
+                            "ticker": tkr,
+                            "rumus_id": rid,
+                            "rumus_nama": rnama,
                             "harga_entry": p,
                             "target_tp": tp,
                             "stop_loss": cl,
@@ -568,11 +605,11 @@ def cek_dan_kirim_jadwal_1000(df_screener=None, now=None):
         return False, "Bukan hari bursa (Weekend)"
 
     total_minutes = now.hour * 60 + now.minute
-    target_start = 10 * 60      # 10:00 WIB
-    target_end = 10 * 60 + 15   # 10:15 WIB
+    target_start = 9 * 60 + 55   # 09:55 WIB
+    target_end = 11 * 60 + 45   # 11:45 WIB (Sepanjang Sesi 1 Bursa)
 
     if target_start <= total_minutes <= target_end:
         return kirim_update_realtime_pagi_1000(df_screener=df_screener, force=False)
-    return False, "Belum / Lewat jam 10:00 WIB"
+    return False, "Di luar jam Sesi 1 bursa (09:55 - 11:45 WIB)"
 
 

@@ -257,8 +257,8 @@ def loop_scheduler_utama():
                 except Exception:
                     pass
 
-            # Pengecekan berkala pemicu update realtime BSJP jam 10:00 WIB
-            if now_cek.weekday() < 5 and now_cek.hour == 10 and now_cek.minute <= 15:
+            # Pengecekan berkala pemicu update realtime BSJP pagi (09:55 - 11:45 WIB)
+            if now_cek.weekday() < 5 and (now_cek.hour == 10 or (now_cek.hour == 9 and now_cek.minute >= 55) or (now_cek.hour == 11 and now_cek.minute <= 45)):
                 try:
                     from notifikasi_telegram import cek_dan_kirim_jadwal_1000
                     cek_dan_kirim_jadwal_1000()

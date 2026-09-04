@@ -1,8 +1,8 @@
 {
   "is_running": true,
-  "pid": 32275,
-  "last_status": "Di luar jam bursa IDX (Menunggu sesi berikutnya)",
-  "last_run": "2026-09-04 07:34:29",
-  "next_run": "2026-09-04 09:00:00",
-  "updated_at": "2026-09-04 08:16:29"
+  "pid": 37143,
+  "last_status": "Menunggu jadwal jam berikutnya (~59 menit lagi)",
+  "last_run": "2026-09-04 10:39:22",
+  "next_run": "2026-09-04 11:00:00",
+  "updated_at": "2026-09-04 10:39:22"
 }

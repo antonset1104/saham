@@ -118,17 +118,17 @@ class TestTrackerAIAndScheduler(unittest.TestCase):
         self.assertFalse(sukses)
         self.assertIn("Weekend", msg)
 
-        # Jam 08:30 (belum jam 10:00) harus False
+        # Jam 08:30 (belum jam buka bursa) harus False
         mon_awal = datetime(2026, 9, 7, 8, 30)
         sukses, msg = cek_dan_kirim_jadwal_1000(now=mon_awal)
         self.assertFalse(sukses)
-        self.assertIn("Belum", msg)
+        self.assertIn("Di luar jam", msg)
 
-        # Jam 14:00 (lewat jam 10:00) harus False
+        # Jam 14:00 (lewat Sesi 1 bursa) harus False
         mon_siang = datetime(2026, 9, 7, 14, 0)
         sukses, msg = cek_dan_kirim_jadwal_1000(now=mon_siang)
         self.assertFalse(sukses)
-        self.assertIn("Belum", msg)
+        self.assertIn("Di luar jam", msg)
 
 if __name__ == "__main__":
     unittest.main()
