@@ -1,5 +1,6 @@
 import os
 import json
+import html
 import requests
 from datetime import datetime
 from dotenv import load_dotenv
@@ -89,18 +90,20 @@ def kirim_alert_transaksi_bot(arena: str, ticker: str, aksi: str, harga: float, 
 
     waktu_str = datetime.now().strftime("%d/%m/%Y %H:%M WIB")
     nilai_rp = harga * lot * 100
+    safe_ticker = html.escape(str(ticker))
+    safe_arena = html.escape(str(arena))
 
     if aksi.upper() == "BELI":
-        header = f"🟢 <b>[BOT EKSEKUSI BELI] — {ticker}</b>"
+        header = f"🟢 <b>[BOT EKSEKUSI BELI] — {safe_ticker}</b>"
         detail_profit = ""
     else:
         status_cuan = "PROFIT 🚀" if profit_rp >= 0 else "CUT LOSS 🩸"
-        header = f"🔴 <b>[BOT EKSEKUSI JUAL - {status_cuan}] — {ticker}</b>"
+        header = f"🔴 <b>[BOT EKSEKUSI JUAL - {html.escape(status_cuan)}] — {safe_ticker}</b>"
         detail_profit = f"\n💵 <b>P/L Realisasi:</b> Rp {profit_rp:+,.0f} ({profit_pct:+.2f}%)"
 
     pesan = (
         f"{header}\n"
-        f"🏛️ <b>Arena:</b> {arena}\n"
+        f"🏛️ <b>Arena:</b> {safe_arena}\n"
         f"💰 <b>Harga:</b> Rp {harga:,.0f}\n"
         f"📦 <b>Volume:</b> {lot:,} lot (~Rp {nilai_rp:,.0f})"
         f"{detail_profit}\n"
@@ -121,10 +124,10 @@ def kirim_alert_bsjp(top_saham: list) -> bool:
     ]
 
     for idx, s in enumerate(top_saham[:5], 1):
-        ticker = s.get("Ticker", "")
+        ticker = html.escape(str(s.get("Ticker", "")))
         harga = s.get("Harga (Rp)", 0)
-        tp_cl = s.get("Auto Trading Plan", "-")
-        bintang = s.get("Total Score", "⭐")
+        tp_cl = html.escape(str(s.get("Auto Trading Plan", "-")))
+        bintang = html.escape(str(s.get("Total Score", "⭐")))
         lines.append(f"<b>{idx}. {ticker}</b> — Rp {harga:,.0f} ({bintang})")
         lines.append(f"   🎯 Plan: <code>{tp_cl}</code>")
 
@@ -200,9 +203,22 @@ def kirim_rekomendasi_rumus_2_dan_9(df_screener=None, force=False) -> tuple[bool
     total_emiten = 0
     rekomendasi_list = []
 
+    # Ambil statistik win rate dinamis dari tracker_ai
+    wr_r2_str = "Strategi Pilihan (Squeeze + Anomali ML)"
+    wr_r9_str = "Strategi Pilihan (Squeeze + Risk/Reward > 1:3)"
+    try:
+        stats = tracker_ai.hitung_ringkasan_statistik()
+        stat_dict = stats.get("stat_per_rumus", {})
+        if "R2" in stat_dict and stat_dict["R2"].get("total_evaluasi", 0) > 0:
+            wr_r2_str = f"Win Rate Historis: {stat_dict['R2']['win_rate']:.1f}% ({stat_dict['R2']['total_evaluasi']} Teruji)"
+        if "R9" in stat_dict and stat_dict["R9"].get("total_evaluasi", 0) > 0:
+            wr_r9_str = f"Win Rate Historis: {stat_dict['R9']['win_rate']:.1f}% ({stat_dict['R9']['total_evaluasi']} Teruji)"
+    except Exception:
+        pass
+
     # Bagian Rumus 2
     lines.append("🔥 <b>RUMUS 2: SQUEEZE + ANOMALI ML + OBV NAIK</b>")
-    lines.append("🏆 <i>Win Rate Historis: 100.0%</i>")
+    lines.append(f"🏆 <i>{html.escape(wr_r2_str)}</i>")
     if not df_r2.empty:
         sort_r2 = df_r2.sort_values(by=["Total Score", "Volume"], ascending=[False, False]) if "Total Score" in df_r2.columns else df_r2
         for idx, (_, row) in enumerate(sort_r2.head(5).iterrows(), 1):
@@ -213,8 +229,10 @@ def kirim_rekomendasi_rumus_2_dan_9(df_screener=None, force=False) -> tuple[bool
             cl = round(p * 0.97)
             bintang = "⭐" * min(score, 8)
             plan = row.get("Auto Trading Plan", f"TP Rp {tp:,} (+5%) | CL Rp {cl:,} (-3%)")
-            lines.append(f"<b>{idx}. #{t}</b> — Rp {p:,.0f} ({bintang})")
-            lines.append(f"   🎯 <code>{plan}</code>")
+            safe_t = html.escape(t)
+            safe_plan = html.escape(str(plan))
+            lines.append(f"<b>{idx}. #{safe_t}</b> — Rp {p:,.0f} ({bintang})")
+            lines.append(f"   🎯 <code>{safe_plan}</code>")
             total_emiten += 1
             rekomendasi_list.append({
                 "ticker": t,
@@ -235,7 +253,7 @@ def kirim_rekomendasi_rumus_2_dan_9(df_screener=None, force=False) -> tuple[bool
 
     # Bagian Rumus 9
     lines.append("🎯 <b>RUMUS 9: SQUEEZE + RISK/REWARD > 1:3</b>")
-    lines.append("🏆 <i>Win Rate Historis: 100.0% (5 dari 5 Teruji)</i>")
+    lines.append(f"🏆 <i>{html.escape(wr_r9_str)}</i>")
     if not df_r9.empty:
         sort_r9 = df_r9.sort_values(by=["Total Score", "Volume"], ascending=[False, False]) if "Total Score" in df_r9.columns else df_r9
         for idx, (_, row) in enumerate(sort_r9.head(5).iterrows(), 1):
@@ -246,8 +264,10 @@ def kirim_rekomendasi_rumus_2_dan_9(df_screener=None, force=False) -> tuple[bool
             cl = round(p * 0.97)
             bintang = "⭐" * min(score, 8)
             plan = row.get("Auto Trading Plan", f"TP Rp {tp:,} (+5%) | CL Rp {cl:,} (-3%)")
-            lines.append(f"<b>{idx}. #{t}</b> — Rp {p:,.0f} ({bintang})")
-            lines.append(f"   🎯 <code>{plan}</code>")
+            safe_t = html.escape(t)
+            safe_plan = html.escape(str(plan))
+            lines.append(f"<b>{idx}. #{safe_t}</b> — Rp {p:,.0f} ({bintang})")
+            lines.append(f"   🎯 <code>{safe_plan}</code>")
             total_emiten += 1
             rekomendasi_list.append({
                 "ticker": t,

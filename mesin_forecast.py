@@ -1,3 +1,9 @@
+try:
+    import truststore
+    truststore.inject_into_ssl()
+except Exception:
+    pass
+
 import yfinance as yf
 import pandas as pd
 import numpy as np

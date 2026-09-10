@@ -124,17 +124,25 @@ Seluruh rumus mensyaratkan kondisi **Bollinger Bands Squeeze** (kompresi volatil
 - Git
 
 ### 2. Setup Virtual Environment
+
 ```bash
-# Clone repositori
-git clone https://github.com/dadungdadung87-cloud/SAHAM-SCREENING.git
-cd SAHAM-SCREENING
+# 1. Clone repositori
+git clone https://github.com/antonset1104/saham.git
+cd saham
 
-# Buat dan aktifkan virtual environment
+# 2. Buat dan aktifkan virtual environment
+# --- Untuk Linux / macOS:
 python3 -m venv .venv
-source .venv/bin/activate  # macOS / Linux
-# atau: .venv\Scripts\activate (Windows)
+source .venv/bin/activate
 
-# Pasang seluruh dependensi
+# --- Untuk Windows (PowerShell):
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+# (Jika PowerShell memblokir script, jalankan: Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass)
+# atau gunakan CMD: .venv\Scripts\activate.bat
+
+# 3. Upgrade pip & pasang dependensi
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
@@ -165,9 +173,12 @@ OPENROUTER_API_KEY=your_openrouter_api_key_here
 
 ## 🚀 Cara Penggunaan
 
+> 💡 **Tip:** Pastikan virtual environment (`.venv`) telah diaktifkan terlebih dahulu, atau Anda dapat memanggil executable langsung dari folder `.venv` (misal `streamlit run app.py` saat aktif, atau `.venv/bin/streamlit` di Linux/macOS, `.venv\Scripts\streamlit` di Windows).
+
 ### 1. Menjalankan Dashboard Web (Streamlit)
 ```bash
-./.venv/bin/streamlit run app.py
+streamlit run app.py
+# atau via binary venv: ./.venv/bin/streamlit run app.py (Linux/macOS) / .venv\Scripts\streamlit run app.py (Windows)
 ```
 Akses dashboard pada browser di: `http://localhost:8501`.
 
@@ -211,7 +222,7 @@ crontab -e
 ```
 Tambahkan baris berikut:
 ```cron
-*/15 9-16 * * 1-5 /path/to/SAHAM-SCREENING/jalankan_bot.sh >> /path/to/SAHAM-SCREENING/bot.log 2>&1
+*/15 9-16 * * 1-5 /path/to/saham/jalankan_bot.sh >> /path/to/saham/bot.log 2>&1
 ```
 
 ---

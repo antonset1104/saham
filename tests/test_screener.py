@@ -29,7 +29,7 @@ class TestScreenerAndBot(unittest.TestCase):
         self.assertEqual(analyze_acquisition_status(berita_resmi, kata_rencana, kata_dalam), "DALAM AKUISISI")
 
     def test_bot_saldo_calculation(self):
-        """Memastikan perhitungan saldo kas dan alokasi modal tepat"""
+        """Memastikan perhitungan saldo kas dan alokasi modal tepat dengan compounding dan mitigasi loss"""
         df_kosong = pd.DataFrame(columns=['Total_Modal'])
         self.assertEqual(cek_saldo_tersedia(df_kosong), MODAL_AWAL)
 
@@ -39,6 +39,21 @@ class TestScreenerAndBot(unittest.TestCase):
         ])
         expected_saldo = MODAL_AWAL - 35_000_000
         self.assertEqual(cek_saldo_tersedia(df_terisi), expected_saldo)
+
+        # Skenario Compounding Profit
+        df_hist_profit = pd.DataFrame([
+            {'Total_Return_Rp': 5_000_000},
+            {'Total_Return_Rp': 3_000_000}
+        ])
+        expected_compounded = MODAL_AWAL + 8_000_000 - 35_000_000
+        self.assertEqual(cek_saldo_tersedia(df_terisi, df_hist_profit), expected_compounded)
+
+        # Skenario Realized Loss
+        df_hist_loss = pd.DataFrame([
+            {'Total_Return_Rp': -10_000_000}
+        ])
+        expected_reduced = MODAL_AWAL - 10_000_000 - 35_000_000
+        self.assertEqual(cek_saldo_tersedia(df_terisi, df_hist_loss), expected_reduced)
 
     def test_fee_trading_calculation(self):
         """Memastikan perhitungan fee beli dan jual akurat"""
@@ -75,7 +90,7 @@ class TestScreenerAndBot(unittest.TestCase):
 
     def test_multi_factor_signal_scoring(self):
         """Memastikan algoritma weighted scoring multi-faktor kuantitatif bekerja akurat"""
-        # Simulasi baris teknikal bullish
+        # Skenario 1: DataFrame lengkap
         dates = pd.date_range("2026-01-01", periods=30)
         df_bullish = pd.DataFrame({
             "Close": [1000 + i * 10 for i in range(30)],
@@ -92,6 +107,25 @@ class TestScreenerAndBot(unittest.TestCase):
         self.assertGreaterEqual(res["score"], 3.0)
         self.assertEqual(res["signal"], "STRONG BUY")
         self.assertTrue(len(res["reasons"]) >= 4)
+
+        # Skenario 2: DataFrame mentah OHLCV + dictionary indikator (alur riil update_data.py)
+        df_raw = pd.DataFrame({
+            "Open": [1000] * 30,
+            "High": [1050] * 30,
+            "Low": [950] * 30,
+            "Close": [1000] * 30,
+            "Volume": [100000] * 30
+        }, index=dates)
+        ind_dict = {
+            "RSI (14D)": 25.0,
+            "Harga MA20": 1100,
+            "MA50": 1000,
+            "Posisi VWAP": "Di Atas VWAP (Kuat)",
+            "Status BB": "Squeeze"
+        }
+        res_pipeline = calculate_signal_score(df_raw, indikator=ind_dict)
+        self.assertGreater(res_pipeline["score"], 0.0)
+        self.assertIn(res_pipeline["signal"], ["BUY", "STRONG BUY"])
 
     def test_gold_conversion_math(self):
         """Memastikan konversi harga emas Troy Oz ke Gram IDR presisi"""

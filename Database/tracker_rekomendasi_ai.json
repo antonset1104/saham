@@ -1,5 +1,841 @@
 [
   {
+    "id": "2026-09-10_13:00_R9_ENAK",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R9",
+    "rumus_nama": "Squeeze + Risk/Reward Menarik (> 1:3)",
+    "ticker": "ENAK",
+    "harga_entry": 232.0,
+    "skor_quant": 3.0,
+    "jejak_harga_jam": {
+      "13:00": 232.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R9_AMIN",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R9",
+    "rumus_nama": "Squeeze + Risk/Reward Menarik (> 1:3)",
+    "ticker": "AMIN",
+    "harga_entry": 242.0,
+    "skor_quant": 3.0,
+    "jejak_harga_jam": {
+      "13:00": 242.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R9_MKAP",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R9",
+    "rumus_nama": "Squeeze + Risk/Reward Menarik (> 1:3)",
+    "ticker": "MKAP",
+    "harga_entry": 1135.0,
+    "skor_quant": 5.0,
+    "jejak_harga_jam": {
+      "13:00": 1135.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R9_CSAP",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R9",
+    "rumus_nama": "Squeeze + Risk/Reward Menarik (> 1:3)",
+    "ticker": "CSAP",
+    "harga_entry": 298.0,
+    "skor_quant": 5.0,
+    "jejak_harga_jam": {
+      "13:00": 298.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R9_BOLT",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R9",
+    "rumus_nama": "Squeeze + Risk/Reward Menarik (> 1:3)",
+    "ticker": "BOLT",
+    "harga_entry": 805.0,
+    "skor_quant": 5.0,
+    "jejak_harga_jam": {
+      "13:00": 805.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R8_TBLA",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R8",
+    "rumus_nama": "Squeeze + Akumulasi Wyckoff",
+    "ticker": "TBLA",
+    "harga_entry": 635.0,
+    "skor_quant": 7.0,
+    "jejak_harga_jam": {
+      "13:00": 635.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R8_BBHI",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R8",
+    "rumus_nama": "Squeeze + Akumulasi Wyckoff",
+    "ticker": "BBHI",
+    "harga_entry": 905.0,
+    "skor_quant": 7.0,
+    "jejak_harga_jam": {
+      "13:00": 905.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R8_ASII",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R8",
+    "rumus_nama": "Squeeze + Akumulasi Wyckoff",
+    "ticker": "ASII",
+    "harga_entry": 4890.0,
+    "skor_quant": 7.0,
+    "jejak_harga_jam": {
+      "13:00": 4890.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R8_FISH",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R8",
+    "rumus_nama": "Squeeze + Akumulasi Wyckoff",
+    "ticker": "FISH",
+    "harga_entry": 625.0,
+    "skor_quant": 8.0,
+    "jejak_harga_jam": {
+      "13:00": 625.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R8_GOLF",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R8",
+    "rumus_nama": "Squeeze + Akumulasi Wyckoff",
+    "ticker": "GOLF",
+    "harga_entry": 172.0,
+    "skor_quant": 8.0,
+    "jejak_harga_jam": {
+      "13:00": 172.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R7_ARNA",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R7",
+    "rumus_nama": "Squeeze + Karakter Solid (Jarang Dibanting)",
+    "ticker": "ARNA",
+    "harga_entry": 505.0,
+    "skor_quant": 5.0,
+    "jejak_harga_jam": {
+      "13:00": 505.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R7_RALS",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R7",
+    "rumus_nama": "Squeeze + Karakter Solid (Jarang Dibanting)",
+    "ticker": "RALS",
+    "harga_entry": 396.0,
+    "skor_quant": 6.0,
+    "jejak_harga_jam": {
+      "13:00": 396.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R7_TBLA",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R7",
+    "rumus_nama": "Squeeze + Karakter Solid (Jarang Dibanting)",
+    "ticker": "TBLA",
+    "harga_entry": 635.0,
+    "skor_quant": 7.0,
+    "jejak_harga_jam": {
+      "13:00": 635.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R7_BRAM",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R7",
+    "rumus_nama": "Squeeze + Karakter Solid (Jarang Dibanting)",
+    "ticker": "BRAM",
+    "harga_entry": 4670.0,
+    "skor_quant": 7.0,
+    "jejak_harga_jam": {
+      "13:00": 4670.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R7_BMSR",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R7",
+    "rumus_nama": "Squeeze + Karakter Solid (Jarang Dibanting)",
+    "ticker": "BMSR",
+    "harga_entry": 322.0,
+    "skor_quant": 7.0,
+    "jejak_harga_jam": {
+      "13:00": 322.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R6_SMMA",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R6",
+    "rumus_nama": "Squeeze + Pola Hammer",
+    "ticker": "SMMA",
+    "harga_entry": 20025.0,
+    "skor_quant": 2.0,
+    "jejak_harga_jam": {
+      "13:00": 20025.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R6_CLPI",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R6",
+    "rumus_nama": "Squeeze + Pola Hammer",
+    "ticker": "CLPI",
+    "harga_entry": 1615.0,
+    "skor_quant": 3.0,
+    "jejak_harga_jam": {
+      "13:00": 1615.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R6_ATIC",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R6",
+    "rumus_nama": "Squeeze + Pola Hammer",
+    "ticker": "ATIC",
+    "harga_entry": 466.0,
+    "skor_quant": 5.0,
+    "jejak_harga_jam": {
+      "13:00": 466.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R6_HERO",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R6",
+    "rumus_nama": "Squeeze + Pola Hammer",
+    "ticker": "HERO",
+    "harga_entry": 338.0,
+    "skor_quant": 6.0,
+    "jejak_harga_jam": {
+      "13:00": 338.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R6_GHON",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R6",
+    "rumus_nama": "Squeeze + Pola Hammer",
+    "ticker": "GHON",
+    "harga_entry": 1695.0,
+    "skor_quant": 6.0,
+    "jejak_harga_jam": {
+      "13:00": 1695.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R5_CEKA",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R5",
+    "rumus_nama": "Squeeze + Golden Cross",
+    "ticker": "CEKA",
+    "harga_entry": 2220.0,
+    "skor_quant": 7.0,
+    "jejak_harga_jam": {
+      "13:00": 2220.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R5_BBHI",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R5",
+    "rumus_nama": "Squeeze + Golden Cross",
+    "ticker": "BBHI",
+    "harga_entry": 905.0,
+    "skor_quant": 7.0,
+    "jejak_harga_jam": {
+      "13:00": 905.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R5_NISP",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R5",
+    "rumus_nama": "Squeeze + Golden Cross",
+    "ticker": "NISP",
+    "harga_entry": 1285.0,
+    "skor_quant": 7.0,
+    "jejak_harga_jam": {
+      "13:00": 1285.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R5_TBMS",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R5",
+    "rumus_nama": "Squeeze + Golden Cross",
+    "ticker": "TBMS",
+    "harga_entry": 1255.0,
+    "skor_quant": 8.0,
+    "jejak_harga_jam": {
+      "13:00": 1255.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R5_GOLF",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R5",
+    "rumus_nama": "Squeeze + Golden Cross",
+    "ticker": "GOLF",
+    "harga_entry": 172.0,
+    "skor_quant": 8.0,
+    "jejak_harga_jam": {
+      "13:00": 172.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R4_ASSA",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R4",
+    "rumus_nama": "Squeeze + Volume Tembus MA20 + Ritel Aktif",
+    "ticker": "ASSA",
+    "harga_entry": 625.0,
+    "skor_quant": 2.0,
+    "jejak_harga_jam": {
+      "13:00": 625.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R4_BSML",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R4",
+    "rumus_nama": "Squeeze + Volume Tembus MA20 + Ritel Aktif",
+    "ticker": "BSML",
+    "harga_entry": 530.0,
+    "skor_quant": 6.0,
+    "jejak_harga_jam": {
+      "13:00": 530.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R4_MNCN",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R4",
+    "rumus_nama": "Squeeze + Volume Tembus MA20 + Ritel Aktif",
+    "ticker": "MNCN",
+    "harga_entry": 208.0,
+    "skor_quant": 7.0,
+    "jejak_harga_jam": {
+      "13:00": 208.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R4_BMTR",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R4",
+    "rumus_nama": "Squeeze + Volume Tembus MA20 + Ritel Aktif",
+    "ticker": "BMTR",
+    "harga_entry": 119.0,
+    "skor_quant": 7.0,
+    "jejak_harga_jam": {
+      "13:00": 119.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R4_BELL",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R4",
+    "rumus_nama": "Squeeze + Volume Tembus MA20 + Ritel Aktif",
+    "ticker": "BELL",
+    "harga_entry": 122.0,
+    "skor_quant": 8.0,
+    "jejak_harga_jam": {
+      "13:00": 122.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R3_MKAP",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R3",
+    "rumus_nama": "Squeeze + Akumulasi Kuat (Bandar) + Akumulasi Pro (A/D)",
+    "ticker": "MKAP",
+    "harga_entry": 1135.0,
+    "skor_quant": 5.0,
+    "jejak_harga_jam": {
+      "13:00": 1135.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R3_LPPS",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R3",
+    "rumus_nama": "Squeeze + Akumulasi Kuat (Bandar) + Akumulasi Pro (A/D)",
+    "ticker": "LPPS",
+    "harga_entry": 85.0,
+    "skor_quant": 7.0,
+    "jejak_harga_jam": {
+      "13:00": 85.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R3_BBMD",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R3",
+    "rumus_nama": "Squeeze + Akumulasi Kuat (Bandar) + Akumulasi Pro (A/D)",
+    "ticker": "BBMD",
+    "harga_entry": 1995.0,
+    "skor_quant": 7.0,
+    "jejak_harga_jam": {
+      "13:00": 1995.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R3_FISH",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R3",
+    "rumus_nama": "Squeeze + Akumulasi Kuat (Bandar) + Akumulasi Pro (A/D)",
+    "ticker": "FISH",
+    "harga_entry": 625.0,
+    "skor_quant": 8.0,
+    "jejak_harga_jam": {
+      "13:00": 625.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R1_PNGO",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R1",
+    "rumus_nama": "Squeeze + Supply Kering + Di Atas VWAP",
+    "ticker": "PNGO",
+    "harga_entry": 3590.0,
+    "skor_quant": 5.0,
+    "jejak_harga_jam": {
+      "13:00": 3590.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R1_BPTR",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R1",
+    "rumus_nama": "Squeeze + Supply Kering + Di Atas VWAP",
+    "ticker": "BPTR",
+    "harga_entry": 77.0,
+    "skor_quant": 5.0,
+    "jejak_harga_jam": {
+      "13:00": 77.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R1_MTLA",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R1",
+    "rumus_nama": "Squeeze + Supply Kering + Di Atas VWAP",
+    "ticker": "MTLA",
+    "harga_entry": 540.0,
+    "skor_quant": 6.0,
+    "jejak_harga_jam": {
+      "13:00": 540.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
+    "id": "2026-09-10_13:00_R1_JRPT",
+    "tanggal": "2026-09-10",
+    "jam": "13:00",
+    "rumus_id": "R1",
+    "rumus_nama": "Squeeze + Supply Kering + Di Atas VWAP",
+    "ticker": "JRPT",
+    "harga_entry": 1130.0,
+    "skor_quant": 7.0,
+    "jejak_harga_jam": {
+      "13:00": 1130.0
+    },
+    "t1_open": null,
+    "t1_high": null,
+    "t1_low": null,
+    "t1_close": null,
+    "max_gain_pct": null,
+    "open_gain_pct": null,
+    "close_gain_pct": null,
+    "status_akurasi": "\u23f3 MENUNGGU T+1",
+    "evaluasi_waktu": null
+  },
+  {
     "id": "2026-09-04_10:00_R9_MKTR",
     "tanggal": "2026-09-04",
     "jam": "10:00",
@@ -11,15 +847,15 @@
     "jejak_harga_jam": {
       "10:00": 123.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 124.0,
+    "t1_high": 124.0,
+    "t1_low": 123.0,
+    "t1_close": 123.0,
+    "max_gain_pct": 0.81,
+    "open_gain_pct": 0.81,
+    "close_gain_pct": 0.0,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R9_AMIN",
@@ -33,15 +869,15 @@
     "jejak_harga_jam": {
       "10:00": 242.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 244.0,
+    "t1_high": 246.0,
+    "t1_low": 238.0,
+    "t1_close": 242.0,
+    "max_gain_pct": 1.65,
+    "open_gain_pct": 0.83,
+    "close_gain_pct": 0.0,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R9_BOLT",
@@ -55,15 +891,15 @@
     "jejak_harga_jam": {
       "10:00": 810.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 815.0,
+    "t1_high": 815.0,
+    "t1_low": 805.0,
+    "t1_close": 805.0,
+    "max_gain_pct": 0.62,
+    "open_gain_pct": 0.62,
+    "close_gain_pct": -0.62,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R9_VINS",
@@ -77,15 +913,15 @@
     "jejak_harga_jam": {
       "10:00": 144.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 142.0,
+    "t1_high": 168.0,
+    "t1_low": 142.0,
+    "t1_close": 148.0,
+    "max_gain_pct": 16.67,
+    "open_gain_pct": -1.39,
+    "close_gain_pct": 2.78,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R9_CSAP",
@@ -99,15 +935,15 @@
     "jejak_harga_jam": {
       "10:00": 294.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 298.0,
+    "t1_high": 300.0,
+    "t1_low": 294.0,
+    "t1_close": 298.0,
+    "max_gain_pct": 2.04,
+    "open_gain_pct": 1.36,
+    "close_gain_pct": 1.36,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R8_MEGA",
@@ -121,15 +957,15 @@
     "jejak_harga_jam": {
       "10:00": 1985.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 1980.0,
+    "t1_high": 1990.0,
+    "t1_low": 1900.0,
+    "t1_close": 1935.0,
+    "max_gain_pct": 0.25,
+    "open_gain_pct": -0.25,
+    "close_gain_pct": -2.52,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R8_LPGI",
@@ -143,15 +979,15 @@
     "jejak_harga_jam": {
       "10:00": 645.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 660.0,
+    "t1_high": 660.0,
+    "t1_low": 635.0,
+    "t1_close": 645.0,
+    "max_gain_pct": 2.33,
+    "open_gain_pct": 2.33,
+    "close_gain_pct": 0.0,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R8_RDTX",
@@ -165,15 +1001,15 @@
     "jejak_harga_jam": {
       "10:00": 13750.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 13525.0,
+    "t1_high": 13525.0,
+    "t1_low": 13525.0,
+    "t1_close": 13525.0,
+    "max_gain_pct": -1.64,
+    "open_gain_pct": -1.64,
+    "close_gain_pct": -1.64,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R8_MTDL",
@@ -187,15 +1023,15 @@
     "jejak_harga_jam": {
       "10:00": 520.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 520.0,
+    "t1_high": 525.0,
+    "t1_low": 515.0,
+    "t1_close": 520.0,
+    "max_gain_pct": 0.96,
+    "open_gain_pct": 0.0,
+    "close_gain_pct": 0.0,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R8_BBSI",
@@ -209,15 +1045,15 @@
     "jejak_harga_jam": {
       "10:00": 4680.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 4610.0,
+    "t1_high": 4610.0,
+    "t1_low": 4610.0,
+    "t1_close": 4610.0,
+    "max_gain_pct": -1.5,
+    "open_gain_pct": -1.5,
+    "close_gain_pct": -1.5,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R7_PSAT",
@@ -231,15 +1067,15 @@
     "jejak_harga_jam": {
       "10:00": 900.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 905.0,
+    "t1_high": 910.0,
+    "t1_low": 890.0,
+    "t1_close": 895.0,
+    "max_gain_pct": 1.11,
+    "open_gain_pct": 0.56,
+    "close_gain_pct": -0.56,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R7_MEGA",
@@ -253,15 +1089,15 @@
     "jejak_harga_jam": {
       "10:00": 1985.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 1980.0,
+    "t1_high": 1990.0,
+    "t1_low": 1900.0,
+    "t1_close": 1935.0,
+    "max_gain_pct": 0.25,
+    "open_gain_pct": -0.25,
+    "close_gain_pct": -2.52,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R7_RALS",
@@ -275,15 +1111,15 @@
     "jejak_harga_jam": {
       "10:00": 386.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 396.0,
+    "t1_high": 398.0,
+    "t1_low": 392.0,
+    "t1_close": 396.0,
+    "max_gain_pct": 3.11,
+    "open_gain_pct": 2.59,
+    "close_gain_pct": 2.59,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R7_BMSR",
@@ -297,15 +1133,15 @@
     "jejak_harga_jam": {
       "10:00": 320.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 316.0,
+    "t1_high": 322.0,
+    "t1_low": 314.0,
+    "t1_close": 322.0,
+    "max_gain_pct": 0.62,
+    "open_gain_pct": -1.25,
+    "close_gain_pct": 0.62,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R7_MASB",
@@ -319,15 +1155,15 @@
     "jejak_harga_jam": {
       "10:00": 3400.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 3310.0,
+    "t1_high": 3330.0,
+    "t1_low": 3300.0,
+    "t1_close": 3300.0,
+    "max_gain_pct": -2.06,
+    "open_gain_pct": -2.65,
+    "close_gain_pct": -2.94,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R6_RSGK",
@@ -341,15 +1177,15 @@
     "jejak_harga_jam": {
       "10:00": 970.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 980.0,
+    "t1_high": 980.0,
+    "t1_low": 920.0,
+    "t1_close": 945.0,
+    "max_gain_pct": 1.03,
+    "open_gain_pct": 1.03,
+    "close_gain_pct": -2.58,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R6_GLVA",
@@ -363,15 +1199,15 @@
     "jejak_harga_jam": {
       "10:00": 322.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 328.0,
+    "t1_high": 330.0,
+    "t1_low": 304.0,
+    "t1_close": 330.0,
+    "max_gain_pct": 2.48,
+    "open_gain_pct": 1.86,
+    "close_gain_pct": 2.48,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R6_LPGI",
@@ -385,15 +1221,15 @@
     "jejak_harga_jam": {
       "10:00": 645.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 660.0,
+    "t1_high": 660.0,
+    "t1_low": 635.0,
+    "t1_close": 645.0,
+    "max_gain_pct": 2.33,
+    "open_gain_pct": 2.33,
+    "close_gain_pct": 0.0,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R5_BMTR",
@@ -407,15 +1243,15 @@
     "jejak_harga_jam": {
       "10:00": 116.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 114.0,
+    "t1_high": 121.0,
+    "t1_low": 113.0,
+    "t1_close": 119.0,
+    "max_gain_pct": 4.31,
+    "open_gain_pct": -1.72,
+    "close_gain_pct": 2.59,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R5_PNBN",
@@ -429,15 +1265,15 @@
     "jejak_harga_jam": {
       "10:00": 920.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 910.0,
+    "t1_high": 915.0,
+    "t1_low": 905.0,
+    "t1_close": 915.0,
+    "max_gain_pct": -0.54,
+    "open_gain_pct": -1.09,
+    "close_gain_pct": -0.54,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R5_BTON",
@@ -451,15 +1287,15 @@
     "jejak_harga_jam": {
       "10:00": 370.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 364.0,
+    "t1_high": 364.0,
+    "t1_low": 364.0,
+    "t1_close": 364.0,
+    "max_gain_pct": -1.62,
+    "open_gain_pct": -1.62,
+    "close_gain_pct": -1.62,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R5_ARGO",
@@ -473,15 +1309,15 @@
     "jejak_harga_jam": {
       "10:00": 1175.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 1180.0,
+    "t1_high": 1200.0,
+    "t1_low": 1160.0,
+    "t1_close": 1160.0,
+    "max_gain_pct": 2.13,
+    "open_gain_pct": 0.43,
+    "close_gain_pct": -1.28,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R5_TOOL",
@@ -495,15 +1331,15 @@
     "jejak_harga_jam": {
       "10:00": 70.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 72.0,
+    "t1_high": 73.0,
+    "t1_low": 70.0,
+    "t1_close": 71.0,
+    "max_gain_pct": 4.29,
+    "open_gain_pct": 2.86,
+    "close_gain_pct": 1.43,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R3_BBSI",
@@ -517,15 +1353,15 @@
     "jejak_harga_jam": {
       "10:00": 4680.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 4610.0,
+    "t1_high": 4610.0,
+    "t1_low": 4610.0,
+    "t1_close": 4610.0,
+    "max_gain_pct": -1.5,
+    "open_gain_pct": -1.5,
+    "close_gain_pct": -1.5,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R3_ACST",
@@ -539,15 +1375,15 @@
     "jejak_harga_jam": {
       "10:00": 90.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 128.0,
+    "t1_high": 128.0,
+    "t1_low": 128.0,
+    "t1_close": 128.0,
+    "max_gain_pct": 42.22,
+    "open_gain_pct": 42.22,
+    "close_gain_pct": 42.22,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R2_TOOL",
@@ -561,15 +1397,15 @@
     "jejak_harga_jam": {
       "10:00": 70.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 72.0,
+    "t1_high": 73.0,
+    "t1_low": 70.0,
+    "t1_close": 71.0,
+    "max_gain_pct": 4.29,
+    "open_gain_pct": 2.86,
+    "close_gain_pct": 1.43,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R1_PNSE",
@@ -583,15 +1419,15 @@
     "jejak_harga_jam": {
       "10:00": 505.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 500.0,
+    "t1_high": 500.0,
+    "t1_low": 500.0,
+    "t1_close": 500.0,
+    "max_gain_pct": -0.99,
+    "open_gain_pct": -0.99,
+    "close_gain_pct": -0.99,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R1_CITY",
@@ -605,15 +1441,15 @@
     "jejak_harga_jam": {
       "10:00": 180.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 202.0,
+    "t1_high": 202.0,
+    "t1_low": 192.0,
+    "t1_close": 193.0,
+    "max_gain_pct": 12.22,
+    "open_gain_pct": 12.22,
+    "close_gain_pct": 7.22,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_10:00_R1_STTP",
@@ -627,15 +1463,15 @@
     "jejak_harga_jam": {
       "10:00": 9625.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 9400.0,
+    "t1_high": 9400.0,
+    "t1_low": 9400.0,
+    "t1_close": 9400.0,
+    "max_gain_pct": -2.34,
+    "open_gain_pct": -2.34,
+    "close_gain_pct": -2.34,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R9_BOLT",
@@ -650,15 +1486,15 @@
       "09:00": 810.0,
       "10:00": 810.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 815.0,
+    "t1_high": 815.0,
+    "t1_low": 805.0,
+    "t1_close": 805.0,
+    "max_gain_pct": 0.62,
+    "open_gain_pct": 0.62,
+    "close_gain_pct": -0.62,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R9_VINS",
@@ -673,15 +1509,15 @@
       "09:00": 143.0,
       "10:00": 144.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 142.0,
+    "t1_high": 168.0,
+    "t1_low": 142.0,
+    "t1_close": 148.0,
+    "max_gain_pct": 17.48,
+    "open_gain_pct": -0.7,
+    "close_gain_pct": 3.5,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R9_IPOL",
@@ -696,15 +1532,15 @@
       "09:00": 116.0,
       "10:00": 117.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 117.0,
+    "t1_high": 118.0,
+    "t1_low": 116.0,
+    "t1_close": 117.0,
+    "max_gain_pct": 1.72,
+    "open_gain_pct": 0.86,
+    "close_gain_pct": 0.86,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R9_CSAP",
@@ -719,15 +1555,15 @@
       "09:00": 298.0,
       "10:00": 294.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 298.0,
+    "t1_high": 300.0,
+    "t1_low": 294.0,
+    "t1_close": 298.0,
+    "max_gain_pct": 0.67,
+    "open_gain_pct": 0.0,
+    "close_gain_pct": 0.0,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R9_CAMP",
@@ -742,15 +1578,15 @@
       "09:00": 173.0,
       "10:00": 170.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 173.0,
+    "t1_high": 173.0,
+    "t1_low": 171.0,
+    "t1_close": 172.0,
+    "max_gain_pct": 0.0,
+    "open_gain_pct": 0.0,
+    "close_gain_pct": -0.58,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R8_VAST",
@@ -765,15 +1601,15 @@
       "09:00": 115.0,
       "10:00": 116.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 112.0,
+    "t1_high": 113.0,
+    "t1_low": 110.0,
+    "t1_close": 112.0,
+    "max_gain_pct": -1.74,
+    "open_gain_pct": -2.61,
+    "close_gain_pct": -2.61,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R8_SKBM",
@@ -788,15 +1624,15 @@
       "09:00": 570.0,
       "10:00": 555.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 545.0,
+    "t1_high": 555.0,
+    "t1_low": 540.0,
+    "t1_close": 550.0,
+    "max_gain_pct": -2.63,
+    "open_gain_pct": -4.39,
+    "close_gain_pct": -3.51,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R8_LPGI",
@@ -811,15 +1647,15 @@
       "09:00": 645.0,
       "10:00": 645.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 660.0,
+    "t1_high": 660.0,
+    "t1_low": 635.0,
+    "t1_close": 645.0,
+    "max_gain_pct": 2.33,
+    "open_gain_pct": 2.33,
+    "close_gain_pct": 0.0,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R8_TBLA",
@@ -834,15 +1670,15 @@
       "09:00": 645.0,
       "10:00": 640.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 635.0,
+    "t1_high": 635.0,
+    "t1_low": 625.0,
+    "t1_close": 635.0,
+    "max_gain_pct": -1.55,
+    "open_gain_pct": -1.55,
+    "close_gain_pct": -1.55,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R8_MTDL",
@@ -857,15 +1693,15 @@
       "09:00": 520.0,
       "10:00": 520.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 520.0,
+    "t1_high": 525.0,
+    "t1_low": 515.0,
+    "t1_close": 520.0,
+    "max_gain_pct": 0.96,
+    "open_gain_pct": 0.0,
+    "close_gain_pct": 0.0,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R7_BRAM",
@@ -880,15 +1716,15 @@
       "09:00": 4580.0,
       "10:00": 4670.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 4650.0,
+    "t1_high": 4670.0,
+    "t1_low": 4650.0,
+    "t1_close": 4670.0,
+    "max_gain_pct": 1.97,
+    "open_gain_pct": 1.53,
+    "close_gain_pct": 1.97,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R7_MEGA",
@@ -903,15 +1739,15 @@
       "09:00": 1995.0,
       "10:00": 1985.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 1980.0,
+    "t1_high": 1990.0,
+    "t1_low": 1900.0,
+    "t1_close": 1935.0,
+    "max_gain_pct": -0.25,
+    "open_gain_pct": -0.75,
+    "close_gain_pct": -3.01,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R7_BMSR",
@@ -926,15 +1762,15 @@
       "09:00": 320.0,
       "10:00": 320.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 316.0,
+    "t1_high": 322.0,
+    "t1_low": 314.0,
+    "t1_close": 322.0,
+    "max_gain_pct": 0.62,
+    "open_gain_pct": -1.25,
+    "close_gain_pct": 0.62,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R7_TBLA",
@@ -949,15 +1785,15 @@
       "09:00": 645.0,
       "10:00": 640.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 635.0,
+    "t1_high": 635.0,
+    "t1_low": 625.0,
+    "t1_close": 635.0,
+    "max_gain_pct": -1.55,
+    "open_gain_pct": -1.55,
+    "close_gain_pct": -1.55,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R7_MASB",
@@ -972,15 +1808,15 @@
       "09:00": 3400.0,
       "10:00": 3400.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 3310.0,
+    "t1_high": 3330.0,
+    "t1_low": 3300.0,
+    "t1_close": 3300.0,
+    "max_gain_pct": -2.06,
+    "open_gain_pct": -2.65,
+    "close_gain_pct": -2.94,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R6_BBSI",
@@ -995,15 +1831,15 @@
       "09:00": 4660.0,
       "10:00": 4680.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 4610.0,
+    "t1_high": 4610.0,
+    "t1_low": 4610.0,
+    "t1_close": 4610.0,
+    "max_gain_pct": -1.07,
+    "open_gain_pct": -1.07,
+    "close_gain_pct": -1.07,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R6_PTPW",
@@ -1018,15 +1854,15 @@
       "09:00": 1180.0,
       "10:00": 1190.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 1180.0,
+    "t1_high": 1190.0,
+    "t1_low": 1180.0,
+    "t1_close": 1180.0,
+    "max_gain_pct": 0.85,
+    "open_gain_pct": 0.0,
+    "close_gain_pct": 0.0,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R6_LPGI",
@@ -1041,15 +1877,15 @@
       "09:00": 645.0,
       "10:00": 645.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 660.0,
+    "t1_high": 660.0,
+    "t1_low": 635.0,
+    "t1_close": 645.0,
+    "max_gain_pct": 2.33,
+    "open_gain_pct": 2.33,
+    "close_gain_pct": 0.0,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R5_PNBN",
@@ -1064,15 +1900,15 @@
       "09:00": 915.0,
       "10:00": 920.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 910.0,
+    "t1_high": 915.0,
+    "t1_low": 905.0,
+    "t1_close": 915.0,
+    "max_gain_pct": 0.0,
+    "open_gain_pct": -0.55,
+    "close_gain_pct": 0.0,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R5_DEFI",
@@ -1087,15 +1923,15 @@
       "09:00": 107.0,
       "10:00": 107.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 107.0,
+    "t1_high": 107.0,
+    "t1_low": 104.0,
+    "t1_close": 106.0,
+    "max_gain_pct": 0.0,
+    "open_gain_pct": 0.0,
+    "close_gain_pct": -0.93,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R5_BMTR",
@@ -1110,15 +1946,15 @@
       "09:00": 118.0,
       "10:00": 116.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 114.0,
+    "t1_high": 121.0,
+    "t1_low": 113.0,
+    "t1_close": 119.0,
+    "max_gain_pct": 2.54,
+    "open_gain_pct": -3.39,
+    "close_gain_pct": 0.85,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R5_PSGO",
@@ -1133,15 +1969,15 @@
       "09:00": 198.0,
       "10:00": 196.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 197.0,
+    "t1_high": 198.0,
+    "t1_low": 194.0,
+    "t1_close": 197.0,
+    "max_gain_pct": 0.0,
+    "open_gain_pct": -0.51,
+    "close_gain_pct": -0.51,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R5_ARGO",
@@ -1156,15 +1992,15 @@
       "09:00": 1175.0,
       "10:00": 1175.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 1180.0,
+    "t1_high": 1200.0,
+    "t1_low": 1160.0,
+    "t1_close": 1160.0,
+    "max_gain_pct": 2.13,
+    "open_gain_pct": 0.43,
+    "close_gain_pct": -1.28,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R3_ACST",
@@ -1179,15 +2015,15 @@
       "09:00": 90.0,
       "10:00": 90.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 128.0,
+    "t1_high": 128.0,
+    "t1_low": 128.0,
+    "t1_close": 128.0,
+    "max_gain_pct": 42.22,
+    "open_gain_pct": 42.22,
+    "close_gain_pct": 42.22,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R1_PNSE",
@@ -1202,15 +2038,15 @@
       "09:00": 500.0,
       "10:00": 505.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 500.0,
+    "t1_high": 500.0,
+    "t1_low": 500.0,
+    "t1_close": 500.0,
+    "max_gain_pct": 0.0,
+    "open_gain_pct": 0.0,
+    "close_gain_pct": 0.0,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R1_SBMA",
@@ -1225,15 +2061,15 @@
       "09:00": 109.0,
       "10:00": 108.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 110.0,
+    "t1_high": 111.0,
+    "t1_low": 109.0,
+    "t1_close": 110.0,
+    "max_gain_pct": 1.83,
+    "open_gain_pct": 0.92,
+    "close_gain_pct": 0.92,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_09:00_R1_STTP",
@@ -1248,15 +2084,15 @@
       "09:00": 9625.0,
       "10:00": 9625.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 9400.0,
+    "t1_high": 9400.0,
+    "t1_low": 9400.0,
+    "t1_close": 9400.0,
+    "max_gain_pct": -2.34,
+    "open_gain_pct": -2.34,
+    "close_gain_pct": -2.34,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R9_LRNA",
@@ -1272,15 +2108,15 @@
       "09:00": 200.0,
       "10:00": 200.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 208.0,
+    "t1_high": 228.0,
+    "t1_low": 202.0,
+    "t1_close": 204.0,
+    "max_gain_pct": 15.15,
+    "open_gain_pct": 5.05,
+    "close_gain_pct": 3.03,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R9_VINS",
@@ -1296,15 +2132,15 @@
       "09:00": 143.0,
       "10:00": 144.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 142.0,
+    "t1_high": 168.0,
+    "t1_low": 142.0,
+    "t1_close": 148.0,
+    "max_gain_pct": 17.48,
+    "open_gain_pct": -0.7,
+    "close_gain_pct": 3.5,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R9_BOLT",
@@ -1320,15 +2156,15 @@
       "09:00": 810.0,
       "10:00": 810.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 815.0,
+    "t1_high": 815.0,
+    "t1_low": 805.0,
+    "t1_close": 805.0,
+    "max_gain_pct": 0.62,
+    "open_gain_pct": 0.62,
+    "close_gain_pct": -0.62,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R9_CAMP",
@@ -1344,15 +2180,15 @@
       "09:00": 173.0,
       "10:00": 170.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 173.0,
+    "t1_high": 173.0,
+    "t1_low": 171.0,
+    "t1_close": 172.0,
+    "max_gain_pct": 1.17,
+    "open_gain_pct": 1.17,
+    "close_gain_pct": 0.58,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R9_BANK",
@@ -1368,15 +2204,15 @@
       "09:00": 274.0,
       "10:00": 272.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 266.0,
+    "t1_high": 268.0,
+    "t1_low": 264.0,
+    "t1_close": 266.0,
+    "max_gain_pct": -2.9,
+    "open_gain_pct": -3.62,
+    "close_gain_pct": -3.62,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R8_AMAG",
@@ -1392,15 +2228,15 @@
       "09:00": 388.0,
       "10:00": 388.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 388.0,
+    "t1_high": 390.0,
+    "t1_low": 386.0,
+    "t1_close": 388.0,
+    "max_gain_pct": 0.0,
+    "open_gain_pct": -0.51,
+    "close_gain_pct": -0.51,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R8_CSRA",
@@ -1416,15 +2252,15 @@
       "09:00": 785.0,
       "10:00": 780.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 780.0,
+    "t1_high": 780.0,
+    "t1_low": 765.0,
+    "t1_close": 775.0,
+    "max_gain_pct": 0.0,
+    "open_gain_pct": 0.0,
+    "close_gain_pct": -0.64,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R8_MAIN",
@@ -1440,15 +2276,15 @@
       "09:00": 695.0,
       "10:00": 690.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 700.0,
+    "t1_high": 700.0,
+    "t1_low": 685.0,
+    "t1_close": 685.0,
+    "max_gain_pct": 0.0,
+    "open_gain_pct": 0.0,
+    "close_gain_pct": -2.14,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R8_SKBM",
@@ -1464,15 +2300,15 @@
       "09:00": 570.0,
       "10:00": 555.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 545.0,
+    "t1_high": 555.0,
+    "t1_low": 540.0,
+    "t1_close": 550.0,
+    "max_gain_pct": -1.77,
+    "open_gain_pct": -3.54,
+    "close_gain_pct": -2.65,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R8_BTPS",
@@ -1488,15 +2324,15 @@
       "09:00": 1015.0,
       "10:00": 1015.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 1055.0,
+    "t1_high": 1075.0,
+    "t1_low": 1055.0,
+    "t1_close": 1055.0,
+    "max_gain_pct": 6.44,
+    "open_gain_pct": 4.46,
+    "close_gain_pct": 4.46,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R7_BMSR",
@@ -1512,15 +2348,15 @@
       "09:00": 320.0,
       "10:00": 320.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 316.0,
+    "t1_high": 322.0,
+    "t1_low": 314.0,
+    "t1_close": 322.0,
+    "max_gain_pct": 0.62,
+    "open_gain_pct": -1.25,
+    "close_gain_pct": 0.62,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R7_BBRM",
@@ -1536,15 +2372,15 @@
       "09:00": 123.0,
       "10:00": 122.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 130.0,
+    "t1_high": 131.0,
+    "t1_low": 126.0,
+    "t1_close": 129.0,
+    "max_gain_pct": 9.17,
+    "open_gain_pct": 8.33,
+    "close_gain_pct": 7.5,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R7_MASB",
@@ -1560,15 +2396,15 @@
       "09:00": 3400.0,
       "10:00": 3400.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 3310.0,
+    "t1_high": 3330.0,
+    "t1_low": 3300.0,
+    "t1_close": 3300.0,
+    "max_gain_pct": -2.06,
+    "open_gain_pct": -2.65,
+    "close_gain_pct": -2.94,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R7_RALS",
@@ -1584,15 +2420,15 @@
       "09:00": 384.0,
       "10:00": 386.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 396.0,
+    "t1_high": 398.0,
+    "t1_low": 392.0,
+    "t1_close": 396.0,
+    "max_gain_pct": 3.11,
+    "open_gain_pct": 2.59,
+    "close_gain_pct": 2.59,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R7_PSSI",
@@ -1608,15 +2444,15 @@
       "09:00": 348.0,
       "10:00": 352.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 360.0,
+    "t1_high": 362.0,
+    "t1_low": 358.0,
+    "t1_close": 358.0,
+    "max_gain_pct": 3.43,
+    "open_gain_pct": 2.86,
+    "close_gain_pct": 2.29,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R6_SUNI",
@@ -1632,15 +2468,15 @@
       "09:00": 705.0,
       "10:00": 700.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 695.0,
+    "t1_high": 695.0,
+    "t1_low": 685.0,
+    "t1_close": 695.0,
+    "max_gain_pct": -1.42,
+    "open_gain_pct": -1.42,
+    "close_gain_pct": -1.42,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R6_BBSI",
@@ -1656,15 +2492,15 @@
       "09:00": 4660.0,
       "10:00": 4680.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 4610.0,
+    "t1_high": 4610.0,
+    "t1_low": 4610.0,
+    "t1_close": 4610.0,
+    "max_gain_pct": -1.07,
+    "open_gain_pct": -1.07,
+    "close_gain_pct": -1.07,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R6_PTPW",
@@ -1680,15 +2516,15 @@
       "09:00": 1180.0,
       "10:00": 1190.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 1180.0,
+    "t1_high": 1190.0,
+    "t1_low": 1180.0,
+    "t1_close": 1180.0,
+    "max_gain_pct": 0.85,
+    "open_gain_pct": 0.0,
+    "close_gain_pct": 0.0,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R6_RSGK",
@@ -1704,15 +2540,15 @@
       "09:00": 940.0,
       "10:00": 970.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 980.0,
+    "t1_high": 980.0,
+    "t1_low": 920.0,
+    "t1_close": 945.0,
+    "max_gain_pct": 0.0,
+    "open_gain_pct": 0.0,
+    "close_gain_pct": -3.57,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R5_SMKL",
@@ -1728,15 +2564,15 @@
       "09:00": 159.0,
       "10:00": 158.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 160.0,
+    "t1_high": 160.0,
+    "t1_low": 155.0,
+    "t1_close": 157.0,
+    "max_gain_pct": 1.91,
+    "open_gain_pct": 1.91,
+    "close_gain_pct": 0.0,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R5_BBRM",
@@ -1752,15 +2588,15 @@
       "09:00": 123.0,
       "10:00": 122.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 130.0,
+    "t1_high": 131.0,
+    "t1_low": 126.0,
+    "t1_close": 129.0,
+    "max_gain_pct": 9.17,
+    "open_gain_pct": 8.33,
+    "close_gain_pct": 7.5,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R5_BTPS",
@@ -1776,15 +2612,15 @@
       "09:00": 1015.0,
       "10:00": 1015.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 1055.0,
+    "t1_high": 1075.0,
+    "t1_low": 1055.0,
+    "t1_close": 1055.0,
+    "max_gain_pct": 6.44,
+    "open_gain_pct": 4.46,
+    "close_gain_pct": 4.46,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R5_PSSI",
@@ -1800,15 +2636,15 @@
       "09:00": 348.0,
       "10:00": 352.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 360.0,
+    "t1_high": 362.0,
+    "t1_low": 358.0,
+    "t1_close": 358.0,
+    "max_gain_pct": 3.43,
+    "open_gain_pct": 2.86,
+    "close_gain_pct": 2.29,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R5_MAIN",
@@ -1824,15 +2660,15 @@
       "09:00": 695.0,
       "10:00": 690.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 700.0,
+    "t1_high": 700.0,
+    "t1_low": 685.0,
+    "t1_close": 685.0,
+    "max_gain_pct": 0.0,
+    "open_gain_pct": 0.0,
+    "close_gain_pct": -2.14,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R4_ASSA",
@@ -1848,15 +2684,15 @@
       "09:00": 645.0,
       "10:00": 640.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 630.0,
+    "t1_high": 635.0,
+    "t1_low": 615.0,
+    "t1_close": 625.0,
+    "max_gain_pct": -0.78,
+    "open_gain_pct": -1.56,
+    "close_gain_pct": -2.34,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R4_BMTR",
@@ -1872,15 +2708,15 @@
       "09:00": 118.0,
       "10:00": 116.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 114.0,
+    "t1_high": 121.0,
+    "t1_low": 113.0,
+    "t1_close": 119.0,
+    "max_gain_pct": 0.83,
+    "open_gain_pct": -5.0,
+    "close_gain_pct": -0.83,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R4_NCKL",
@@ -1896,15 +2732,15 @@
       "09:00": 960.0,
       "10:00": 955.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 1005.0,
+    "t1_high": 1015.0,
+    "t1_low": 975.0,
+    "t1_close": 980.0,
+    "max_gain_pct": 4.64,
+    "open_gain_pct": 3.61,
+    "close_gain_pct": 1.03,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R4_BBTN",
@@ -1920,15 +2756,15 @@
       "09:00": 1270.0,
       "10:00": 1250.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 1220.0,
+    "t1_high": 1230.0,
+    "t1_low": 1210.0,
+    "t1_close": 1220.0,
+    "max_gain_pct": -1.99,
+    "open_gain_pct": -2.79,
+    "close_gain_pct": -2.79,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R4_CMRY",
@@ -1944,15 +2780,15 @@
       "09:00": 4680.0,
       "10:00": 4630.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 4520.0,
+    "t1_high": 4520.0,
+    "t1_low": 4450.0,
+    "t1_close": 4460.0,
+    "max_gain_pct": -4.44,
+    "open_gain_pct": -4.44,
+    "close_gain_pct": -5.71,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R3_TPMA",
@@ -1968,15 +2804,15 @@
       "09:00": 494.0,
       "10:00": 492.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 490.0,
+    "t1_high": 494.0,
+    "t1_low": 490.0,
+    "t1_close": 492.0,
+    "max_gain_pct": 0.0,
+    "open_gain_pct": -0.81,
+    "close_gain_pct": -0.4,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R3_SKBM",
@@ -1992,15 +2828,15 @@
       "09:00": 570.0,
       "10:00": 555.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 545.0,
+    "t1_high": 555.0,
+    "t1_low": 540.0,
+    "t1_close": 550.0,
+    "max_gain_pct": -1.77,
+    "open_gain_pct": -3.54,
+    "close_gain_pct": -2.65,
+    "status_akurasi": "\u274c MELESET (CL)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R3_MAIN",
@@ -2016,15 +2852,15 @@
       "09:00": 695.0,
       "10:00": 690.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 700.0,
+    "t1_high": 700.0,
+    "t1_low": 685.0,
+    "t1_close": 685.0,
+    "max_gain_pct": 0.0,
+    "open_gain_pct": 0.0,
+    "close_gain_pct": -2.14,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R3_LTLS",
@@ -2040,15 +2876,15 @@
       "09:00": 890.0,
       "10:00": 925.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 1080.0,
+    "t1_high": 1135.0,
+    "t1_low": 1055.0,
+    "t1_close": 1065.0,
+    "max_gain_pct": 27.53,
+    "open_gain_pct": 21.35,
+    "close_gain_pct": 19.66,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R3_ACST",
@@ -2064,15 +2900,15 @@
       "09:00": 90.0,
       "10:00": 90.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 128.0,
+    "t1_high": 128.0,
+    "t1_low": 128.0,
+    "t1_close": 128.0,
+    "max_gain_pct": 42.22,
+    "open_gain_pct": 42.22,
+    "close_gain_pct": 42.22,
+    "status_akurasi": "\ud83c\udfaf AKURAT (HIT TP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R1_KMDS",
@@ -2088,15 +2924,15 @@
       "09:00": 525.0,
       "10:00": 525.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 515.0,
+    "t1_high": 525.0,
+    "t1_low": 515.0,
+    "t1_close": 520.0,
+    "max_gain_pct": 0.96,
+    "open_gain_pct": -0.96,
+    "close_gain_pct": 0.0,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R1_CHEK",
@@ -2112,15 +2948,15 @@
       "09:00": 135.0,
       "10:00": 134.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 133.0,
+    "t1_high": 134.0,
+    "t1_low": 129.0,
+    "t1_close": 133.0,
+    "max_gain_pct": -0.74,
+    "open_gain_pct": -1.48,
+    "close_gain_pct": -1.48,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-04_08:00_R1_PNSE",
@@ -2136,15 +2972,15 @@
       "09:00": 500.0,
       "10:00": 505.0
     },
-    "t1_open": null,
-    "t1_high": null,
-    "t1_low": null,
-    "t1_close": null,
-    "max_gain_pct": null,
-    "open_gain_pct": null,
-    "close_gain_pct": null,
-    "status_akurasi": "\u23f3 MENUNGGU T+1",
-    "evaluasi_waktu": null
+    "t1_open": 500.0,
+    "t1_high": 500.0,
+    "t1_low": 500.0,
+    "t1_close": 500.0,
+    "max_gain_pct": 0.0,
+    "open_gain_pct": 0.0,
+    "close_gain_pct": 0.0,
+    "status_akurasi": "\u2696\ufe0f NETRAL (BEP)",
+    "evaluasi_waktu": "2026-09-10 13:47"
   },
   {
     "id": "2026-09-03_16:00_R9_HDIT",

@@ -1,3 +1,9 @@
+try:
+    import truststore
+    truststore.inject_into_ssl()
+except Exception:
+    pass
+
 import io
 import sys
 import subprocess
@@ -205,13 +211,10 @@ def analisa_forensik_ai(data_saham_dict, master_filters_keys):
 def ai_penyisihan_turnamen(data_grup_dict, api_key):
     saham_grup_ini = list(data_grup_dict.keys())
     daftar_model_estafet = [
-        'gemini-3.7-flash', 
-        'gemini-3.6-flash',
-        'gemini-3.5-flash',
-        'gemini-flash-latest',
-        'gemini-3.5-flash-lite',
-        'gemini-3.1-flash-lite',
-        'gemini-flash-lite-latest'
+        'gemini-2.0-flash', 
+        'gemini-1.5-flash',
+        'gemini-1.5-flash-8b',
+        'gemini-1.5-pro'
     ]
     genai.configure(api_key=api_key)
     payload_text = ""
@@ -257,13 +260,10 @@ def ai_penyisihan_turnamen(data_grup_dict, api_key):
 def ai_grand_final_top5(data_saham_dict, api_key):
     import json
     daftar_model_estafet = [
-        'gemini-3.7-flash', 
-        'gemini-3.6-flash',
-        'gemini-3.5-flash',
-        'gemini-flash-latest',
-        'gemini-3.5-flash-lite',
-        'gemini-3.1-flash-lite',
-        'gemini-flash-lite-latest'
+        'gemini-2.0-flash', 
+        'gemini-1.5-flash',
+        'gemini-1.5-flash-8b',
+        'gemini-1.5-pro'
     ]
     genai.configure(api_key=api_key)
     
@@ -470,8 +470,8 @@ df_hasil = load_data_saham()
 
 # --- TAMBAHAN KALKULASI VALUE TRANSAKSI OTOMATIS ---
 if not df_hasil.empty and 'Volume' in df_hasil.columns and 'Harga (Rp)' in df_hasil.columns:
-    # Value = Harga * Volume * 100 (karena 1 Lot = 100 Lembar)
-    df_hasil['Value Transaksi'] = df_hasil['Harga (Rp)'] * df_hasil['Volume'] * 100
+    # Volume dari Yahoo Finance untuk IDX sudah dalam satuan lembar saham
+    df_hasil['Value Transaksi'] = df_hasil['Harga (Rp)'] * df_hasil['Volume']
 
 # ==========================================
 # HEADER & SIDEBAR
@@ -899,7 +899,7 @@ if not df_hasil.empty:
         
         if 'Turnover' not in df_hasil.columns:
             if 'Volume' in df_hasil.columns and 'Harga (Rp)' in df_hasil.columns:
-                df_hasil['Turnover'] = df_hasil['Harga (Rp)'] * df_hasil['Volume'] * 100
+                df_hasil['Turnover'] = df_hasil['Harga (Rp)'] * df_hasil['Volume']
             else:
                 df_hasil['Turnover'] = 0
 

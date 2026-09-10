@@ -1,3 +1,17 @@
+import sys
+if hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+
+try:
+    import truststore
+    truststore.inject_into_ssl()
+except Exception:
+    pass
+
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -146,11 +160,15 @@ def cek_sentimen_berita(ticker, session):
 # SECTION 3: KALKULASI TEKNIKAL & BANDARMOLOGI
 # ==========================================
 def hitung_semua_indikator(df_saham, ticker, aman_session):
-    close_today = df_saham['Close'].iloc[-1].item()
-    close_yest = df_saham['Close'].iloc[-2].item()
-    open_today = df_saham['Open'].iloc[-1].item()
-    high_today = df_saham['High'].iloc[-1].item()
-    low_today = df_saham['Low'].iloc[-1].item()
+    df_saham = df_saham.copy()
+    if isinstance(df_saham.columns, pd.MultiIndex):
+        df_saham.columns = [c[0] if isinstance(c, tuple) else c for c in df_saham.columns]
+
+    close_today = float(df_saham['Close'].iloc[-1])
+    close_yest = float(df_saham['Close'].iloc[-2])
+    open_today = float(df_saham['Open'].iloc[-1])
+    high_today = float(df_saham['High'].iloc[-1])
+    low_today = float(df_saham['Low'].iloc[-1])
     vol_today = int(df_saham['Volume'].iloc[-1].item()) if not pd.isna(df_saham['Volume'].iloc[-1].item()) else 0
     
     change_rp = close_today - close_yest
@@ -224,15 +242,12 @@ def hitung_semua_indikator(df_saham, ticker, aman_session):
     else:
         status_bandar = "Normal"
 
-    obv = [0]
-    for i in range(1, len(df_saham)):
-        if df_saham['Close'].iloc[i] > df_saham['Close'].iloc[i-1]: obv.append(obv[-1] + df_saham['Volume'].iloc[i])
-        elif df_saham['Close'].iloc[i] < df_saham['Close'].iloc[i-1]: obv.append(obv[-1] - df_saham['Volume'].iloc[i])
-        else: obv.append(obv[-1])
-    df_saham['OBV'] = obv
+    diff_close = df_saham['Close'].diff().fillna(0)
+    obv_direction = np.where(diff_close > 0, 1, np.where(diff_close < 0, -1, 0))
+    df_saham['OBV'] = (obv_direction * df_saham['Volume']).cumsum()
     
-    obv_sekarang = df_saham['OBV'].iloc[-1]
-    obv_5_hari_lalu = df_saham['OBV'].iloc[-6] if len(df_saham['OBV']) >= 6 else obv_sekarang
+    obv_sekarang = float(df_saham['OBV'].iloc[-1])
+    obv_5_hari_lalu = float(df_saham['OBV'].iloc[-6]) if len(df_saham['OBV']) >= 6 else obv_sekarang
     if obv_sekarang > obv_5_hari_lalu: obv_trend = "Akumulasi (Naik)"
     elif obv_sekarang < obv_5_hari_lalu: obv_trend = "Distribusi (Turun)"
     else: obv_trend = "Netral"
@@ -591,7 +606,7 @@ def main():
                             "PBV (x)": pbv
                         }
                         data_akhir.update(ind)
-                        sig_res = calculate_signal_score(df_saham)
+                        sig_res = calculate_signal_score(df_saham, indikator=ind)
                         data_akhir.update({
                             "Total Score": score, 
                             "Rekomendasi": rekomendasi, 

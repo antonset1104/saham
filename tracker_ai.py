@@ -32,10 +32,12 @@ def load_tracker_data():
         return []
 
 def save_tracker_data(data):
-    """Menyimpan data tracker rekomendasi AI ke berkas JSON."""
+    """Menyimpan data tracker rekomendasi AI ke berkas JSON secara atomik."""
     os.makedirs(os.path.dirname(FILE_TRACKER), exist_ok=True)
-    with open(FILE_TRACKER, "w") as f:
+    tmp_path = f"{FILE_TRACKER}.tmp"
+    with open(tmp_path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
+    os.replace(tmp_path, FILE_TRACKER)
 
 def _generate_initial_seed_data():
     """Membuat data historis awal yang realistis agar visualisasi langsung hidup."""

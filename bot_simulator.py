@@ -1,3 +1,11 @@
+import sys
+if hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+
 import pandas as pd
 import os
 from datetime import datetime
@@ -65,10 +73,21 @@ def inisialisasi_database(rumus_id):
         
     return file_porto, file_hist
 
-def cek_saldo_tersedia(df_porto):
-    if df_porto.empty:
-        return MODAL_AWAL
-    return MODAL_AWAL - df_porto['Total_Modal'].sum()
+def cek_saldo_tersedia(df_porto, df_history=None):
+    """
+    Menghitung saldo kas tersedia secara dinamis:
+    Saldo = MODAL_AWAL + Total Realized PnL - Total Modal Aktif
+    """
+    total_realized_pnl = 0.0
+    if df_history is not None and not df_history.empty and 'Total_Return_Rp' in df_history.columns:
+        total_realized_pnl = float(df_history['Total_Return_Rp'].dropna().sum())
+
+    total_modal_aktif = 0.0
+    if df_porto is not None and not df_porto.empty and 'Total_Modal' in df_porto.columns:
+        total_modal_aktif = float(df_porto['Total_Modal'].dropna().sum())
+
+    saldo_kas = MODAL_AWAL + total_realized_pnl - total_modal_aktif
+    return max(0.0, saldo_kas)
 
 # ==========================================
 # 🤖 MESIN EKSEKUSI UTAMA (MODE BSJP)
@@ -184,13 +203,47 @@ def jalankan_bot():
         # ==========================================
         # FASE B: MODE BELI (MASUKKAN SAHAM KE GUDANG)
         # ==========================================
+        df_sinyal = None
         if os.path.exists(file_sinyal):
-            saldo_sekarang = cek_saldo_tersedia(df_porto)
-            saham_dimiliki = df_porto['Ticker'].tolist() if not df_porto.empty else []
             try:
                 df_sinyal = pd.read_csv(file_sinyal)
+                os.remove(file_sinyal) # Hapus sinyal manual setelah dibaca
+            except Exception as e:
+                print(f"⚠️ Gagal membaca sinyal manual Rumus {i}: {e}")
+        elif jam_sekarang >= datetime.strptime("15:00", "%H:%M").time():
+            # AUTO-PILOT: Jika sore hari (>= 15:00) dan tidak ada sinyal manual,
+            # ambil otomatis kandidat terbaik yang lolos filter kuantitatif rumus ini
+            try:
+                import tracker_ai
+                hasil_rumus = tracker_ai.filter_saham_9_rumus(df_market)
+                key_r = f"R{i}"
+                df_kandidat = hasil_rumus.get(key_r, pd.DataFrame())
+                if not df_kandidat.empty:
+                    sort_cols = [c for c in ["Total Score", "Volume"] if c in df_kandidat.columns]
+                    if sort_cols:
+                        df_kandidat = df_kandidat.sort_values(by=sort_cols, ascending=[False, False])
+                    
+                    list_sinyal = []
+                    for _, row_k in df_kandidat.head(3).iterrows():
+                        t_kode = str(row_k.get("Ticker", "")).strip().upper()
+                        h_entry = float(row_k.get("Harga (Rp)", 0))
+                        if t_kode and h_entry > 0:
+                            list_sinyal.append({
+                                "Ticker": t_kode,
+                                "Target_TP": round(h_entry * 1.05),
+                                "Target_CL": round(h_entry * 0.97)
+                            })
+                    if list_sinyal:
+                        df_sinyal = pd.DataFrame(list_sinyal)
+            except Exception as e_auto:
+                pass
+
+        if df_sinyal is not None and not df_sinyal.empty:
+            saldo_sekarang = cek_saldo_tersedia(df_porto, df_history)
+            saham_dimiliki = df_porto['Ticker'].tolist() if not df_porto.empty else []
+            try:
                 for _, sinyal in df_sinyal.iterrows():
-                    ticker = sinyal['Ticker']
+                    ticker = str(sinyal['Ticker']).strip().upper()
                     # Cegah beli saham yang sama berulang-ulang
                     if ticker in saham_dimiliki:
                         continue
@@ -218,13 +271,11 @@ def jalankan_bot():
                             'Target_CL': sinyal['Target_CL']
                         }])], ignore_index=True)
                         saldo_sekarang -= total_modal_dikeluarkan
+                        saham_dimiliki.append(ticker)
                         print(f"🛒 [RUMUS {i}] BELI: {ticker} @ Rp {harga_beli} | {jumlah_lot} Lot")
                         kirim_alert_transaksi_bot(f"Rumus {i}", ticker, "BELI", harga_beli, jumlah_lot)
-
-                # WAJIB: Hapus kertas belanja agar besok tidak dibeli lagi
-                os.remove(file_sinyal)
             except Exception as e:
-                print(f"⚠️ Gagal membaca sinyal Rumus {i}: {e}")
+                print(f"⚠️ Gagal mengeksekusi pembelian Rumus {i}: {e}")
 
         # ----------------------------------------------------
         # 💾 SIMPAN SEMUA KE DALAM FILE CSV MASING-MASING SECARA ATOMIK
