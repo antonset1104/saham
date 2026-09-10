@@ -569,6 +569,15 @@ def sync_otomatis_data_web():
         st.cache_data.clear()
         st.rerun(scope="app")
 
+    # Pemicu otomatis kirim alert Telegram jika jam bursa (Pagi 10:00 & Sore 15:30)
+    try:
+        from notifikasi_telegram import is_telegram_configured, cek_dan_kirim_jadwal_1530, cek_dan_kirim_jadwal_1000
+        if is_telegram_configured() and not df_hasil.empty:
+            cek_dan_kirim_jadwal_1530(df_screener=df_hasil)
+            cek_dan_kirim_jadwal_1000(df_screener=df_hasil)
+    except Exception:
+        pass
+
 sync_otomatis_data_web()
 
 with st.sidebar.expander("⚡ Update Data Pasar (Stockbit & Yahoo)", expanded=True):

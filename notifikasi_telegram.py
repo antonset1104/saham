@@ -8,9 +8,20 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def get_telegram_config():
-    """Mengambil konfigurasi Telegram dinamis dari env."""
-    tok = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
-    cid = os.getenv("TELEGRAM_CHAT_ID", "").strip()
+    """Mengambil konfigurasi Telegram dinamis dari session_state, secrets, atau env."""
+    tok, cid = "", ""
+    try:
+        import streamlit as st
+        if hasattr(st, "secrets"):
+            tok = str(st.secrets.get("TELEGRAM_BOT_TOKEN", "")).strip()
+            cid = str(st.secrets.get("TELEGRAM_CHAT_ID", "")).strip()
+    except Exception:
+        pass
+
+    if not tok:
+        tok = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+    if not cid:
+        cid = os.getenv("TELEGRAM_CHAT_ID", "").strip()
     return tok, cid
 
 def is_telegram_configured() -> bool:
@@ -309,7 +320,7 @@ def kirim_rekomendasi_rumus_2_dan_9(df_screener=None, force=False) -> tuple[bool
 def cek_dan_kirim_jadwal_1530(df_screener=None, now=None):
     """
     Pemeriksaan berkala yang dipanggil oleh scheduler:
-    Jika hari bursa (Senin-Jumat) dan waktu sudah mencapai >= 15:30 WIB (dan belum lewat 16:05 WIB),
+    Jika hari bursa (Senin-Jumat) dan waktu sudah mencapai >= 15:30 WIB (dan belum lewat 20:00 WIB),
     serta belum pernah kirim hari ini -> kirim otomatis!
     """
     if now is None:
@@ -320,11 +331,13 @@ def cek_dan_kirim_jadwal_1530(df_screener=None, now=None):
         
     total_minutes = now.hour * 60 + now.minute
     target_start = 15 * 60 + 30 # 15:30 WIB
-    target_end = 16 * 60 + 5   # 16:05 WIB
+    target_end = 20 * 60 + 0    # 20:00 WIB (Fleksibel hingga malam hari bursa jika PC/aplikasi baru aktif)
     
     if target_start <= total_minutes <= target_end:
         return kirim_rekomendasi_rumus_2_dan_9(df_screener=df_screener, force=False)
-    return False, "Belum / Lewat jam 15:30 WIB"
+    if total_minutes < target_start:
+        return False, "Belum jam 15:30 WIB"
+    return False, "Lewat jam 20:00 WIB"
 
 def _ambil_data_realtime_emiten(tickers: list, df_screener=None) -> dict:
     """
@@ -626,10 +639,10 @@ def cek_dan_kirim_jadwal_1000(df_screener=None, now=None):
 
     total_minutes = now.hour * 60 + now.minute
     target_start = 9 * 60 + 55   # 09:55 WIB
-    target_end = 11 * 60 + 45   # 11:45 WIB (Sepanjang Sesi 1 Bursa)
+    target_end = 12 * 60 + 30   # 12:30 WIB (Sepanjang Sesi 1 Bursa s/d istirahat siang)
 
     if target_start <= total_minutes <= target_end:
         return kirim_update_realtime_pagi_1000(df_screener=df_screener, force=False)
-    return False, "Di luar jam Sesi 1 bursa (09:55 - 11:45 WIB)"
+    return False, "Di luar jam Sesi 1 bursa (09:55 - 12:30 WIB)"
 
 

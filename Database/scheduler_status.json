@@ -1,8 +1,8 @@
 {
-  "is_running": true,
-  "pid": 37143,
-  "last_status": "Menunggu jadwal jam berikutnya (~59 menit lagi)",
-  "last_run": "2026-09-04 10:39:22",
-  "next_run": "2026-09-04 11:00:00",
-  "updated_at": "2026-09-04 10:39:22"
+  "is_running": false,
+  "pid": null,
+  "last_status": "Scheduler belum diaktifkan (Klik Aktifkan di Sidebar)",
+  "last_run": "-",
+  "next_run": "-",
+  "updated_at": "-"
 }

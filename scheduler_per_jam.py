@@ -73,7 +73,15 @@ def get_scheduler_status():
                     os.kill(pid, 0)
                 except OSError:
                     data["is_running"] = False
+                    data["pid"] = None
                     data["last_status"] = "Proses berhenti secara eksternal"
+                    try:
+                        with open(FILE_STATUS, "w") as fw:
+                            json.dump(data, fw, indent=2)
+                        if os.path.exists(FILE_CONTROL):
+                            os.remove(FILE_CONTROL)
+                    except Exception:
+                        pass
             return data
     except Exception:
         return {"is_running": False, "last_status": "Error membaca status"}
@@ -135,11 +143,16 @@ def start_scheduler_daemon():
         json.dump({"active": True}, f)
         
     # Jalankan sebagai subprocess mandiri yang terpisah (detached session)
+    creation_flags = 0
+    if sys.platform == "win32":
+        creation_flags = subprocess.CREATE_NEW_PROCESS_GROUP | getattr(subprocess, "DETACHED_PROCESS", 0)
+
     proc = subprocess.Popen(
         [py_bin, script_path, "--run-loop"],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
-        start_new_session=True
+        creationflags=creation_flags,
+        start_new_session=(sys.platform != "win32")
     )
     
     pid = proc.pid
