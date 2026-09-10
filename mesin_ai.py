@@ -10,12 +10,13 @@ load_dotenv()
 # 🔑 HELPER PENGAMBIL API KEY GROQ
 # ==========================================
 def get_groq_api_key():
-    """Mengambil Groq API Key secara fleksibel dari st.secrets, .env, atau os.environ"""
-    # 1. Cek Streamlit Secrets jika berjalan di dalam Streamlit
+    """Mengambil Groq API Key secara fleksibel dari st.session_state, st.secrets, .env, atau os.environ"""
     try:
         import streamlit as st
-        if "GROQ_API_KEY" in st.secrets:
-            return st.secrets["GROQ_API_KEY"]
+        if "custom_GROQ_API_KEY" in st.session_state and st.session_state["custom_GROQ_API_KEY"]:
+            return str(st.session_state["custom_GROQ_API_KEY"]).strip()
+        if hasattr(st, "secrets") and "GROQ_API_KEY" in st.secrets:
+            return str(st.secrets["GROQ_API_KEY"]).strip()
     except Exception:
         pass
     

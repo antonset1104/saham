@@ -36,6 +36,31 @@ import tracker_ai
 import scheduler_per_jam
 
 # ==========================================
+# 🔑 HELPER PENGAMBIL SECRET / API KEY FLEKSIBEL
+# ==========================================
+def get_secret(key_name, default=None):
+    """Mengambil API key/secret secara aman dari session state, st.secrets, os.environ, atau .env"""
+    # 1. Coba dari session state jika diinput via UI
+    if f"custom_{key_name}" in st.session_state and st.session_state[f"custom_{key_name}"]:
+        return str(st.session_state[f"custom_{key_name}"]).strip()
+
+    # 2. Coba dari st.secrets (defensif terhadap StreamlitSecretNotFoundError)
+    try:
+        if hasattr(st, "secrets"):
+            val = st.secrets.get(key_name)
+            if val:
+                return str(val).strip()
+    except Exception:
+        pass
+
+    # 3. Coba dari Environment Variable / file .env
+    env_val = os.getenv(key_name) or os.environ.get(key_name)
+    if env_val:
+        return str(env_val).strip()
+
+    return default
+
+# ==========================================
 # 🧠 FUNGSI HAKIM AI (KLASEMEN GLOBAL DENGAN RADAR & MODE JSON)
 # ==========================================
 def ai_hakim_klasemen(data_top15, api_key):
@@ -98,10 +123,7 @@ def ai_hakim_klasemen(data_top15, api_key):
 
 # AI BANDAR (V6)
 def analisa_bandar_ai_multisaham(data_saham_dict, pilihan_ai):
-    try:
-        OPENROUTER_API_KEY = st.secrets.get("OPENROUTER_API_KEY", os.environ.get("OPENROUTER_API_KEY"))
-    except:
-        OPENROUTER_API_KEY = None
+    OPENROUTER_API_KEY = get_secret("OPENROUTER_API_KEY")
     if not OPENROUTER_API_KEY: return "❌ Kunci API OpenRouter belum dipasang!"
 
     model_andalan = "openrouter/free" 
@@ -155,10 +177,7 @@ def analisa_bandar_ai_multisaham(data_saham_dict, pilihan_ai):
 
 # AI FORENSIK BANDAR (V7)
 def analisa_forensik_ai(data_saham_dict, master_filters_keys):
-    try:
-        OPENROUTER_API_KEY = st.secrets.get("OPENROUTER_API_KEY", os.environ.get("OPENROUTER_API_KEY"))
-    except:
-        OPENROUTER_API_KEY = None
+    OPENROUTER_API_KEY = get_secret("OPENROUTER_API_KEY")
     if not OPENROUTER_API_KEY: return "❌ Kunci API OpenRouter belum dipasang!"
 
     model_andalan = "openrouter/free" 
@@ -1184,13 +1203,17 @@ if not df_hasil.empty:
                     with tab_otomatis:
                         st.markdown("Sistem akan menyeleksi 15 saham terbaik per rumus secara global, lalu AI akan memilih Top 5 untuk dicetak ke tabel Spreadsheet.")
                         
+                        if not get_secret("GEMINI_API_KEY"):
+                            with st.expander("🔑 Masukkan Kunci Gemini API (Sesi Ini / Belum Ada di .env)", expanded=True):
+                                st.caption("Kunci API ini akan digunakan selama sesi berjalan, atau Anda dapat menyimpannya permanen di file `.env`.")
+                                st.text_input("Gemini API Key:", type="password", placeholder="Tempel kunci AIzaSy... di sini", key="custom_GEMINI_API_KEY")
+
                         if st.button("🛸 Jalankan Auto-Pilot Ultimate", type="primary", key="autopilot_utama"):
                             
-                            # PASTIKAN BARIS INI ADA TEPAT DI BAWAH "if st.button"
-                            GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY"))
+                            GEMINI_API_KEY = get_secret("GEMINI_API_KEY")
                             
                             if not GEMINI_API_KEY:
-                                st.error("❌ Kunci API GEMINI belum dipasang!")
+                                st.error("❌ **Kunci API GEMINI belum dipasang!**\n\nSilakan masukkan kunci API pada kotak input di atas atau buat file `.env` di folder proyek dengan isi:\n```ini\nGEMINI_API_KEY=kunci_anda_disini\n```")
                             else:
                                 daftar_rumus = {
                                     1: df_v1, 2: df_v2, 3: df_v3, 
@@ -1351,9 +1374,9 @@ if not df_hasil.empty:
                     input_tester = st.text_area("📋 Paste Daftar Saham Uji Coba (Minimal 3 Saham):", placeholder="Contoh:\nVISI\nBBHI\nPANI", height=150, key="input_tester_gemini")
                     
                     if st.button("🚀 Tarik Daftar Server Google & Mulai Uji Coba"):
-                        GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY"))
+                        GEMINI_API_KEY = get_secret("GEMINI_API_KEY")
                         if not GEMINI_API_KEY:
-                            st.error("❌ Kunci API GEMINI belum dipasang di Secrets!")
+                            st.error("❌ Kunci API GEMINI belum dipasang! Masukkan di .env atau konfigurasi Secrets.")
                         else:
                             saham_bersih = [s.strip().upper() for s in re.split(r'[,\s\n]+', input_tester) if s.strip()]
                             saham_unik = list(dict.fromkeys(saham_bersih))
