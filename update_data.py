@@ -49,6 +49,9 @@ if not TOKEN_CURIAN:
     except FileNotFoundError:
         TOKEN_CURIAN = ""
 
+if TOKEN_CURIAN.startswith("Bearer "):
+    TOKEN_CURIAN = TOKEN_CURIAN[7:].strip()
+
 if not os.path.exists(DIR_ARSIP):
     os.makedirs(DIR_ARSIP)
 

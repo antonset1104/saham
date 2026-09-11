@@ -610,7 +610,58 @@ with st.sidebar.expander("⚡ Update Data Pasar (Stockbit & Yahoo)", expanded=Tr
             index=0,
             key="pilihan_mode_update"
         )
-        
+
+        with st.expander("🔑 Konfigurasi Token Stockbit", expanded=False):
+            curr_sb_token = os.getenv("STOCKBIT_TOKEN", "")
+            if not curr_sb_token and os.path.exists("token_stockbit.txt"):
+                try:
+                    with open("token_stockbit.txt", "r") as f:
+                        curr_sb_token = f.read().strip()
+                except Exception:
+                    pass
+            
+            sb_token_input = st.text_input(
+                "Stockbit Bearer Token:",
+                value=curr_sb_token,
+                type="password",
+                placeholder="Paste token eyJhbGciOi...",
+                help="Diambil dari Inspect Element (F12) -> Network -> Header Authorization di stockbit.com"
+            )
+            if st.button("💾 Simpan Token Stockbit", use_container_width=True, key="btn_save_sb_token"):
+                clean_sb = sb_token_input.strip()
+                if clean_sb.startswith("Bearer "):
+                    clean_sb = clean_sb[7:].strip()
+                
+                try:
+                    with open("token_stockbit.txt", "w") as f:
+                        f.write(clean_sb)
+                except Exception:
+                    pass
+                
+                if os.path.exists(".env"):
+                    try:
+                        with open(".env", "r") as f:
+                            env_lines = f.readlines()
+                        new_env = []
+                        sb_found = False
+                        for l in env_lines:
+                            if l.startswith("STOCKBIT_TOKEN="):
+                                new_env.append(f"STOCKBIT_TOKEN={clean_sb}\n")
+                                sb_found = True
+                            else:
+                                new_env.append(l)
+                        if not sb_found:
+                            new_env.append(f"STOCKBIT_TOKEN={clean_sb}\n")
+                        with open(".env", "w") as f:
+                            f.writelines(new_env)
+                    except Exception:
+                        pass
+                
+                os.environ["STOCKBIT_TOKEN"] = clean_sb
+                st.success("Token Stockbit berhasil disimpan!")
+                time.sleep(0.5)
+                st.rerun()
+
         btn_run_update = st.button("🚀 Tarik Data Stockbit Sekarang", use_container_width=True, type="primary", key="btn_tarik_data_sb")
         if btn_run_update:
             py_bin = sys.executable or "./.venv/bin/python"
