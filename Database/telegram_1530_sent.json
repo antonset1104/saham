@@ -1,57 +1,17 @@
 {
-  "last_sent_date": "2026-09-04",
-  "waktu": "2026-09-04 07:33:53",
-  "total_emiten": 5,
+  "last_sent_date": "2026-09-11",
+  "waktu": "2026-09-11 15:30:16",
+  "total_emiten": 1,
   "rekomendasi": [
     {
-      "ticker": "GTBO",
+      "ticker": "ACES",
       "rumus_id": "R9",
       "rumus_nama": "Rumus 9 (Risk/Reward > 1:3)",
-      "harga_entry": 172.0,
-      "target_tp": 181,
-      "stop_loss": 167,
-      "score": 8,
-      "plan": "TP: 173 | CL: 171"
-    },
-    {
-      "ticker": "HDIT",
-      "rumus_id": "R9",
-      "rumus_nama": "Rumus 9 (Risk/Reward > 1:3)",
-      "harga_entry": 51.0,
-      "target_tp": 54,
-      "stop_loss": 49,
-      "score": 6,
-      "plan": "TP: 53 | CL: 49"
-    },
-    {
-      "ticker": "BANK",
-      "rumus_id": "R9",
-      "rumus_nama": "Rumus 9 (Risk/Reward > 1:3)",
-      "harga_entry": 276.0,
-      "target_tp": 290,
-      "stop_loss": 268,
-      "score": 6,
-      "plan": "TP: 293 | CL: 264"
-    },
-    {
-      "ticker": "CAMP",
-      "rumus_id": "R9",
-      "rumus_nama": "Rumus 9 (Risk/Reward > 1:3)",
-      "harga_entry": 172.0,
-      "target_tp": 181,
-      "stop_loss": 167,
-      "score": 6,
-      "plan": "TP: 178 | CL: 167"
-    },
-    {
-      "ticker": "JRPT",
-      "rumus_id": "R9",
-      "rumus_nama": "Rumus 9 (Risk/Reward > 1:3)",
-      "harga_entry": 1085.0,
-      "target_tp": 1139,
-      "stop_loss": 1052,
-      "score": 6,
-      "plan": "TP: 1103 | CL: 1072"
+      "harga_entry": 352.0,
+      "target_tp": 370,
+      "stop_loss": 341,
+      "score": 0,
+      "plan": "TP: 363 | CL: 344"
     }
   ]
 }
