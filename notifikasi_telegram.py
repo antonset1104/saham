@@ -189,15 +189,27 @@ def kirim_rekomendasi_rumus_2_dan_9(df_screener=None, force=False) -> tuple[bool
     import pandas as pd
     import tracker_ai
     
-    if df_screener is None or df_screener.empty:
+    if df_screener is None or df_screener.empty or len(df_screener) < 20:
         file_hasil = "Database/hasil_screener.csv"
         if os.path.exists(file_hasil):
             try:
-                df_screener = pd.read_csv(file_hasil)
-            except Exception as e:
-                return False, f"Gagal membaca database: {e}"
-        else:
-            return False, "Database hasil screener belum tersedia."
+                df_temp = pd.read_csv(file_hasil)
+                if not df_temp.empty and len(df_temp) >= 20:
+                    df_screener = df_temp
+                elif os.path.exists("hasil_screener.csv"):
+                    df_screener = pd.read_csv("hasil_screener.csv")
+                elif not df_temp.empty:
+                    df_screener = df_temp
+            except Exception:
+                if os.path.exists("hasil_screener.csv"):
+                    try: df_screener = pd.read_csv("hasil_screener.csv")
+                    except: pass
+        elif os.path.exists("hasil_screener.csv"):
+            try: df_screener = pd.read_csv("hasil_screener.csv")
+            except: pass
+
+    if df_screener is None or df_screener.empty:
+        return False, "Database hasil screener belum tersedia."
 
     hasil_rumus = tracker_ai.filter_saham_9_rumus(df_screener)
     df_r2 = hasil_rumus.get("R2", pd.DataFrame())

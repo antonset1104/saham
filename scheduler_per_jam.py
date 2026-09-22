@@ -263,7 +263,8 @@ def loop_scheduler_utama():
                 break
             # Pengecekan berkala pemicu alert BSJP jam 15:30 WIB
             now_cek = datetime.now()
-            if now_cek.weekday() < 5 and now_cek.hour == 15 and now_cek.minute >= 30:
+            # Pengecekan berkala pemicu alert BSJP sore (15:30 - 20:00 WIB)
+            if now_cek.weekday() < 5 and (15 * 60 + 30 <= now_cek.hour * 60 + now_cek.minute <= 20 * 60):
                 try:
                     from notifikasi_telegram import cek_dan_kirim_jadwal_1530
                     cek_dan_kirim_jadwal_1530()

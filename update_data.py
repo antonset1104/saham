@@ -540,7 +540,7 @@ def main():
         
         print(f"📥 Mengunduh {len(daftar_saham)} data saham secara bersamaan (Maks 8 jalur)...")
         data_mentah = yf.download(
-            tickers_str, period="3mo", interval="1d", group_by='ticker', threads=8, session=aman_session, progress=False
+            tickers_str, period="3mo", interval="1d", group_by='ticker', threads=8, progress=False
         )
         
         if data_mentah.empty:
