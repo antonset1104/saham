@@ -277,6 +277,14 @@ def loop_scheduler_utama():
                     cek_dan_kirim_jadwal_1000()
                 except Exception:
                     pass
+
+            # Pengecekan berkala pemicu screener fundamental Jumat malam (20:00 - 23:59 WIB)
+            if now_cek.weekday() == 4 and now_cek.hour >= 20:
+                try:
+                    from notifikasi_telegram import cek_dan_kirim_jadwal_jumat_2000
+                    cek_dan_kirim_jadwal_jumat_2000()
+                except Exception:
+                    pass
             time.sleep(15)
 
     update_scheduler_status(is_running=False, pid=None, last_status="Daemon selesai")
@@ -293,6 +301,12 @@ if __name__ == "__main__":
     elif "--run-once" in sys.argv:
         print("Menjalankan satu siklus sekarang...")
         sukses, msg = jalankan_satu_siklus()
+        print("Hasil:", msg)
+    elif "--run-fundamental-jumat" in sys.argv:
+        print("Menjalankan screener fundamental Jumat malam...")
+        from screener_fundamental_jumat import jalankan_screener_fundamental, kirim_hasil_ke_telegram
+        df = jalankan_screener_fundamental()
+        sukses, msg = kirim_hasil_ke_telegram(df, force=True)
         print("Hasil:", msg)
     else:
         st = get_scheduler_status()

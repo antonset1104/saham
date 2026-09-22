@@ -854,6 +854,17 @@ with st.sidebar.expander("📲 Notifikasi Telegram Bot"):
                 else:
                     st.error(f"Gagal kirim: {msg_p}")
 
+        st.caption("💎 **Jadwal Fundamental Super:** Otomatis dikirim ke Telegram setiap **Jumat pukul 20:00 WIB**.")
+        from notifikasi_telegram import kirim_alert_screener_fundamental_jumat
+        if st.button("💎 Analisa & Kirim Screener Jumat Sekarang", use_container_width=True, key="btn_kirim_jumat_manual"):
+            with st.spinner("Menganalisis seluruh saham bursa dengan 12 kriteria fundamental Stockbit..."):
+                sukses_j, msg_j = kirim_alert_screener_fundamental_jumat(force=True)
+                if sukses_j:
+                    st.success("Laporan fundamental Jumat terkirim ke Telegram!")
+                    st.toast("Laporan Fundamental Jumat terkirim!", icon="💎")
+                else:
+                    st.error(f"Gagal: {msg_j}")
+
 st.title("⚡ AlgoTrade Screener - IHSG Ultimate")
 st.markdown("Detektor Jejak Bandar, Anomali Volume, & Strategi BSJP.")
 st.markdown("---")
@@ -1201,8 +1212,9 @@ if not df_hasil.empty:
             cond_v9 = (cond_squeeze & (df_hasil.get('Risk/Reward Ratio', '') == 'Sangat Menarik (> 1:3)'))
             df_v9 = df_hasil[cond_v9].copy() if not df_hasil.empty else pd.DataFrame()
 
-            tab_screener, tab_ai, tab_tracker = st.tabs([
+            tab_screener, tab_fundamental, tab_ai, tab_tracker = st.tabs([
                 "🎯 Screener Spesial", 
+                "💎 Fundamental Super (Jumat 20:00)",
                 "🧠 Asisten AI", 
                 "📈 Tracker Akurasi 9 Rumus (Per Jam & Harian)"
             ])
@@ -1242,6 +1254,65 @@ if not df_hasil.empty:
                     render_strategy_table(df_v8, "Screener_Rumus_8")
                 elif "RUMUS 9" in pilihan_v:
                     render_strategy_table(df_v9, "Screener_Rumus_9")
+
+            with tab_fundamental:
+                st.markdown("### 💎 Screener Fundamental Super (Jumat Malam 20:00 WIB)")
+                st.caption("Penyaring seluruh saham listing bursa dengan 12 kriteria ketat Stockbit Screener: Valuasi Diskon, Kas Melimpah (Net Cash), Bebas Risiko Utang (DER <= 0.5), Profitabilitas Prima (ROA >= 10%, ROE >= 15%), dan Laba Bertumbuh.")
+                
+                col_f1, col_f2, col_f3 = st.columns([1, 1, 1])
+                with col_f1:
+                    btn_run_fund = st.button("🔄 Jalankan Screening Sekarang", use_container_width=True, key="btn_run_fund_ui")
+                with col_f2:
+                    btn_send_fund = st.button("📲 Kirim Hasil ke Telegram", use_container_width=True, key="btn_send_fund_ui")
+                with col_f3:
+                    st.caption("⏰ **Jadwal Otomatis:** Setiap Jumat 20:00 WIB")
+                
+                file_fund_csv = "Database/hasil_screener_fundamental_jumat.csv"
+                if btn_run_fund:
+                    with st.spinner("Mengevaluasi seluruh saham bursa (bisa memakan waktu 30-60 detik)..."):
+                        from screener_fundamental_jumat import jalankan_screener_fundamental
+                        df_fund = jalankan_screener_fundamental()
+                        st.success(f"Analisa selesai! Ditemukan {len(df_fund)} emiten lolos kriteria.")
+                elif os.path.exists(file_fund_csv):
+                    try:
+                        df_fund = pd.read_csv(file_fund_csv)
+                    except Exception:
+                        df_fund = pd.DataFrame()
+                else:
+                    df_fund = pd.DataFrame()
+
+                if btn_send_fund:
+                    with st.spinner("Mengirimkan laporan ke bot Telegram..."):
+                        from notifikasi_telegram import kirim_alert_screener_fundamental_jumat
+                        sukses_tg, msg_tg = kirim_alert_screener_fundamental_jumat(df_lolos=df_fund, force=True)
+                        if sukses_tg:
+                            st.success(msg_tg)
+                            st.toast("Laporan Fundamental terkirim ke Telegram!", icon="💎")
+                        else:
+                            st.error(msg_tg)
+
+                st.markdown("---")
+                if not df_fund.empty:
+                    m1, m2, m3, m4 = st.columns(4)
+                    m1.metric("🌟 Saham Lolos", f"{len(df_fund)} Emiten")
+                    avg_roe = df_fund["ROE (%)"].mean() if "ROE (%)" in df_fund.columns else 0
+                    m2.metric("📈 Rata-Rata ROE", f"{avg_roe:.1f}%")
+                    avg_per = df_fund["PER TTM"].mean() if "PER TTM" in df_fund.columns else 0
+                    m3.metric("📊 Rata-Rata PER", f"{avg_per:.1f}x")
+                    avg_pbv = df_fund["PBV"].mean() if "PBV" in df_fund.columns else 0
+                    m4.metric("💰 Rata-Rata PBV", f"{avg_pbv:.2f}x")
+                    
+                    st.dataframe(df_fund, use_container_width=True, hide_index=True)
+                    csv_data = df_fund.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        label="📥 Download Hasil Screener Fundamental (CSV)",
+                        data=csv_data,
+                        file_name="hasil_screener_fundamental_jumat.csv",
+                        mime="text/csv",
+                        key="dl_fund_csv"
+                    )
+                else:
+                    st.info("ℹ️ Belum ada data hasil screening fundamental tersimpan. Klik **'Jalankan Screening Sekarang'** untuk memulai analisa seluruh bursa.")
 
             with tab_ai:
                 pilihan_ai = st.selectbox(

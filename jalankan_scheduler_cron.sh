@@ -3,7 +3,7 @@
 # SCRIPT PENJADWAL PER JAM BURSA IHSG
 # Menjalankan update seluruh saham IHSG, bot simulator, dan evaluasi tracker AI
 # ==============================================================================
-DIR="/Users/antonsetiawan/Documents/website/saham"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$DIR" || exit 1
 
 mkdir -p Database

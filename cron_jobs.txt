@@ -1,2 +1,6 @@
-0 9,10,11,14,15,16 * * 1-5 /Users/antonsetiawan/Documents/website/saham/jalankan_scheduler_cron.sh
-30 15 * * 1-5 /Users/antonsetiawan/Documents/website/saham/jalankan_scheduler_cron.sh
+# Update per jam bursa (Senin-Jumat)
+0 9,10,11,14,15,16 * * 1-5 /Users/hannyindriani/Documents/saham/jalankan_scheduler_cron.sh
+# Rekomendasi BSJP Sore (Senin-Jumat 15:30 WIB)
+30 15 * * 1-5 /Users/hannyindriani/Documents/saham/jalankan_scheduler_cron.sh
+# Screener Fundamental Seluruh Saham Bursa (Setiap Jumat 20:00 WIB)
+0 20 * * 5 /Users/hannyindriani/Documents/saham/jalankan_fundamental_jumat.sh

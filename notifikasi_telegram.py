@@ -164,6 +164,7 @@ def kirim_ringkasan_pasar(ringkasan: dict) -> bool:
 
 FILE_LAST_SENT_1530 = "Database/telegram_1530_sent.json"
 FILE_LAST_SENT_1000 = "Database/telegram_1000_sent.json"
+FILE_LAST_SENT_JUMAT_2000 = "Database/last_sent_jumat_2000.json"
 
 def kirim_rekomendasi_rumus_2_dan_9(df_screener=None, force=False) -> tuple[bool, str]:
     """
@@ -644,5 +645,32 @@ def cek_dan_kirim_jadwal_1000(df_screener=None, now=None):
     if target_start <= total_minutes <= target_end:
         return kirim_update_realtime_pagi_1000(df_screener=df_screener, force=False)
     return False, "Di luar jam Sesi 1 bursa (09:55 - 12:30 WIB)"
+
+def kirim_alert_screener_fundamental_jumat(df_lolos=None, force=False):
+    """
+    Mengirimkan laporan saham yang lolos screener fundamental 12 kriteria (Jumat malam 20:00 WIB).
+    """
+    from screener_fundamental_jumat import kirim_hasil_ke_telegram
+    return kirim_hasil_ke_telegram(df_lolos=df_lolos, force=force)
+
+def cek_dan_kirim_jadwal_jumat_2000(now=None, force=False):
+    """
+    Pemeriksaan berkala yang dipanggil oleh scheduler:
+    Jika hari Jumat (now.weekday() == 4) dan waktu sudah mencapai 20:00 WIB (s/d 23:59 WIB),
+    serta belum pernah kirim hari ini -> jalankan screener fundamental seluruh emiten dan kirim ke Telegram!
+    """
+    if now is None:
+        now = datetime.now()
+
+    # 4 = Jumat
+    if now.weekday() != 4 and not force:
+        return False, "Bukan hari Jumat (Jadwal evaluasi hanya setiap Jumat malam 20:00 WIB)"
+
+    total_minutes = now.hour * 60 + now.minute
+    target_start = 20 * 60  # 20:00 WIB
+
+    if total_minutes >= target_start or force:
+        return kirim_alert_screener_fundamental_jumat(force=force)
+    return False, "Belum mencapai jam 20:00 WIB"
 
 
