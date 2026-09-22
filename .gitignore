@@ -33,3 +33,4 @@ sedang_update.lock
 # Temporary files
 *.tmp
 Database/*.tmp
+cloudflared*
