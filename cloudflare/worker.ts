@@ -1,7 +1,12 @@
 import { Container, getContainer } from "@cloudflare/containers";
 import { handleState } from "./state";
 
-export class SahamContainer extends Container<Env> {
+type OptionalSecret =
+  | "STOCKBIT_TOKEN" | "GEMINI_API_KEY" | "GROQ_API_KEY"
+  | "OPENROUTER_API_KEY" | "TELEGRAM_BOT_TOKEN" | "TELEGRAM_CHAT_ID";
+type ContainerEnv = Env & Partial<Record<OptionalSecret, string>>;
+
+export class SahamContainer extends Container<ContainerEnv> {
   static outboundByHost = {
     "state.internal": (request: Request, env: Env): Promise<Response> => handleState(request, env),
   };
