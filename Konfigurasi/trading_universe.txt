@@ -1,0 +1,21 @@
+# Universe riset awal. Pilih emiten aktif; perubahan daftar historis perlu dicatat.
+BBCA
+BBRI
+BMRI
+BBNI
+TLKM
+ASII
+UNVR
+INDF
+ICBP
+ANTM
+PTBA
+ITMG
+KLBF
+PGAS
+SMGR
+AMRT
+CPIN
+EXCL
+BRIS
+MDKA

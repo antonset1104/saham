@@ -1,0 +1,29 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "saham-trading",
+  "main": "cloudflare/worker.ts",
+  "compatibility_date": "2026-10-22",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "routes": [{ "pattern": "saham.vijeron.com", "custom_domain": true }],
+  "containers": [{
+    "name": "saham-app",
+    "class_name": "SahamContainer",
+    "image": "./Dockerfile",
+    "max_instances": 1,
+    "instance_type": "standard-1"
+  }],
+  "durable_objects": {
+    "bindings": [{ "name": "SAHAM_CONTAINER", "class_name": "SahamContainer" }]
+  },
+  "exports": {
+    "SahamContainer": { "type": "durable-object", "storage": "sqlite", "container": "saham-app" }
+  },
+  "d1_databases": [{
+    "binding": "STATE_DB",
+    "database_name": "saham-state",
+    "database_id": "d4b491b8-9e87-4913-b221-25bf85625285"
+  }],
+  "triggers": { "crons": ["30 11 * * MON-FRI"] },
+  "observability": { "enabled": true }
+}

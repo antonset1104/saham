@@ -4,6 +4,12 @@ venv/
 env/
 ENV/
 .env
+.env.*
+.dev.vars*
+node_modules/
+.wrangler/
+cloudflare/state_seed.sql
+worker-configuration.d.ts
 
 # Sensitive Credentials & Tokens
 token_stockbit.txt
@@ -33,4 +39,7 @@ sedang_update.lock
 # Temporary files
 *.tmp
 Database/*.tmp
+Database/*.sqlite3*
+Database/trading_research_report.json
+Database/overnight_research_report.json
 cloudflared*

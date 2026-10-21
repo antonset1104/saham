@@ -1,5 +1,7 @@
 import os
+import tempfile
 import unittest
+from unittest.mock import patch
 import pandas as pd
 import numpy as np
 from datetime import datetime
@@ -8,6 +10,17 @@ import tracker_ai
 import scheduler_per_jam
 
 class TestTrackerAIAndScheduler(unittest.TestCase):
+
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.tracker_file = patch.object(
+            tracker_ai, "FILE_TRACKER", os.path.join(self.temp_dir.name, "tracker.json")
+        )
+        self.tracker_file.start()
+
+    def tearDown(self):
+        self.tracker_file.stop()
+        self.temp_dir.cleanup()
 
     def test_filter_saham_9_rumus(self):
         """Memastikan filter 9 rumus berjalan pada DataFrame valid dan kosong tanpa crash"""

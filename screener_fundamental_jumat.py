@@ -6,6 +6,10 @@ import html
 import requests
 import pandas as pd
 import numpy as np
+from market_tls import configure_yahoo_tls
+
+configure_yahoo_tls()
+
 import yfinance as yf
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed

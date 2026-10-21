@@ -1,5 +1,6 @@
 import os
 import unittest
+from unittest.mock import patch
 import pandas as pd
 import numpy as np
 
@@ -130,10 +131,13 @@ class TestScreenerAndBot(unittest.TestCase):
     def test_gold_conversion_math(self):
         """Memastikan konversi harga emas Troy Oz ke Gram IDR presisi"""
         usd_rate = 16000.0
-        gold_info = get_gold_price_idr(usd_idr=usd_rate)
+        gold_price = pd.DataFrame({"Close": [3000.0]}, index=pd.DatetimeIndex(["2026-10-12"]))
+        with patch("data_multi_aset.yf.download", return_value=gold_price):
+            gold_info = get_gold_price_idr(usd_idr=usd_rate)
         
         # 1 Troy Oz = 31.1034768 gram
         self.assertAlmostEqual(TROY_OZ_TO_GRAM, 31.1034768, places=4)
+        self.assertEqual(gold_info["usd_per_oz"], 3000.0)
         expected_per_gram = (gold_info["usd_per_oz"] / TROY_OZ_TO_GRAM) * usd_rate
         self.assertAlmostEqual(gold_info["idr_per_gram"], expected_per_gram, places=1)
         self.assertGreater(gold_info["idr_per_gram"], 1_000_000)

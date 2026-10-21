@@ -49,21 +49,35 @@ Platform screening kuantitatif saham Bursa Efek Indonesia (IHSG), deteksi bandar
    - Perhitungan modal total, nilai pasar terkini, dan floating profit/loss (Rp & %).
 
 6. **Mesin Prediksi Tren Harga Saham AI (Machine Learning Forecasting):**
-   - Memproyeksikan estimasi pergerakan harga 7–30 hari ke depan menggunakan regresi multi-langkah (`XGBoost` / `GradientBoosting`).
-   - Visualisasi interaktif Plotly menampilkan riwayat harga aktual, kurva proyeksi masa depan, dan area batas ketidakpastian (*confidence band*).
-   - Evaluasi akurasi metrik MAPE (*Mean Absolute Percentage Error*) dan visualisasi *feature importance*.
+   - Memperkirakan perubahan harga penutupan secara langsung untuk 1, 5, atau 10 hari bursa dari data OHLCV harian yang sudah selesai. Ticker dan horizon yang dipilih otomatis memicu perhitungan; hasil disimpan sementara selama 15 menit.
+   - Memilih antara patokan harga tetap dan Ridge teratur berdasarkan dua blok validasi waktu dan satu blok pemeriksaan terbaru sebelum uji akhir. Model harus menurunkan galat minimal 5% secara total, unggul di kedua blok validasi, dan mengungguli patokan setidaknya 2% pada blok pemeriksaan. Jeda sebesar horizon mencegah label dari masa depan menyeberang ke periode berikutnya.
+   - Menampilkan galat return pada 40 titik uji terbaru dibandingkan patokan harga tetap. Rentang pada grafik memakai persentil ke-90 galat historis, bukan *confidence interval* dengan jaminan cakupan.
+   - Jika galat model tidak turun setidaknya 2% terhadap patokan pada periode uji terbaru, dashboard menampilkan peringatan. Estimasi return bersih memakai fee beli 0,15% dan jual 0,25%; spread dan slippage belum dihitung. Tanggal target belum memperhitungkan hari libur bursa.
+   - Pada Windows, koneksi Yahoo memakai gabungan CA publik dan sertifikat sistem Windows agar verifikasi TLS tetap aktif di jaringan yang memakai sertifikat perusahaan. Bundle disimpan di cache pengguna sehingga scheduler tetap dapat membacanya setelah dashboard ditutup.
 
-7. **Sistem Notifikasi Telegram Cerdas:**
+7. **Riset Sinyal Trading EOD (1 dan 5 sesi):**
+   - Menyimpan OHLCV mentah Yahoo untuk universe di `Konfigurasi/trading_universe.txt` ke SQLite append-only. Observasi lama tidak ditimpa; candle yang belum selesai tidak disimpan.
+   - Menggunakan label return dari *open* sesi setelah sinyal ke *close* pada horizon, setelah fee beli 0,15%, fee jual 0,25%, dan asumsi slippage 0,10% per sisi.
+   - Model lintas saham dilatih berkala secara walk-forward hanya dari label yang sudah matang. Validasi dan holdout memakai transaksi non-overlap, pembanding momentum sederhana, serta skor Brier.
+   - Sinyal hanya tampil bila kedua periode menghasilkan return positif, unggul lebih dari 1 poin persentase atas momentum, Brier membaik, dan minimal 10 cohort transaksi. Sinyal kedaluwarsa saat sesi berikutnya buka.
+   - Scheduler aplikasi menjalankan riset sekali per hari kerja setelah 17:45 WIB. Di Windows, `install_trading_schedule.ps1` dapat memasang tugas cadangan pukul 18:30 WIB saat dashboard tidak dibuka. Backfill Yahoo dan universe saat ini belum menjadi arsip historis point-in-time terverifikasi.
+
+   **Riset Overnight (beli sore, jual pagi):**
+   - Candle Yahoo 5 menit disimpan saat pertama diterima. Fitur berakhir pada candle 14:30 WIB; jendela sinyal 14:45–15:00, simulasi beli pada open candle 15:15, lalu jual pada open candle 09:05 hari bursa berikutnya.
+   - Backtest menghitung fee dan slippage pada kedua sisi, membandingkan dengan momentum sederhana, serta menahan sinyal hingga validasi dan holdout mempunyai minimal 10 hari pengamatan yang sudah tersedia sebelum pukul 15:00 WIB. Backfill awal tidak dihitung sebagai pengamatan tepat waktu.
+   - Tugas Windows mengambil data dan memperbarui laporan pada 14:45 dan 18:45 WIB. Jika sumber belum menyediakan candle tepat waktu, atau uji tidak mengungguli patokan, hasilnya tanpa sinyal. Harga open candle pada backtest bukan jaminan harga transaksi nyata.
+
+8. **Sistem Notifikasi Telegram Cerdas:**
    - Mengirim alert rekomendasi BSJP sore hari secara otomatis sebelum jam bursa tutup.
    - Mengirim notifikasi eksekusi beli/jual bot simulator secara instan ke Telegram channel atau chat pribadi pengguna.
    - Tombol pengujian koneksi Telegram langsung dari sidebar web.
 
-8. **Pembaruan Otomatis IHSG Per Jam (Background Scheduler):**
-   - Layanan penjadwal otomatis yang memantau jam bursa IDX (Senin–Jumat pukul 09:00–16:00 WIB) setiap 60 menit.
+9. **Pembaruan Otomatis IHSG Per Jam (Background Scheduler):**
+   - Layanan penjadwal otomatis yang memantau sesi perdagangan kontinu pasar reguler IDX setiap 60 menit. Senin–Kamis: 09:00–12:00 dan 13:30–15:49 WIB; Jumat: 09:00–11:30 dan 14:00–15:49 WIB.
    - Memproses data seluruh saham IHSG, menjalankan bot simulator, dan mencatat snapshot pasar secara kontinu.
    - Dilengkapi kartu status detak jantung (*heartbeat*) dan tombol *Start/Stop* langsung di sidebar web.
 
-9. **Tracker Evaluasi Akurasi Prediksi AI 9 Rumus (Per Jam & Harian):**
+10. **Tracker Evaluasi Akurasi Prediksi AI 9 Rumus (Per Jam & Harian):**
    - Menyimpan riwayat setiap saham yang masuk ke dalam 9 Rumus BSJP pada setiap jam pasar.
    - Memverifikasi realisasi kenaikan harga di keesokan harinya (T+1: Open, High, Low, Close).
    - Menghitung akurasi secara transparan: Scorecard Win Rate Total, Rata-rata Max Gain, Rumus Terakurat (#1), Grafik Batang Perbandingan Akurasi Antar Rumus (Plotly), dan Tabel Riwayat Terfilter.
@@ -105,6 +119,11 @@ Seluruh rumus mensyaratkan kondisi **Bollinger Bands Squeeze** (kompresi volatil
 │   └── test_screener.py
 ├── app.py                      # Dashboard Web interaktif (Streamlit)
 ├── update_data.py              # Ingestion data, kalkulasi teknikal & ML
+├── mesin_forecast.py           # Prediksi langsung dan uji berbasis waktu
+├── market_history_store.py     # Penyimpanan EOD SQLite append-only
+├── trading_research.py         # Model lintas saham dan backtest walk-forward
+├── trading_pipeline.py         # Unduh, evaluasi, dan terbitkan laporan sinyal
+├── paper_trading.py            # Jurnal keputusan EOD dan simulasi eksekusi ke depan
 ├── bot_simulator.py            # Mesin eksekusi trading simulator 9 arena
 ├── mesin_ai.py                 # Engine AI Groq & helper histori arsip
 ├── update_akuisisi.py          # Pemindai RSS berita aksi korporasi
@@ -202,7 +221,22 @@ Akses dashboard pada browser di: `http://localhost:8501`.
 ./.venv/bin/python bot_simulator.py
 ```
 
-### 4. Memperbarui Data Sentimen Berita Akuisisi
+### 4. Memperbarui Riset Sinyal EOD
+```bash
+# Windows PowerShell, setelah 17:45 WIB
+.venv\Scripts\python.exe trading_pipeline.py
+
+# Uji ulang dari SQLite tanpa unduh ulang
+.venv\Scripts\python.exe trading_pipeline.py --no-download
+```
+Laporan ada di `Database/trading_research_report.json` dan tab **Riset Sinyal Trading EOD**. Ubah `Konfigurasi/trading_universe.txt` untuk memilih saham; minimal lima ticker likuid diperlukan.
+Backtest menampilkan momentum yang masuk setiap cohort dan momentum pembanding pada tanggal serta jumlah posisi yang sama dengan model. Persetujuan sinyal memakai pembanding setara, kas 0%, kalibrasi Brier, dan validasi serta holdout setelah biaya. Pembanding setara menguji pemilihan saham pada kesempatan yang dipilih model; itu bukan strategi mandiri.
+Pipeline menyimpan keputusan EOD pertama per tanggal dan horizon, termasuk keputusan tanpa sinyal, di tabel `paper_runs` dalam `Database/market_history.sqlite3`. Sinyal yang lolos masuk tabel `paper_orders` dan direkonsiliasi otomatis setelah bar sesi berikutnya tersedia. Simulasi memakai open sesi berikutnya, close pada horizon 1/5 sesi, anggaran Rp10 juta per posisi, lot 100 saham, fee serta slippage. Harga berasal dari OHLCV yang diamati setelah keputusan dan bukan konfirmasi order nyata; data yang hilang tetap menunggu, sedangkan observasi yang tidak memenuhi urutan waktu ditandai tidak terverifikasi.
+Riset overnight dapat diuji dengan `.venv\Scripts\python.exe overnight_pipeline.py` atau `.venv\Scripts\python.exe overnight_pipeline.py --no-download`. Laporannya berada di `Database/overnight_research_report.json` dan tampil pada tab yang sama.
+Untuk menjalankan otomatis di Windows, buka `start_saham_windows.bat` atau aktifkan scheduler dari sidebar; menjalankan `streamlit run app.py` saja tidak mengaktifkan scheduler.
+Untuk pembaruan walau dashboard tertutup, jalankan `powershell -ExecutionPolicy Bypass -File .\install_trading_schedule.ps1` satu kali. Tugas Windows menjalankan EOD pada hari kerja pukul 18:30, dan riset overnight pukul 14:45 serta 18:45 waktu lokal UTC+7. Akun Windows harus tetap masuk karena tugas memakai logon interaktif; komputer juga harus menyala dan memiliki koneksi data.
+
+### 5. Memperbarui Data Sentimen Berita Akuisisi
 ```bash
 ./.venv/bin/python update_akuisisi.py
 ```
@@ -235,6 +269,14 @@ Jalankan suite pengujian unit untuk memastikan seluruh logika matematika, kalkul
 ```
 
 ---
+
+## Hosting Cloudflare
+
+Versi cloud memakai Worker sebagai pintu masuk `saham.vijeron.com`, Container untuk Streamlit dan proses Python, D1 `saham-state` untuk data persisten, serta Access yang hanya mengizinkan anggota akun Cloudflare. Worker menolak permintaan yang tidak diautentikasi Access, termasuk alamat Worker lain. Cron menjalankan riset EOD setiap Senin–Jumat pukul 18:30 WIB (11:30 UTC). Status `no_edge` tetap dapat menjadi hasil yang valid.
+
+Sebelum deploy, jalankan `cloudflare/schema.sql` di D1. Konfigurasi ada di `wrangler.jsonc`. Build Dockerfile dilakukan melalui Workers Builds jika mesin pengembang tidak memiliki Docker. Siapkan enam secret opsional yang dipakai aplikasi dari `.env` ke Worker: `STOCKBIT_TOKEN`, `GEMINI_API_KEY`, `GROQ_API_KEY`, `OPENROUTER_API_KEY`, `TELEGRAM_BOT_TOKEN`, dan `TELEGRAM_CHAT_ID`; jangan commit nilainya. File pasar dan jurnal dari `Database/` dan `Arsip_Data_Harian/` disimpan dalam potongan terkompresi di D1 oleh Container. Kunci API tetap hanya berada di secret Worker.
+
+Pada mode cloud, UI menyembunyikan pengaturan token, perintah Git pull, dan scheduler lokal. Scheduler Windows dan pengiriman Telegram berbasis sesi Streamlit tidak dijalankan di cloud; perbarui screener dari panel aplikasi bila dibutuhkan. Riset EOD berjalan dari Cron sekalipun dashboard tertutup. Verifikasi build, login Access, WebSocket Streamlit, data dan hasil EOD setelah deploy sebelum memakai aplikasi untuk keputusan trading.
 
 ## ⚖️ Lisensi & Disclaimer
 

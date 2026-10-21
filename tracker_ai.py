@@ -4,6 +4,9 @@ import time
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
+from market_tls import configure_yahoo_tls
+
+configure_yahoo_tls()
 
 FILE_TRACKER = "Database/tracker_rekomendasi_ai.json"
 

@@ -4,50 +4,78 @@ import time
 import json
 import signal
 import subprocess
-from datetime import datetime, timedelta
+import ctypes
+from ctypes import wintypes
+from datetime import datetime, time as clock_time, timedelta
+from zoneinfo import ZoneInfo
+
+JAKARTA = ZoneInfo("Asia/Jakarta")
+
+
+def _now_wib() -> datetime:
+    return datetime.now(JAKARTA).replace(tzinfo=None)
+
+
+def _process_alive(pid: int) -> bool:
+    if sys.platform == "win32":
+        kernel = ctypes.windll.kernel32
+        kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+        kernel.OpenProcess.restype = wintypes.HANDLE
+        kernel.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
+        kernel.GetExitCodeProcess.restype = wintypes.BOOL
+        kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+        kernel.CloseHandle.restype = wintypes.BOOL
+        handle = kernel.OpenProcess(0x1000, False, pid)
+        if not handle:
+            return False
+        try:
+            exit_code = wintypes.DWORD()
+            return bool(kernel.GetExitCodeProcess(handle, ctypes.byref(exit_code))) and exit_code.value == 259
+        finally:
+            kernel.CloseHandle(handle)
+    try:
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False
+
+
+def _research_due(now_wib: datetime, last_attempt: datetime | None) -> bool:
+    return (
+        now_wib.weekday() < 5
+        and (now_wib.hour, now_wib.minute) >= (17, 45)
+        and (last_attempt is None or last_attempt.date() != now_wib.date())
+    )
 
 FILE_STATUS = "Database/scheduler_status.json"
 FILE_CONTROL = "Database/scheduler_control.json"
 
-def is_market_hours(now=None):
-    """
-    Mengecek apakah saat ini merupakan jam perdagangan bursa efek Indonesia (WIB).
-    Senin - Jumat:
-      Sesi 1: 08:55 - 12:05 WIB (Jumat: 08:55 - 11:35 WIB)
-      Sesi 2: 13:25 - 16:15 WIB (Jumat: 13:55 - 16:15 WIB)
-    """
+def is_market_hours(now: datetime | None = None) -> bool:
+    """Jam transaksi kontinu pasar reguler BEI sejak aturan September 2026."""
     if now is None:
-        now = datetime.now()
-    
-    # 0 = Senin, 4 = Jumat, 5 = Sabtu, 6 = Minggu
+        now = _now_wib()
+    elif now.tzinfo is not None:
+        now = now.astimezone(JAKARTA)
     if now.weekday() >= 5:
         return False
-        
-    hour = now.hour
-    minute = now.minute
-    total_minutes = hour * 60 + minute
-    
-    # Jumat
+    current = now.time().replace(tzinfo=None)
     if now.weekday() == 4:
-        sesi1 = (8 * 60 + 55) <= total_minutes <= (11 * 60 + 35)
-        sesi2 = (13 * 60 + 55) <= total_minutes <= (16 * 60 + 15)
-        return sesi1 or sesi2
-    else:
-        # Senin - Kamis
-        sesi1 = (8 * 60 + 55) <= total_minutes <= (12 * 60 + 5)
-        sesi2 = (13 * 60 + 25) <= total_minutes <= (16 * 60 + 15)
-        return sesi1 or sesi2
+        return (clock_time(9) <= current <= clock_time(11, 30)
+                or clock_time(14) <= current < clock_time(15, 50))
+    return (clock_time(9) <= current <= clock_time(12)
+            or clock_time(13, 30) <= current < clock_time(15, 50))
 
 def update_scheduler_status(is_running=False, pid=None, last_status="Siap", last_run=None, next_run=None):
     """Menyimpan status detak jantung (heartbeat) scheduler ke JSON."""
     os.makedirs(os.path.dirname(FILE_STATUS), exist_ok=True)
+    current = _now_wib()
     status_data = {
         "is_running": is_running,
         "pid": pid,
         "last_status": last_status,
-        "last_run": last_run or datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "next_run": next_run or (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S"),
-        "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "last_run": last_run or current.strftime("%Y-%m-%d %H:%M:%S"),
+        "next_run": next_run or (current + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S"),
+        "updated_at": current.strftime("%Y-%m-%d %H:%M:%S")
     }
     with open(FILE_STATUS, "w") as f:
         json.dump(status_data, f, indent=2)
@@ -69,9 +97,7 @@ def get_scheduler_status():
             # Verifikasi apakah proses dengan PID tersebut benar-benar masih hidup
             pid = data.get("pid")
             if pid and data.get("is_running"):
-                try:
-                    os.kill(pid, 0)
-                except OSError:
+                if not _process_alive(pid):
                     data["is_running"] = False
                     data["pid"] = None
                     data["last_status"] = "Proses berhenti secara eksternal"
@@ -93,7 +119,7 @@ def jalankan_satu_siklus(limit=None):
     2. bot_simulator.py (Eksekusi transaksi virtual bot BSJP)
     """
     py_bin = sys.executable or "./.venv/bin/python"
-    waktu_mulai = datetime.now()
+    waktu_mulai = _now_wib()
     
     cmd_update = [py_bin, "update_data.py"]
     if limit:
@@ -104,7 +130,7 @@ def jalankan_satu_siklus(limit=None):
     
     # Jalankan bot simulator
     cmd_bot = [py_bin, "bot_simulator.py"]
-    print(f"🤖 [{datetime.now().strftime('%H:%M:%S')}] Memulai eksekusi bot_simulator.py...")
+    print(f"🤖 [{_now_wib().strftime('%H:%M:%S')}] Memulai eksekusi bot_simulator.py...")
     res_bot = subprocess.run(cmd_bot, capture_output=True, text=True)
     
     # 3. Kirim alert BSJP 15:30 WIB otomatis jika jadwal tiba
@@ -125,10 +151,20 @@ def jalankan_satu_siklus(limit=None):
     except Exception as e_10:
         pass
     
-    durasi = (datetime.now() - waktu_mulai).total_seconds()
+    durasi = (_now_wib() - waktu_mulai).total_seconds()
     status_msg = f"Selesai dalam {durasi:.1f} detik" if res_update.returncode == 0 else f"Gagal: {res_update.stderr[:100]}"
     
     return res_update.returncode == 0, status_msg
+
+
+def jalankan_riset_eod() -> tuple[bool, str]:
+    """One research refresh after the completed IDX daily candle is available."""
+    result = subprocess.run(
+        [sys.executable, "trading_pipeline.py"], cwd=os.path.dirname(os.path.abspath(__file__)),
+        capture_output=True, text=True, timeout=1200,
+    )
+    detail = (result.stdout if result.returncode == 0 else result.stderr).strip()
+    return result.returncode == 0, detail[-500:]
 
 def start_scheduler_daemon():
     """Memulai proses background daemon dari scheduler."""
@@ -147,13 +183,17 @@ def start_scheduler_daemon():
     if sys.platform == "win32":
         creation_flags = subprocess.CREATE_NEW_PROCESS_GROUP | getattr(subprocess, "DETACHED_PROCESS", 0)
 
-    proc = subprocess.Popen(
-        [py_bin, script_path, "--run-loop"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        creationflags=creation_flags,
-        start_new_session=(sys.platform != "win32")
-    )
+    os.makedirs("Logs", exist_ok=True)
+    with open("Logs/scheduler_windows.log", "a", encoding="utf-8") as log_file:
+        proc = subprocess.Popen(
+            [py_bin, script_path, "--run-loop"],
+            stdout=log_file,
+            stderr=subprocess.STDOUT,
+            creationflags=creation_flags,
+            start_new_session=(sys.platform != "win32"),
+            cwd=os.path.dirname(script_path),
+            env={**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUNBUFFERED": "1"},
+        )
     
     pid = proc.pid
     with open(FILE_CONTROL, "w") as f:
@@ -186,6 +226,14 @@ def loop_scheduler_utama():
     print(f"🚀 Scheduler daemon per jam berjalan (PID: {pid})...")
     
     last_run_dt = None
+    last_research_attempt = None
+    try:
+        with open("Database/trading_research_report.json", encoding="utf-8") as report_file:
+            generated = datetime.fromisoformat(json.load(report_file)["generated_at"]).astimezone(JAKARTA)
+            if (generated.hour, generated.minute) >= (17, 45):
+                last_research_attempt = generated.replace(tzinfo=None)
+    except (OSError, ValueError, KeyError, json.JSONDecodeError):
+        pass
     st_old = get_scheduler_status()
     if st_old.get("last_run") and st_old.get("last_run") != "-":
         try:
@@ -210,7 +258,14 @@ def loop_scheduler_utama():
             print("🛑 File kontrol tidak ditemukan. Keluar...")
             break
             
-        now = datetime.now()
+        now = _now_wib()
+        if _research_due(now, last_research_attempt):
+            last_research_attempt = now
+            try:
+                success, detail = jalankan_riset_eod()
+                print(f"Riset EOD {'selesai' if success else 'gagal'}: {detail}")
+            except (OSError, subprocess.TimeoutExpired) as error:
+                print(f"Riset EOD gagal: {error}")
         next_hour = (now + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
         
         # Cek apakah perlu run:
@@ -232,7 +287,7 @@ def loop_scheduler_utama():
             update_scheduler_status(is_running=True, pid=pid, last_status="Sedang memperbarui seluruh IHSG...")
             
             sukses, pesan = jalankan_satu_siklus()
-            last_run_dt = datetime.now()
+            last_run_dt = _now_wib()
             
             status_text = f"Sukses update jam {last_run_dt.strftime('%H:%M')} WIB ({pesan})" if sukses else f"Gagal update: {pesan}"
             update_scheduler_status(
@@ -262,7 +317,7 @@ def loop_scheduler_utama():
             if not os.path.exists(FILE_CONTROL):
                 break
             # Pengecekan berkala pemicu alert BSJP jam 15:30 WIB
-            now_cek = datetime.now()
+            now_cek = _now_wib()
             # Pengecekan berkala pemicu alert BSJP sore (15:30 - 20:00 WIB)
             if now_cek.weekday() < 5 and (15 * 60 + 30 <= now_cek.hour * 60 + now_cek.minute <= 20 * 60):
                 try:

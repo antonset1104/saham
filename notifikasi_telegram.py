@@ -4,6 +4,9 @@ import html
 import requests
 from datetime import datetime
 from dotenv import load_dotenv
+from market_tls import configure_yahoo_tls
+
+configure_yahoo_tls()
 
 load_dotenv()
 

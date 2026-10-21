@@ -15,10 +15,13 @@ import json
 import glob
 import time
 import re
+import sqlite3
 from datetime import datetime
+from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
+CLOUD_MODE = os.getenv("SAHAM_CLOUD_MODE") == "1"
 
 # IMPORT UNTUK AI OPENROUTER & GOOGLE
 from openai import OpenAI
@@ -30,10 +33,15 @@ from data_multi_aset import (
     save_multi_asset_portfolio, get_usd_idr_rate, get_gold_price_idr,
     ASSET_CLASS_LABELS
 )
-from mesin_forecast import run_stock_forecast
+from mesin_forecast import FORECAST_VERSION, run_stock_forecast
+from trading_research import signal_is_actionable
+from trading_pipeline import load_universe
+from paper_trading import load_summary as load_paper_summary
+from zoneinfo import ZoneInfo
 from notifikasi_telegram import is_telegram_configured, kirim_pesan_telegram, kirim_ringkasan_pasar
 import tracker_ai
 import scheduler_per_jam
+
 
 # ==========================================
 # 🔑 HELPER PENGAMBIL SECRET / API KEY FLEKSIBEL
@@ -332,6 +340,31 @@ def ai_grand_final_top5(data_saham_dict, api_key):
 # ==========================================
 st.set_page_config(page_title="Screener Saham IHSG", layout="wide", initial_sidebar_state="expanded")
 
+
+@st.cache_data(ttl=900, show_spinner=False)
+def cached_stock_forecast(ticker: str, horizon: int, model_version: str) -> dict:
+    """Pilih ticker/horizon langsung memicu prediksi; cache mengurangi unduhan ulang."""
+    return run_stock_forecast(ticker, periods=horizon)
+
+# ==========================================
+# 📊 GOOGLE ADSENSE & GOOGLE ANALYTICS
+# ==========================================
+st.html("""
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6180580801533680"
+     crossorigin="anonymous"></script>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-79X7K7H4MJ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-79X7K7H4MJ');
+</script>
+""")
+
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
@@ -507,15 +540,24 @@ if not df_hasil.empty and "Terakhir Update" in df_hasil.columns:
 LOCK_UPDATE_FILE = "sedang_update.lock"
 is_updating = os.path.exists(LOCK_UPDATE_FILE)
 
-# Deteksi transisi: sebelumnya update aktif tapi lock file sudah dihapus -> BERHASIL SELESAI
+# Hapusnya lock hanya menandakan proses berakhir; data harus benar-benar berganti.
 if st.session_state.get("is_updating_saham") and not is_updating:
     st.session_state["is_updating_saham"] = False
-    st.session_state["just_completed_update"] = True
+    previous_mtime = st.session_state.pop("update_started_mtime", None)
+    current_mtime = os.path.getmtime(FILE_HASIL) if os.path.exists(FILE_HASIL) else 0
+    succeeded = previous_mtime is not None and current_mtime > previous_mtime
+    st.session_state["just_completed_update"] = succeeded
+    st.session_state["update_failed"] = not succeeded
     st.cache_data.clear()
 
 if is_updating:
     st.session_state["is_updating_saham"] = True
     st.session_state["just_completed_update"] = False
+    st.session_state["update_failed"] = False
+    if "update_started_mtime" not in st.session_state:
+        st.session_state["update_started_mtime"] = (
+            os.path.getmtime(FILE_HASIL) if os.path.exists(FILE_HASIL) else 0
+        )
 
 # --- AUTO-TRIGGER KETIKA GANTI HARI & JAM BURSA AKTIF ---
 now_dt = datetime.now()
@@ -540,7 +582,7 @@ perlu_update_hari_baru = (
     not st.session_state.get("auto_triggered_today")
 )
 
-if perlu_update_hari_baru:
+if perlu_update_hari_baru and not CLOUD_MODE:
     st.session_state["auto_triggered_today"] = True
     py_bin = sys.executable or "./.venv/bin/python"
     try:
@@ -550,8 +592,12 @@ if perlu_update_hari_baru:
             stderr=subprocess.DEVNULL,
             start_new_session=True
         )
+        st.session_state["update_started_mtime"] = (
+            os.path.getmtime(FILE_HASIL) if os.path.exists(FILE_HASIL) else 0
+        )
         st.session_state["is_updating_saham"] = True
         st.session_state["just_completed_update"] = False
+        st.session_state["update_failed"] = False
         st.toast("🌅 Hari baru terdeteksi! Memulai sinkronisasi data IHSG hari ini...", icon="🚀")
         time.sleep(1)
         st.rerun()
@@ -561,18 +607,30 @@ if perlu_update_hari_baru:
 # --- AUTO-SYNC MONITOR DATA BARU DI WEB (SETIAP 15 DETIK) ---
 @st.fragment(run_every="15s")
 def sync_otomatis_data_web():
-    current_mtime = os.path.getmtime(FILE_HASIL) if os.path.exists(FILE_HASIL) else 0
-    if "cached_file_mtime" not in st.session_state:
-        st.session_state["cached_file_mtime"] = current_mtime
-    elif current_mtime > st.session_state["cached_file_mtime"]:
-        st.session_state["cached_file_mtime"] = current_mtime
-        st.cache_data.clear()
+    current_lock_state = os.path.exists(LOCK_UPDATE_FILE)
+    previous_lock_state = st.session_state.get("cached_update_lock_state")
+    st.session_state["cached_update_lock_state"] = current_lock_state
+    if previous_lock_state is not None and current_lock_state != previous_lock_state:
+        st.rerun(scope="app")
+    watched_files = (FILE_HASIL, "Database/trading_research_report.json",
+                     "Database/overnight_research_report.json")
+    current_mtimes = []
+    for path in watched_files:
+        try:
+            current_mtimes.append(os.stat(path).st_mtime_ns)
+        except OSError:
+            current_mtimes.append(0)
+    previous_mtimes = st.session_state.get("cached_research_mtimes")
+    st.session_state["cached_research_mtimes"] = tuple(current_mtimes)
+    if previous_mtimes is not None and previous_mtimes != tuple(current_mtimes):
+        if previous_mtimes[0] != current_mtimes[0]:
+            st.cache_data.clear()
         st.rerun(scope="app")
 
     # Pemicu otomatis kirim alert Telegram jika jam bursa (Pagi 10:00 & Sore 15:30)
     try:
         from notifikasi_telegram import is_telegram_configured, cek_dan_kirim_jadwal_1530, cek_dan_kirim_jadwal_1000
-        if is_telegram_configured() and not df_hasil.empty:
+        if not CLOUD_MODE and is_telegram_configured() and not df_hasil.empty:
             cek_dan_kirim_jadwal_1530(df_screener=df_hasil)
             cek_dan_kirim_jadwal_1000(df_screener=df_hasil)
     except Exception:
@@ -603,6 +661,8 @@ with st.sidebar.expander("⚡ Update Data Pasar (Stockbit & Yahoo)", expanded=Tr
     else:
         if st.session_state.get("just_completed_update"):
             st.success("✅ **Data Saham Selesai Diperbarui!**")
+        elif st.session_state.get("update_failed"):
+            st.error("Pembaruan berhenti tanpa menghasilkan data baru. Periksa sumber data atau log proses.")
             
         mode_opsi = st.radio(
             "Cakupan Update:",
@@ -611,56 +671,57 @@ with st.sidebar.expander("⚡ Update Data Pasar (Stockbit & Yahoo)", expanded=Tr
             key="pilihan_mode_update"
         )
 
-        with st.expander("🔑 Konfigurasi Token Stockbit", expanded=False):
-            curr_sb_token = os.getenv("STOCKBIT_TOKEN", "")
-            if not curr_sb_token and os.path.exists("token_stockbit.txt"):
-                try:
-                    with open("token_stockbit.txt", "r") as f:
-                        curr_sb_token = f.read().strip()
-                except Exception:
-                    pass
-            
-            sb_token_input = st.text_input(
-                "Stockbit Bearer Token:",
-                value=curr_sb_token,
-                type="password",
-                placeholder="Paste token eyJhbGciOi...",
-                help="Diambil dari Inspect Element (F12) -> Network -> Header Authorization di stockbit.com"
-            )
-            if st.button("💾 Simpan Token Stockbit", use_container_width=True, key="btn_save_sb_token"):
-                clean_sb = sb_token_input.strip()
-                if clean_sb.startswith("Bearer "):
-                    clean_sb = clean_sb[7:].strip()
-                
-                try:
-                    with open("token_stockbit.txt", "w") as f:
-                        f.write(clean_sb)
-                except Exception:
-                    pass
-                
-                if os.path.exists(".env"):
+        if not CLOUD_MODE:
+            with st.expander("🔑 Konfigurasi Token Stockbit", expanded=False):
+                curr_sb_token = os.getenv("STOCKBIT_TOKEN", "")
+                if not curr_sb_token and os.path.exists("token_stockbit.txt"):
                     try:
-                        with open(".env", "r") as f:
-                            env_lines = f.readlines()
-                        new_env = []
-                        sb_found = False
-                        for l in env_lines:
-                            if l.startswith("STOCKBIT_TOKEN="):
-                                new_env.append(f"STOCKBIT_TOKEN={clean_sb}\n")
-                                sb_found = True
-                            else:
-                                new_env.append(l)
-                        if not sb_found:
-                            new_env.append(f"STOCKBIT_TOKEN={clean_sb}\n")
-                        with open(".env", "w") as f:
-                            f.writelines(new_env)
+                        with open("token_stockbit.txt", "r") as f:
+                            curr_sb_token = f.read().strip()
+                    except Exception:
+                        pass
+            
+                sb_token_input = st.text_input(
+                    "Stockbit Bearer Token:",
+                    value=curr_sb_token,
+                    type="password",
+                    placeholder="Paste token eyJhbGciOi...",
+                    help="Diambil dari Inspect Element (F12) -> Network -> Header Authorization di stockbit.com"
+                )
+                if st.button("💾 Simpan Token Stockbit", use_container_width=True, key="btn_save_sb_token"):
+                    clean_sb = sb_token_input.strip()
+                    if clean_sb.startswith("Bearer "):
+                        clean_sb = clean_sb[7:].strip()
+                
+                    try:
+                        with open("token_stockbit.txt", "w") as f:
+                            f.write(clean_sb)
                     except Exception:
                         pass
                 
-                os.environ["STOCKBIT_TOKEN"] = clean_sb
-                st.success("Token Stockbit berhasil disimpan!")
-                time.sleep(0.5)
-                st.rerun()
+                    if os.path.exists(".env"):
+                        try:
+                            with open(".env", "r") as f:
+                                env_lines = f.readlines()
+                            new_env = []
+                            sb_found = False
+                            for l in env_lines:
+                                if l.startswith("STOCKBIT_TOKEN="):
+                                    new_env.append(f"STOCKBIT_TOKEN={clean_sb}\n")
+                                    sb_found = True
+                                else:
+                                    new_env.append(l)
+                            if not sb_found:
+                                new_env.append(f"STOCKBIT_TOKEN={clean_sb}\n")
+                            with open(".env", "w") as f:
+                                f.writelines(new_env)
+                        except Exception:
+                            pass
+
+                    os.environ["STOCKBIT_TOKEN"] = clean_sb
+                    st.success("Token Stockbit berhasil disimpan!")
+                    time.sleep(0.5)
+                    st.rerun()
 
         btn_run_update = st.button("🚀 Tarik Data Stockbit Sekarang", use_container_width=True, type="primary", key="btn_tarik_data_sb")
         if btn_run_update:
@@ -677,8 +738,12 @@ with st.sidebar.expander("⚡ Update Data Pasar (Stockbit & Yahoo)", expanded=Tr
                     stderr=subprocess.DEVNULL,
                     start_new_session=True
                 )
+                st.session_state["update_started_mtime"] = (
+                    os.path.getmtime(FILE_HASIL) if os.path.exists(FILE_HASIL) else 0
+                )
                 st.session_state["is_updating_saham"] = True
                 st.session_state["just_completed_update"] = False
+                st.session_state["update_failed"] = False
                 st.rerun()
             except Exception as err:
                 st.error(f"Gagal memulai update: {err}")
@@ -688,53 +753,58 @@ with col_sync1:
     if st.button("🔄 Refresh Web", use_container_width=True, help="Bersihkan cache dan muat ulang database CSV lokal"):
         st.cache_data.clear()
         st.rerun()
-with col_sync2:
-    if st.button("🌐 Pull GitHub", use_container_width=True, help="Tarik perubahan data terbaru dari repository GitHub"):
-        with st.spinner("Git pull..."):
-            try:
-                os.system("git pull origin main")
-                time.sleep(1)
-            except Exception as e:
-                st.error(f"Error: {e}")
-        st.cache_data.clear()
-        st.rerun()
+if not CLOUD_MODE:
+    with col_sync2:
+        if st.button("🌐 Pull GitHub", use_container_width=True, help="Tarik perubahan data terbaru dari repository GitHub"):
+            with st.spinner("Git pull..."):
+                try:
+                    os.system("git pull origin main")
+                    time.sleep(1)
+                except Exception as e:
+                    st.error(f"Error: {e}")
+            st.cache_data.clear()
+            st.rerun()
 
 # --- KONTROL SCHEDULER OTOMATIS PER JAM ---
-sched_status = scheduler_per_jam.get_scheduler_status()
-is_sched_active = sched_status.get("is_running", False)
+if CLOUD_MODE:
+    st.sidebar.info("Riset harga EOD berjalan otomatis hari bursa pukul 18:30 WIB. Data screener dapat diperbarui manual dari panel di atas.")
 
-with st.sidebar.expander("🔁 Scheduler Otomatis Per Jam", expanded=is_sched_active):
-    if is_sched_active:
-        st.markdown("""
-            <div style="background-color: #064e3b; border: 1px solid #10b981; border-radius: 6px; padding: 10px; text-align: center; margin-bottom: 10px;">
-                <span style="color: #34d399; font-weight: 700; font-size: 13px;">🟢 STATUS: AKTIF BERJALAN</span><br>
-                <span style="color: #a7f3d0; font-size: 11px;">Update seluruh IHSG otomatis setiap jam bursa</span>
-            </div>
-        """, unsafe_allow_html=True)
-        st.caption(f"🕒 Terakhir Jalan: **{sched_status.get('last_run', '-')}**")
-        st.caption(f"⏳ Jadwal Berikutnya: **{sched_status.get('next_run', '-')}**")
-        st.caption(f"📝 Status: {sched_status.get('last_status', '-')}")
-        if st.button("⏹️ Hentikan Scheduler", use_container_width=True, type="secondary", key="btn_stop_sched"):
-            scheduler_per_jam.stop_scheduler_daemon()
-            st.success("Scheduler dihentikan.")
-            time.sleep(1)
-            st.rerun()
-    else:
-        st.markdown("""
-            <div style="background-color: #1e293b; border: 1px solid #475569; border-radius: 6px; padding: 10px; text-align: center; margin-bottom: 10px;">
-                <span style="color: #94a3b8; font-weight: 700; font-size: 13px;">⚪ STATUS: NONAKTIF</span><br>
-                <span style="color: #cbd5e1; font-size: 11px;">Otomatisasi per jam sedang mati</span>
-            </div>
-        """, unsafe_allow_html=True)
-        st.caption("Pemicu pembaruan data seluruh IHSG setiap 1 jam pada jam perdagangan bursa IDX (09:00 - 16:00 WIB).")
-        if st.button("▶️ Aktifkan Scheduler Per Jam", use_container_width=True, type="primary", key="btn_start_sched"):
-            sukses, msg = scheduler_per_jam.start_scheduler_daemon()
-            if sukses:
-                st.success(msg)
-            else:
-                st.info(msg)
-            time.sleep(1)
-            st.rerun()
+if not CLOUD_MODE:
+    sched_status = scheduler_per_jam.get_scheduler_status()
+    is_sched_active = sched_status.get("is_running", False)
+
+    with st.sidebar.expander("🔁 Scheduler Otomatis Per Jam", expanded=is_sched_active):
+        if is_sched_active:
+            st.markdown("""
+                <div style="background-color: #064e3b; border: 1px solid #10b981; border-radius: 6px; padding: 10px; text-align: center; margin-bottom: 10px;">
+                    <span style="color: #34d399; font-weight: 700; font-size: 13px;">🟢 STATUS: AKTIF BERJALAN</span><br>
+                    <span style="color: #a7f3d0; font-size: 11px;">Update seluruh IHSG otomatis setiap jam bursa</span>
+                </div>
+            """, unsafe_allow_html=True)
+            st.caption(f"🕒 Terakhir Jalan: **{sched_status.get('last_run', '-')}**")
+            st.caption(f"⏳ Jadwal Berikutnya: **{sched_status.get('next_run', '-')}**")
+            st.caption(f"📝 Status: {sched_status.get('last_status', '-')}")
+            if st.button("⏹️ Hentikan Scheduler", use_container_width=True, type="secondary", key="btn_stop_sched"):
+                scheduler_per_jam.stop_scheduler_daemon()
+                st.success("Scheduler dihentikan.")
+                time.sleep(1)
+                st.rerun()
+        else:
+            st.markdown("""
+                <div style="background-color: #1e293b; border: 1px solid #475569; border-radius: 6px; padding: 10px; text-align: center; margin-bottom: 10px;">
+                    <span style="color: #94a3b8; font-weight: 700; font-size: 13px;">⚪ STATUS: NONAKTIF</span><br>
+                    <span style="color: #cbd5e1; font-size: 11px;">Otomatisasi per jam sedang mati</span>
+                </div>
+            """, unsafe_allow_html=True)
+            st.caption("Pemicu pembaruan data seluruh IHSG setiap 1 jam pada jam perdagangan bursa IDX (09:00 - 16:00 WIB).")
+            if st.button("▶️ Aktifkan Scheduler Per Jam", use_container_width=True, type="primary", key="btn_start_sched"):
+                sukses, msg = scheduler_per_jam.start_scheduler_daemon()
+                if sukses:
+                    st.success(msg)
+                else:
+                    st.info(msg)
+                time.sleep(1)
+                st.rerun()
 
 st.sidebar.title("⚙️ Preset Filter Cepat")
 st.sidebar.info("Gunakan **'BSJP (Beli Sore 15:30)'** untuk mencari saham yang mantap dibeli sebelum penutupan bursa!")
@@ -786,84 +856,85 @@ with st.sidebar.expander("🛠️ Manajemen Preset Kustom"):
                 st.rerun()
         else: st.info("Belum ada preset kustom.")
 
-with st.sidebar.expander("📲 Notifikasi Telegram Bot"):
-    from notifikasi_telegram import get_telegram_config, simpan_konfigurasi_telegram
-    tok_curr, cid_curr = get_telegram_config()
-    is_cfg = is_telegram_configured()
+if not CLOUD_MODE:
+    with st.sidebar.expander("📲 Notifikasi Telegram Bot"):
+        from notifikasi_telegram import get_telegram_config, simpan_konfigurasi_telegram
+        tok_curr, cid_curr = get_telegram_config()
+        is_cfg = is_telegram_configured()
     
-    if is_cfg:
-        st.success("✅ Bot Telegram Terhubung")
-    else:
-        st.info("💡 Hubungkan Telegram untuk menerima alert real-time ke Android.")
+        if is_cfg:
+            st.success("✅ Bot Telegram Terhubung")
+        else:
+            st.info("💡 Hubungkan Telegram untuk menerima alert real-time ke Android.")
         
-    input_token = st.text_input("Bot Token:", value=tok_curr, type="password", placeholder="Contoh: 123456:ABC-DEF...", help="Dapatkan dari @BotFather di aplikasi Telegram Android")
-    input_cid = st.text_input("Chat ID:", value=cid_curr, placeholder="Contoh: 123456789", help="Dapatkan dari @userinfobot di aplikasi Telegram Android")
+        input_token = st.text_input("Bot Token:", value=tok_curr, type="password", placeholder="Contoh: 123456:ABC-DEF...", help="Dapatkan dari @BotFather di aplikasi Telegram Android")
+        input_cid = st.text_input("Chat ID:", value=cid_curr, placeholder="Contoh: 123456789", help="Dapatkan dari @userinfobot di aplikasi Telegram Android")
     
-    col_tg1, col_tg2 = st.columns(2)
-    with col_tg1:
-        if st.button("💾 Simpan", use_container_width=True, key="btn_save_tg_config"):
-            if input_token.strip() and input_cid.strip():
-                if simpan_konfigurasi_telegram(input_token.strip(), input_cid.strip()):
-                    st.success("Tersimpan!")
-                    time.sleep(0.5)
-                    st.rerun()
-                else:
-                    st.error("Gagal simpan ke .env")
-            else:
-                st.warning("Isi Token & Chat ID!")
-                
-    with col_tg2:
-        if st.button("🔔 Tes Kirim", use_container_width=True, key="btn_test_tg"):
-            t_pakai = input_token.strip() or tok_curr
-            c_pakai = input_cid.strip() or cid_curr
-            if t_pakai and c_pakai:
-                with st.spinner("Mengirim pesan tes..."):
-                    berhasil = kirim_pesan_telegram(
-                        "🔔 <b>Tes Notifikasi AlgoTrade Screener IHSG</b>\nKoneksi bot Telegram Anda aktif dan siap mengirim alert!",
-                        token=t_pakai,
-                        chat_id=c_pakai
-                    )
-                    if berhasil:
-                        st.toast("Notifikasi Telegram terkirim ke Android!", icon="📲")
-                        st.success("Pesan terkirim ke Telegram!")
+        col_tg1, col_tg2 = st.columns(2)
+        with col_tg1:
+            if st.button("💾 Simpan", use_container_width=True, key="btn_save_tg_config"):
+                if input_token.strip() and input_cid.strip():
+                    if simpan_konfigurasi_telegram(input_token.strip(), input_cid.strip()):
+                        st.success("Tersimpan!")
+                        time.sleep(0.5)
+                        st.rerun()
                     else:
-                        st.error("Gagal kirim. Pastikan sudah klik START di bot Anda.")
-            else:
-                st.warning("Konfigurasi belum lengkap.")
-                
-    if is_cfg:
-        st.markdown("---")
-        st.caption("⏰ **Jadwal BSJP Sore:** Otomatis dikirim ke Telegram setiap hari bursa pukul **15:30 WIB**.")
-        from notifikasi_telegram import kirim_rekomendasi_rumus_2_dan_9, kirim_update_realtime_pagi_1000
-        if st.button("🦅 Kirim Alert BSJP Sore Sekarang", use_container_width=True, key="btn_kirim_bsjp_manual"):
-            with st.spinner("Menyaring saham Rumus 2 & 9..."):
-                sukses_b, msg_b = kirim_rekomendasi_rumus_2_dan_9(df_screener=df_hasil, force=True)
-                if sukses_b:
-                    st.success("Rekomendasi terkirim ke Telegram!")
-                    st.toast("Rekomendasi BSJP terkirim ke Telegram!", icon="🦅")
+                        st.error("Gagal simpan ke .env")
                 else:
-                    st.error(f"Gagal kirim: {msg_b}")
+                    st.warning("Isi Token & Chat ID!")
 
-        st.caption("🌅 **Jadwal Evaluasi Pagi:** Otomatis dikirim ke Telegram setiap hari bursa pukul **10:00 WIB**.")
-        if st.button("🌅 Kirim Update Realtime Pagi Sekarang", use_container_width=True, key="btn_kirim_pagi_manual"):
-            with st.spinner("Memeriksa harga realtime saham BSJP..."):
-                sukses_p, msg_p = kirim_update_realtime_pagi_1000(df_screener=df_hasil, force=True)
-                if sukses_p:
-                    st.success("Update realtime pagi terkirim ke Telegram!")
-                    st.toast("Update realtime BSJP terkirim ke Telegram!", icon="🌅")
+        with col_tg2:
+            if st.button("🔔 Tes Kirim", use_container_width=True, key="btn_test_tg"):
+                t_pakai = input_token.strip() or tok_curr
+                c_pakai = input_cid.strip() or cid_curr
+                if t_pakai and c_pakai:
+                    with st.spinner("Mengirim pesan tes..."):
+                        berhasil = kirim_pesan_telegram(
+                            "🔔 <b>Tes Notifikasi AlgoTrade Screener IHSG</b>\nKoneksi bot Telegram Anda aktif dan siap mengirim alert!",
+                            token=t_pakai,
+                            chat_id=c_pakai
+                        )
+                        if berhasil:
+                            st.toast("Notifikasi Telegram terkirim ke Android!", icon="📲")
+                            st.success("Pesan terkirim ke Telegram!")
+                        else:
+                            st.error("Gagal kirim. Pastikan sudah klik START di bot Anda.")
                 else:
-                    st.error(f"Gagal kirim: {msg_p}")
+                    st.warning("Konfigurasi belum lengkap.")
 
-        st.caption("💎 **Jadwal Fundamental Super:** Otomatis dikirim ke Telegram setiap **Jumat pukul 20:00 WIB**.")
-        from notifikasi_telegram import kirim_alert_screener_fundamental_jumat
-        if st.button("💎 Analisa & Kirim Screener Jumat Sekarang", use_container_width=True, key="btn_kirim_jumat_manual"):
-            with st.spinner("Menganalisis seluruh saham bursa dengan 12 kriteria fundamental Stockbit..."):
-                sukses_j, msg_j = kirim_alert_screener_fundamental_jumat(force=True)
-                if sukses_j:
-                    st.success("Laporan fundamental Jumat terkirim ke Telegram!")
-                    st.toast("Laporan Fundamental Jumat terkirim!", icon="💎")
-                else:
-                    st.error(f"Gagal: {msg_j}")
+        if is_cfg:
+            st.markdown("---")
+            st.caption("⏰ **Jadwal BSJP Sore:** Otomatis dikirim ke Telegram setiap hari bursa pukul **15:30 WIB**.")
+            from notifikasi_telegram import kirim_rekomendasi_rumus_2_dan_9, kirim_update_realtime_pagi_1000
+            if st.button("🦅 Kirim Alert BSJP Sore Sekarang", use_container_width=True, key="btn_kirim_bsjp_manual"):
+                with st.spinner("Menyaring saham Rumus 2 & 9..."):
+                    sukses_b, msg_b = kirim_rekomendasi_rumus_2_dan_9(df_screener=df_hasil, force=True)
+                    if sukses_b:
+                        st.success("Rekomendasi terkirim ke Telegram!")
+                        st.toast("Rekomendasi BSJP terkirim ke Telegram!", icon="🦅")
+                    else:
+                        st.error(f"Gagal kirim: {msg_b}")
+
+            st.caption("🌅 **Jadwal Evaluasi Pagi:** Otomatis dikirim ke Telegram setiap hari bursa pukul **10:00 WIB**.")
+            if st.button("🌅 Kirim Update Realtime Pagi Sekarang", use_container_width=True, key="btn_kirim_pagi_manual"):
+                with st.spinner("Memeriksa harga realtime saham BSJP..."):
+                    sukses_p, msg_p = kirim_update_realtime_pagi_1000(df_screener=df_hasil, force=True)
+                    if sukses_p:
+                        st.success("Update realtime pagi terkirim ke Telegram!")
+                        st.toast("Update realtime BSJP terkirim ke Telegram!", icon="🌅")
+                    else:
+                        st.error(f"Gagal kirim: {msg_p}")
+
+            st.caption("💎 **Jadwal Fundamental Super:** Otomatis dikirim ke Telegram setiap **Jumat pukul 20:00 WIB**.")
+            from notifikasi_telegram import kirim_alert_screener_fundamental_jumat
+            if st.button("💎 Analisa & Kirim Screener Jumat Sekarang", use_container_width=True, key="btn_kirim_jumat_manual"):
+                with st.spinner("Menganalisis seluruh saham bursa dengan 12 kriteria fundamental Stockbit..."):
+                    sukses_j, msg_j = kirim_alert_screener_fundamental_jumat(force=True)
+                    if sukses_j:
+                        st.success("Laporan fundamental Jumat terkirim ke Telegram!")
+                        st.toast("Laporan Fundamental Jumat terkirim!", icon="💎")
+                    else:
+                        st.error(f"Gagal: {msg_j}")
 
 st.title("⚡ AlgoTrade Screener - IHSG Ultimate")
 st.markdown("Detektor Jejak Bandar, Anomali Volume, & Strategi BSJP.")
@@ -959,15 +1030,16 @@ elif st.session_state.get("just_completed_update"):
             st.session_state["just_completed_update"] = False
             st.rerun()
 
-# Polling loop otomatis saat update berjalan: jeda 2.5 detik lalu rerun
-if is_updating:
-    time.sleep(2.5)
-    st.rerun()
-
 # ==============================================================================
 # RENDER 4 TABS UTAMA (VERSI BERSIH 100%)
 # ==============================================================================
 if not df_hasil.empty:
+    latest_screener_date = (
+        pd.to_datetime(df_hasil["Terakhir Update"], errors="coerce").max()
+        if "Terakhir Update" in df_hasil.columns else pd.NaT
+    )
+    if pd.isna(latest_screener_date) or latest_screener_date.date() < datetime.now(ZoneInfo("Asia/Jakarta")).date():
+        st.warning("Data screener belum diperbarui untuk sesi hari ini. Tunggu pembaruan selesai sebelum memakai hasil screener untuk keputusan trading.")
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📊 Market Overview", 
         "📌 Screener Utama", 
@@ -1889,9 +1961,10 @@ if not df_hasil.empty:
         st.markdown("## 🌐 Multi-Aset Tracker & Mesin Prediksi AI")
         st.markdown("<div class='bandar-box-green'><b>💡 FITUR MULTI-ASET & FORECAST:</b> Pantau portofolio terdiversifikasi lintas kelas aset (Saham IHSG, Emas Fisik/Digital, Cryptocurrency, Saham US) serta analisis proyeksi harga saham masa depan berbasis machine learning.</div>", unsafe_allow_html=True)
         
-        tab_sub_multi, tab_sub_forecast = st.tabs([
+        tab_sub_multi, tab_sub_forecast, tab_sub_signals = st.tabs([
             "🥇 Multi-Aset Portfolio Tracker",
-            "🔮 AI Price Forecaster (XGBoost)"
+            "🔮 Prediksi Harga Harian/Mingguan",
+            "📈 Riset Sinyal Trading EOD",
         ])
         
         # --- SUBTAB 1: MULTI-ASET PORTFOLIO ---
@@ -1992,12 +2065,23 @@ if not df_hasil.empty:
         
         # --- SUBTAB 2: AI PRICE FORECASTER ---
         with tab_sub_forecast:
-            st.markdown("### 🔮 Mesin Prediksi Tren Harga Saham (Machine Learning)")
-            st.caption("Memproyeksikan estimasi pergerakan harga 7–30 hari ke depan menggunakan regresi multi-langkah dan rentang volatilitas ketidakpastian.")
+            st.markdown("### 🔮 Prediksi Harga Saham Harian/Mingguan")
+            st.caption("Prediksi penutupan dari candle harian terakhir yang sudah selesai. Tanggal target adalah perkiraan hari kerja dan dapat bergeser saat libur bursa.")
             
-            col_fc1, col_fc2, col_fc3 = st.columns([2, 1, 1])
+            col_fc1, col_fc2 = st.columns([2, 1])
             with col_fc1:
-                daftar_pilihan_ticker = df_hasil['Ticker'].tolist() if 'Ticker' in df_hasil.columns else ['BBCA', 'TLKM', 'BBRI', 'ASII', 'BMRI']
+                try:
+                    ticker_riset = load_universe()
+                except (OSError, ValueError):
+                    ticker_riset = ['BBCA', 'TLKM', 'BBRI', 'ASII', 'BMRI']
+                ticker_screener = (
+                    [str(value).strip().upper() for value in df_hasil['Ticker'].dropna()]
+                    if 'Ticker' in df_hasil.columns else []
+                )
+                daftar_pilihan_ticker = list(dict.fromkeys(
+                    ticker_riset + [ticker for ticker in ticker_screener
+                                    if re.fullmatch(r'[A-Z0-9]{3,6}', ticker)]
+                ))
                 pilih_ticker_fc = st.selectbox(
                     "Pilih Emiten untuk Diprediksi:",
                     daftar_pilihan_ticker,
@@ -2005,18 +2089,15 @@ if not df_hasil.empty:
                     key="fc_ticker_pilih"
                 )
             with col_fc2:
-                pilih_hari_fc = st.slider("Horizon Prediksi (Hari):", min_value=7, max_value=30, value=14, step=7)
-            with col_fc3:
-                st.markdown("<br>", unsafe_allow_html=True)
-                btn_prediksi = st.button("🚀 Jalankan Prediksi AI", use_container_width=True, type="primary")
+                pilih_hari_fc = st.select_slider("Horizon (hari bursa):", options=[1, 5, 10], value=5)
             
-            if btn_prediksi or f"prediksi_{pilih_ticker_fc}" in st.session_state:
-                st.session_state[f"prediksi_{pilih_ticker_fc}"] = True
-                with st.spinner(f"Melatih model machine learning & memproyeksikan harga {pilih_ticker_fc}..."):
-                    hasil_fc = run_stock_forecast(pilih_ticker_fc, periods=pilih_hari_fc)
+            with st.spinner(f"Memvalidasi dan memprediksi {pilih_ticker_fc}..."):
+                hasil_fc = cached_stock_forecast(pilih_ticker_fc, pilih_hari_fc, FORECAST_VERSION)
                 
-                if hasil_fc.get("status") == "success":
-                    st.success(f"Prediksi untuk **{pilih_ticker_fc}** berhasil diselesaikan!")
+            if hasil_fc.get("status") == "success":
+                    st.caption(f"Data terakhir: {hasil_fc['data_asof']} · Model: {hasil_fc['model_name']} · Uji: {hasil_fc['test_samples']} titik asal ({hasil_fc['test_from']} s.d. {hasil_fc['test_to']})")
+                    if not hasil_fc["beats_baseline"]:
+                        st.warning("Galat model belum lebih rendah minimal 2% dari patokan harga tetap pada data uji terbaru. Arah dan target belum menunjukkan keunggulan trading yang cukup kuat.")
                     
                     # Metrik Hasil Prediksi
                     col_m1, col_m2, col_m3, col_m4 = st.columns(4)
@@ -2029,10 +2110,10 @@ if not df_hasil.empty:
                             f"{hasil_fc['expected_return_pct']:+.2f}%"
                         )
                     with col_m3:
-                        st.metric("Estimasi Error (MAPE)", f"{hasil_fc['mape']:.2f}%")
+                        st.metric("Galat uji horizon", f"{hasil_fc['return_mae_pct']:.2f}%", help="MAE return horizon pada 40 titik uji; lebih kecil lebih baik.")
                     with col_m4:
-                        arah = "BULLISH 🚀" if hasil_fc['expected_return_pct'] > 0 else "BEARISH 📉"
-                        st.metric("Arah Tren Model", arah)
+                        st.metric("Patokan harga tetap", f"{hasil_fc['baseline_mae_pct']:.2f}%", help="Galat pada titik uji yang sama jika harga diprediksi tetap.")
+                    st.caption(f"Perbaikan galat vs harga tetap: {hasil_fc['improvement_vs_baseline_pct']:+.1f}%. Estimasi return setelah fee beli 0,15% dan jual 0,25%: {hasil_fc['estimated_net_return_pct']:+.2f}%. Spread dan slippage belum dihitung. Rentang grafik memakai persentil ke-90 galat historis ({hasil_fc['historical_error_pct']:.2f}%), tanpa jaminan cakupan.")
                     
                     # Visualisasi Plotly Interaktif
                     df_hist_fc = hasil_fc["history_df"]
@@ -2049,23 +2130,20 @@ if not df_hasil.empty:
                         line=dict(color="#3b82f6", width=2)
                     ))
                     
-                    # 2. Area Rentang Ketidakpastian (Upper & Lower Band)
+                    # 2. Rentang galat historis hanya pada tanggal target langsung.
                     fig.add_trace(go.Scatter(
-                        x=list(df_future_fc["ds"]) + list(df_future_fc["ds"])[::-1],
-                        y=list(df_future_fc["yhat_upper"]) + list(df_future_fc["yhat_lower"])[::-1],
-                        fill="toself",
-                        fillcolor="rgba(245, 158, 11, 0.15)",
-                        line=dict(color="rgba(255,255,255,0)"),
-                        name="Rentang Ketidakpastian (Confidence Band)",
-                        showlegend=True
+                        x=[df_future_fc["ds"].iloc[0], df_future_fc["ds"].iloc[0]],
+                        y=[df_future_fc["yhat_lower"].iloc[0], df_future_fc["yhat_upper"].iloc[0]],
+                        mode="lines", line=dict(color="#f59e0b", width=8),
+                        opacity=0.35, name="Rentang galat historis"
                     ))
                     
-                    # 3. Garis Prediksi Proyeksi Masa Depan
+                    # 3. Titik target; garis hanya menghubungkan harga terakhir.
                     fig.add_trace(go.Scatter(
-                        x=df_future_fc["ds"],
-                        y=df_future_fc["yhat"],
+                        x=[df_hist_fc["ds"].iloc[-1], df_future_fc["ds"].iloc[0]],
+                        y=[df_hist_fc["y"].iloc[-1], df_future_fc["yhat"].iloc[0]],
                         mode="lines+markers",
-                        name=f"Estimasi Model ({pilih_hari_fc} Hari)",
+                        name=f"Target langsung ({pilih_hari_fc} hari bursa)",
                         line=dict(color="#f59e0b", width=3, dash="dash")
                     ))
                     
@@ -2084,12 +2162,116 @@ if not df_hasil.empty:
                     # Faktor Penggerak (Feature Importance)
                     feat_imp = hasil_fc.get("feature_importance", {})
                     if feat_imp:
-                        st.markdown("**🧠 Faktor Penggerak Model (Feature Importance):**")
+                        st.markdown("**Fitur yang dipakai model (bukan sebab perubahan harga):**")
                         cols_fi = st.columns(len(feat_imp))
                         for idx_fi, (k_fi, v_fi) in enumerate(feat_imp.items()):
                             with cols_fi[idx_fi]:
                                 st.caption(f"**{k_fi}**")
                                 st.progress(min(1.0, max(0.0, v_fi / 100)))
                                 st.caption(f"{v_fi:.1f}%")
+            else:
+                st.error(hasil_fc.get("message", "Gagal memproses prediksi."))
+
+        with tab_sub_signals:
+            st.markdown("### 📈 Sinyal probabilistik harian/mingguan")
+            st.caption("Sinyal dihitung setelah candle EOD selesai. Simulasi masuk pada open sesi berikutnya dan keluar pada close setelah 1 atau 5 sesi, termasuk fee dan asumsi slippage.")
+            report_path = "Database/trading_research_report.json"
+            if not os.path.isfile(report_path):
+                st.info("Riset EOD belum pernah dijalankan. Scheduler akan memperbaruinya setelah 17:45 WIB, atau jalankan `python trading_pipeline.py`.")
+            else:
+                try:
+                    with open(report_path, encoding="utf-8") as report_file:
+                        trading_report = json.load(report_file)
+                except (OSError, ValueError) as report_error:
+                    st.error(f"Laporan riset tidak dapat dibaca: {report_error}")
                 else:
-                    st.error(hasil_fc.get("message", "Gagal memproses prediksi."))
+                    signal_horizon = st.select_slider("Horizon sinyal (sesi bursa)", options=[1, 5], value=1, key="signal_horizon")
+                    result = trading_report.get("results", {}).get(str(signal_horizon), {})
+                    st.caption(f"Dibuat: {trading_report.get('generated_at', '-')} · Universe: {trading_report.get('universe_size', 0)} saham · Bar tersimpan: {trading_report.get('stored_rows', 0):,}")
+                    if result.get("status") == "insufficient_data":
+                        st.warning(result.get("message", "Data historis belum cukup."))
+                    elif result:
+                        asof = result.get("data_asof", "")
+                        actionable = bool(result.get("approved")) and signal_is_actionable(asof, datetime.now(ZoneInfo("Asia/Jakarta")))
+                        st.caption(f"Candle terakhir: {asof} · Data uji terbaru mulai {result.get('holdout_from', '-')} · Saham likuid pada candle terakhir: {result.get('symbols_with_latest_bar', 0)}")
+                        validation = result.get("validation", {})
+                        holdout = result.get("holdout", {})
+                        for label, metrics in (("Validasi", validation), ("Holdout", holdout)):
+                            if metrics:
+                                matched = metrics.get("matched_benchmark_return_pct")
+                                matched_text = (f"{matched:+.2f}%" if matched is not None
+                                                else "belum dihitung")
+                                st.write(f"**{label}:** model {metrics['total_return_pct']:+.2f}% · momentum frekuensi setara {matched_text} · momentum tiap cohort {metrics['benchmark_return_pct']:+.2f}% · kas 0% · drawdown {metrics['max_drawdown_pct']:.2f}% · transaksi {metrics['trade_cohorts']}/{metrics['tested_cohorts']} cohort · Brier {metrics['brier']:.4f} (prior {metrics['prior_brier']:.4f})")
+                        if actionable and result.get("signals"):
+                            st.success("Model lolos validasi dan holdout setelah biaya. Sinyal berlaku hanya sebelum open sesi berikutnya.")
+                            st.dataframe(pd.DataFrame(result["signals"]).rename(columns={
+                                "ticker": "Ticker", "probability_pct": "Skor peluang model (%)",
+                                "last_close": "Close terakhir (Rp)", "momentum_5_pct": "Momentum 5 sesi (%)",
+                            }), use_container_width=True, hide_index=True)
+                        else:
+                            st.warning("Tidak ada sinyal yang memenuhi kriteria riset saat ini, atau jendela masuk pada open berikutnya sudah lewat.")
+                        st.caption(trading_report.get("data_note", ""))
+
+            st.markdown("### 🧾 Jurnal paper trading EOD")
+            st.caption("Keputusan disimpan saat laporan EOD terbit. Momentum frekuensi setara memakai tanggal dan jumlah posisi yang sama dengan model. Simulasi memakai anggaran Rp10 juta per posisi, lot 100 saham, fee dan slippage. Harga open/close baru dicatat setelah bar harian berikutnya tersedia; ini bukan bukti order nyata terisi.")
+            try:
+                paper_summary = load_paper_summary(Path("Database/market_history.sqlite3"))
+            except (OSError, sqlite3.Error, ValueError) as paper_error:
+                st.error(f"Jurnal paper trading tidak dapat dibaca: {paper_error}")
+            else:
+                if paper_summary is None or paper_summary["recorded_runs"] == 0:
+                    st.info("Jurnal akan mulai mencatat keputusan pada pembaruan EOD berikutnya.")
+                else:
+                    counts = paper_summary["order_counts"]
+                    st.write(
+                        f"Keputusan tersimpan: **{paper_summary['recorded_runs']}** · "
+                        f"Tanpa sinyal: **{paper_summary['no_signal_runs']}** · "
+                        f"Menunggu harga/keluar: **{counts.get('pending_entry', 0) + counts.get('open', 0)}** · "
+                        f"Selesai: **{counts.get('closed', 0)}** · "
+                        f"Tidak terverifikasi/terisi: **{counts.get('unverified_entry', 0) + counts.get('unverified_exit', 0) + counts.get('insufficient_budget', 0)}**"
+                    )
+                    if counts.get("closed", 0):
+                        st.caption(
+                            f"P/L simulasi posisi tertutup: Rp {paper_summary['closed_pnl_idr']:,.0f} · "
+                            f"Rata-rata return posisi tertutup: {paper_summary['average_closed_return_pct']:+.2f}%"
+                        )
+                    if paper_summary["orders"]:
+                        st.dataframe(pd.DataFrame(paper_summary["orders"]),
+                                     use_container_width=True, hide_index=True)
+
+            st.markdown("### 🌙 Beli sore, jual pagi berikutnya")
+            st.caption("Sinyal 14:45–15:00 WIB memakai candle selesai 14:30; simulasi beli pada open candle 15:15 dan jual pada open candle 09:05 sesi berikutnya. Biaya dan slippage sudah dihitung.")
+            overnight_path = "Database/overnight_research_report.json"
+            if not os.path.isfile(overnight_path):
+                st.info("Riwayat 5 menit sedang dikumpulkan. Riset overnight dijadwalkan pukul 14:45 dan 18:45 WIB pada hari bursa.")
+            else:
+                try:
+                    with open(overnight_path, encoding="utf-8") as overnight_file:
+                        overnight_report = json.load(overnight_file)
+                    overnight = overnight_report.get("result", {})
+                    generated = datetime.fromisoformat(overnight_report["generated_at"])
+                    local_now = datetime.now(ZoneInfo("Asia/Jakarta"))
+                except (OSError, ValueError, KeyError, TypeError) as overnight_error:
+                    st.error(f"Laporan overnight tidak dapat dibaca: {overnight_error}")
+                else:
+                    st.caption(f"Dibuat: {generated.isoformat()} · Bar 5 menit tersimpan: {overnight_report.get('stored_rows', 0):,} · Cakupan: {overnight.get('universe_coverage_pct', 0)}%")
+                    if overnight.get("status") == "insufficient_data":
+                        st.info(overnight.get("message", "Riwayat transaksi belum cukup."))
+                    else:
+                        if overnight.get("status") == "collecting_point_in_time":
+                            st.info(overnight.get("message", "Pengamatan tepat waktu sedang dikumpulkan."))
+                        for label, metrics in (("Diagnostik backfill validasi", overnight.get("validation", {})),
+                                               ("Diagnostik backfill holdout", overnight.get("holdout", {})),
+                                               ("Validasi tepat waktu", overnight.get("timely_validation") or {}),
+                                               ("Holdout tepat waktu", overnight.get("timely_holdout") or {})):
+                            if metrics:
+                                st.write(f"**{label}:** return model {metrics['total_return_pct']:+.2f}% · momentum {metrics['benchmark_return_pct']:+.2f}% · transaksi {metrics['trade_days']}/{metrics['tested_days']} hari · Brier {metrics['brier']:.4f} (prior {metrics['prior_brier']:.4f}) · pengamatan tepat waktu {metrics['observed_before_signal_days']} hari")
+                        live_window = (generated.date() == local_now.date()
+                                       and (14, 45) <= (local_now.hour, local_now.minute) < (15, 0))
+                        if live_window and overnight.get("actionable") and overnight.get("signals"):
+                            st.success("Sinyal overnight lolos validasi dan berlaku hingga sebelum pukul 15:00 WIB.")
+                            st.dataframe(pd.DataFrame(overnight["signals"]), width="stretch",
+                                         hide_index=True)
+                        else:
+                            st.warning("Belum ada sinyal overnight terverifikasi yang masih berlaku.")
+                    st.caption(overnight_report.get("data_note", ""))

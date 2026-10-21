@@ -4,6 +4,10 @@ try:
 except Exception:
     pass
 
+from market_tls import configure_yahoo_tls
+
+configure_yahoo_tls()
+
 import os
 import json
 import yfinance as yf

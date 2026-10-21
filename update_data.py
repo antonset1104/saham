@@ -12,6 +12,10 @@ try:
 except Exception:
     pass
 
+from market_tls import configure_yahoo_tls
+
+configure_yahoo_tls()
+
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -22,6 +26,7 @@ import xml.etree.ElementTree as ET # <-- Modul untuk membaca berita RSS
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
 from analysis_signal import calculate_signal_score
 from notifikasi_telegram import kirim_alert_bsjp, is_telegram_configured
@@ -513,7 +518,7 @@ def main():
     with open(LOCK_FILE, "w") as f: f.write("SEDANG PROSES")
 
     try:
-        now = datetime.now()
+        now = datetime.now(ZoneInfo("Asia/Jakarta")).replace(tzinfo=None)
         tanggal_hari_ini = now.strftime("%Y-%m-%d")
         waktu_sekarang = now.strftime("%H:%M")
         jam_sekarang = now.hour 
