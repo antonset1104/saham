@@ -16,7 +16,7 @@ import glob
 import time
 import re
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -541,7 +541,8 @@ LOCK_UPDATE_FILE = "sedang_update.lock"
 is_updating = os.path.exists(LOCK_UPDATE_FILE)
 
 # Hapusnya lock hanya menandakan proses berakhir; data harus benar-benar berganti.
-if st.session_state.get("is_updating_saham") and not is_updating:
+if (st.session_state.get("is_updating_saham") and not is_updating
+        and time.time() - st.session_state.get("update_started_at", 0) >= 10):
     st.session_state["is_updating_saham"] = False
     previous_mtime = st.session_state.pop("update_started_mtime", None)
     current_mtime = os.path.getmtime(FILE_HASIL) if os.path.exists(FILE_HASIL) else 0
@@ -596,6 +597,7 @@ if perlu_update_hari_baru and not CLOUD_MODE:
             os.path.getmtime(FILE_HASIL) if os.path.exists(FILE_HASIL) else 0
         )
         st.session_state["is_updating_saham"] = True
+        st.session_state["update_started_at"] = time.time()
         st.session_state["just_completed_update"] = False
         st.session_state["update_failed"] = False
         st.toast("🌅 Hari baru terdeteksi! Memulai sinkronisasi data IHSG hari ini...", icon="🚀")
@@ -608,6 +610,9 @@ if perlu_update_hari_baru and not CLOUD_MODE:
 @st.fragment(run_every="15s")
 def sync_otomatis_data_web():
     current_lock_state = os.path.exists(LOCK_UPDATE_FILE)
+    if (st.session_state.get("is_updating_saham") and not current_lock_state
+            and time.time() - st.session_state.get("update_started_at", 0) >= 10):
+        st.rerun(scope="app")
     previous_lock_state = st.session_state.get("cached_update_lock_state")
     st.session_state["cached_update_lock_state"] = current_lock_state
     if previous_lock_state is not None and current_lock_state != previous_lock_state:
@@ -664,12 +669,16 @@ with st.sidebar.expander("⚡ Update Data Pasar (Stockbit & Yahoo)", expanded=Tr
         elif st.session_state.get("update_failed"):
             st.error("Pembaruan berhenti tanpa menghasilkan data baru. Periksa sumber data atau log proses.")
             
-        mode_opsi = st.radio(
-            "Cakupan Update:",
-            ["Uji Cepat (15 Saham)", "Seluruh IHSG (900+ Saham)"],
-            index=0,
-            key="pilihan_mode_update"
-        )
+        if CLOUD_MODE:
+            mode_opsi = "Seluruh IHSG (900+ Saham)"
+            st.caption("Cakupan pembaruan: seluruh saham IHSG.")
+        else:
+            mode_opsi = st.radio(
+                "Cakupan Update:",
+                ["Uji Cepat (15 Saham)", "Seluruh IHSG (900+ Saham)"],
+                index=0,
+                key="pilihan_mode_update"
+            )
 
         if not CLOUD_MODE:
             with st.expander("🔑 Konfigurasi Token Stockbit", expanded=False):
@@ -742,6 +751,7 @@ with st.sidebar.expander("⚡ Update Data Pasar (Stockbit & Yahoo)", expanded=Tr
                     os.path.getmtime(FILE_HASIL) if os.path.exists(FILE_HASIL) else 0
                 )
                 st.session_state["is_updating_saham"] = True
+                st.session_state["update_started_at"] = time.time()
                 st.session_state["just_completed_update"] = False
                 st.session_state["update_failed"] = False
                 st.rerun()
@@ -1034,12 +1044,25 @@ elif st.session_state.get("just_completed_update"):
 # RENDER 4 TABS UTAMA (VERSI BERSIH 100%)
 # ==============================================================================
 if not df_hasil.empty:
+    now_jakarta = datetime.now(ZoneInfo("Asia/Jakarta"))
+    expected_session = now_jakarta.date()
+    if now_jakarta.weekday() >= 5 or now_jakarta.hour < 9:
+        expected_session -= timedelta(days=1)
+    while expected_session.weekday() >= 5:
+        expected_session -= timedelta(days=1)
     latest_screener_date = (
         pd.to_datetime(df_hasil["Terakhir Update"], errors="coerce").max()
         if "Terakhir Update" in df_hasil.columns else pd.NaT
     )
-    if pd.isna(latest_screener_date) or latest_screener_date.date() < datetime.now(ZoneInfo("Asia/Jakarta")).date():
-        st.warning("Data screener belum diperbarui untuk sesi hari ini. Tunggu pembaruan selesai sebelum memakai hasil screener untuk keputusan trading.")
+    if pd.isna(latest_screener_date) or latest_screener_date.date() < expected_session:
+        st.warning("Data screener belum diperbarui untuk sesi perdagangan terakhir. Tunggu pembaruan selesai sebelum memakai hasil screener untuk keputusan trading.")
+    if CLOUD_MODE:
+        try:
+            universe_size = len({line.strip() for line in Path("Konfigurasi/saham.txt").read_text(encoding="utf-8").splitlines() if line.strip()})
+        except OSError:
+            universe_size = 0
+        if universe_size and len(df_hasil) < universe_size * 0.7:
+            st.warning(f"Cakupan screener parsial: {len(df_hasil)} dari {universe_size} saham. Jangan gunakan hasil screener untuk keputusan trading sampai pembaruan lengkap.")
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📊 Market Overview", 
         "📌 Screener Utama", 
