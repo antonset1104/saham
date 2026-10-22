@@ -1,5 +1,7 @@
-import { Container, getContainer } from "@cloudflare/containers";
+import { Container, ContainerProxy, getContainer } from "@cloudflare/containers";
 import { handleState } from "./state";
+
+export { ContainerProxy };
 
 type OptionalSecret =
   | "STOCKBIT_TOKEN" | "GEMINI_API_KEY" | "GROQ_API_KEY"
@@ -7,10 +9,6 @@ type OptionalSecret =
 type ContainerEnv = Env & Partial<Record<OptionalSecret, string>>;
 
 export class SahamContainer extends Container<ContainerEnv> {
-  static outboundByHost = {
-    "state.internal": (request: Request, env: Env): Promise<Response> => handleState(request, env),
-  };
-
   defaultPort = 8501;
   requiredPorts = [8501, 8503];
   sleepAfter = "15m";
@@ -24,14 +22,34 @@ export class SahamContainer extends Container<ContainerEnv> {
     TELEGRAM_CHAT_ID: this.env.TELEGRAM_CHAT_ID ?? "",
   };
 
+  private async ensureReady(): Promise<void> {
+    await this.startAndWaitForPorts({
+      ports: this.requiredPorts,
+      cancellationOptions: { portReadyTimeoutMS: 120_000 },
+    });
+  }
+
+  override async fetch(request: Request): Promise<Response> {
+    await this.ensureReady();
+    return super.fetch(request);
+  }
+
   async runEod(): Promise<void> {
+    await this.ensureReady();
     const response = await this.containerFetch("http://localhost/run/eod", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
     }, 8503);
-    if (!response.ok) throw new Error(`EOD container failed: ${response.status}`);
+    if (!response.ok) {
+      const detail = (await response.text()).slice(0, 1000);
+      throw new Error(`EOD container failed: ${response.status}: ${detail}`);
+    }
   }
 }
+
+SahamContainer.outboundByHost = {
+  "state.internal": (request: Request, env: Env): Promise<Response> => handleState(request, env),
+};
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
