@@ -6,7 +6,8 @@ import numpy as np
 import pandas as pd
 
 from mesin_forecast import (
-    _time_windows, _validation_folds, build_forecast_features, forecast_from_history,
+    _extend_with_verified_eod, _time_windows, _validation_folds,
+    build_forecast_features, forecast_from_history,
     run_stock_forecast,
 )
 
@@ -37,6 +38,30 @@ def predictable_history(length=400):
 
 
 class ForecastTest(unittest.TestCase):
+    def test_verified_eod_fills_lagging_adjusted_feed_on_same_scale(self):
+        stored = sample_history()
+        adjusted = stored.iloc[:-1].copy()
+        adjusted[["Close", "High", "Low"]] *= 0.9
+        combined, supplemented = _extend_with_verified_eod(adjusted, stored)
+        self.assertTrue(supplemented)
+        self.assertEqual(len(combined), len(stored))
+        self.assertAlmostEqual(combined["Close"].iloc[-1], stored["Close"].iloc[-1] * 0.9)
+
+    def test_verified_eod_rejects_inconsistent_scale_or_price_jump(self):
+        stored = sample_history()
+        adjusted = stored.iloc[:-1].copy()
+        adjusted[["Close", "High", "Low"]] *= 0.9
+        adjusted.iloc[-1, adjusted.columns.get_loc("Close")] *= 1.1
+        result, supplemented = _extend_with_verified_eod(adjusted, stored)
+        self.assertFalse(supplemented)
+        pd.testing.assert_frame_equal(result, adjusted)
+
+        adjusted = stored.iloc[:-1].copy()
+        stored.iloc[-1, stored.columns.get_loc("Close")] *= 2
+        result, supplemented = _extend_with_verified_eod(adjusted, stored)
+        self.assertFalse(supplemented)
+        pd.testing.assert_frame_equal(result, adjusted)
+
     def test_features_do_not_read_future_bars(self):
         original = sample_history()
         changed = original.copy()

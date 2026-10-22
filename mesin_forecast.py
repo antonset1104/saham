@@ -14,8 +14,10 @@ from market_tls import configure_yahoo_tls
 
 configure_yahoo_tls()
 
+from contextlib import closing
 from datetime import datetime, time
 import re
+import sqlite3
 from typing import Any, NamedTuple
 from zoneinfo import ZoneInfo
 
@@ -25,9 +27,11 @@ from sklearn.linear_model import Ridge
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
+from market_history_store import DEFAULT_DB, read_daily_bars
+
 
 MIN_TRAIN = 90
-FORECAST_VERSION = "direct-horizon-v5"
+FORECAST_VERSION = "direct-horizon-v6"
 VALIDATION_SIZE = 80
 VALIDATION_FOLD_SIZE = 40
 GATE_SIZE = 40
@@ -257,6 +261,49 @@ def forecast_from_history(raw_df: pd.DataFrame, ticker: str, periods: int = 5,
     }
 
 
+def _stored_eod_history(symbol: str) -> pd.DataFrame:
+    """Read completed IDX bars already verified by the scheduled EOD pipeline."""
+    if not re.fullmatch(r"[A-Z0-9]{3,6}", symbol) or not DEFAULT_DB.is_file():
+        return pd.DataFrame()
+    try:
+        with closing(sqlite3.connect(f"{DEFAULT_DB.resolve().as_uri()}?mode=ro", uri=True)) as connection:
+            bars = read_daily_bars(connection, [symbol])
+    except (OSError, sqlite3.Error, ValueError):
+        return pd.DataFrame()
+    if bars.empty:
+        return pd.DataFrame()
+    return bars.rename(columns={
+        "open": "Open", "high": "High", "low": "Low", "close": "Close", "volume": "Volume",
+    }).set_index("trade_date")[["Close", "High", "Low", "Volume"]]
+
+
+def _extend_with_verified_eod(
+    adjusted: pd.DataFrame, stored: pd.DataFrame,
+) -> tuple[pd.DataFrame, bool]:
+    """Append at most five missing EOD bars when recent raw/adjusted scales agree."""
+    if stored.empty:
+        return adjusted, False
+    if adjusted.empty:
+        return stored, True
+    common = adjusted.index.intersection(stored.index)
+    if len(common) < 2 or common[-1] != adjusted.index[-1]:
+        return adjusted, False
+    overlap = common[-2:]
+    factors = adjusted.loc[overlap, "Close"] / stored.loc[overlap, "Close"]
+    if (not np.isfinite(factors.to_numpy()).all() or (factors <= 0).any()
+            or abs(factors.iloc[-1] / factors.iloc[-2] - 1) > 0.005):
+        return adjusted, False
+    extension = stored.loc[stored.index > adjusted.index[-1]].copy()
+    if extension.empty or len(extension) > 5:
+        return adjusted, False
+    factor = float(factors.iloc[-1])
+    extension[["Close", "High", "Low"]] *= factor
+    prices = pd.concat([adjusted["Close"].tail(1), extension["Close"]])
+    if prices.pct_change().abs().iloc[1:].gt(0.5).any():
+        return adjusted, False
+    return pd.concat([adjusted, extension]), True
+
+
 def run_stock_forecast(ticker: str, periods: int = 5, history_period: str = "2y") -> dict[str, Any]:
     """Unduh OHLCV tersesuaikan dan jalankan prediksi setelah candle EOD tersedia."""
     if not isinstance(ticker, str):
@@ -270,8 +317,26 @@ def run_stock_forecast(ticker: str, periods: int = 5, history_period: str = "2y"
 
         raw = yf.download(yf_symbol, period=history_period, interval="1d", progress=False,
                           auto_adjust=True, timeout=15)
-        if raw is None or raw.empty:
+        stored_raw = _stored_eod_history(symbol)
+        try:
+            stored = _clean_history(stored_raw) if not stored_raw.empty else pd.DataFrame()
+        except ValueError:
+            stored = pd.DataFrame()
+        try:
+            adjusted = _clean_history(raw) if raw is not None and not raw.empty else pd.DataFrame()
+        except ValueError:
+            adjusted = pd.DataFrame()
+        history, supplemented = _extend_with_verified_eod(adjusted, stored)
+        if history.empty:
             raise ValueError(f"Data historis {ticker} tidak ditemukan.")
-        return forecast_from_history(raw, ticker, periods=periods)
+        result = forecast_from_history(history, ticker, periods=periods)
+        result["price_source"] = ("Arsip EOD terverifikasi" if adjusted.empty else
+                                  "Yahoo adjusted + arsip EOD" if supplemented else "Yahoo adjusted")
+        if not stored.empty and stored.index[-1] > history.index[-1]:
+            result["freshness_warning"] = (
+                "Arsip EOD lebih baru, tetapi skala harga tidak konsisten; "
+                "prediksi memakai data Yahoo terakhir yang aman."
+            )
+        return result
     except Exception as error:
         return {"status": "error", "message": f"Prediksi gagal: {error}"}

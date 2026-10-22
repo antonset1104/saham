@@ -2118,7 +2118,9 @@ if not df_hasil.empty:
                 hasil_fc = cached_stock_forecast(pilih_ticker_fc, pilih_hari_fc, FORECAST_VERSION)
                 
             if hasil_fc.get("status") == "success":
-                    st.caption(f"Data terakhir: {hasil_fc['data_asof']} · Model: {hasil_fc['model_name']} · Uji: {hasil_fc['test_samples']} titik asal ({hasil_fc['test_from']} s.d. {hasil_fc['test_to']})")
+                    st.caption(f"Data terakhir: {hasil_fc['data_asof']} · Sumber: {hasil_fc.get('price_source', 'Yahoo')} · Model: {hasil_fc['model_name']} · Uji: {hasil_fc['test_samples']} titik asal ({hasil_fc['test_from']} s.d. {hasil_fc['test_to']})")
+                    if hasil_fc.get("freshness_warning"):
+                        st.warning(hasil_fc["freshness_warning"])
                     if not hasil_fc["beats_baseline"]:
                         st.warning("Galat model belum lebih rendah minimal 2% dari patokan harga tetap pada data uji terbaru. Arah dan target belum menunjukkan keunggulan trading yang cukup kuat.")
                     
