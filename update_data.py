@@ -22,6 +22,7 @@ import numpy as np
 import os
 import time
 import requests
+from threading import Event
 import xml.etree.ElementTree as ET # <-- Modul untuk membaca berita RSS
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -56,6 +57,8 @@ if not TOKEN_CURIAN:
 
 if TOKEN_CURIAN.startswith("Bearer "):
     TOKEN_CURIAN = TOKEN_CURIAN[7:].strip()
+
+_stockbit_unauthorized = Event()
 
 if not os.path.exists(DIR_ARSIP):
     os.makedirs(DIR_ARSIP)
@@ -99,9 +102,11 @@ def get_fundamental(ticker_jk):
     return kategori_saham, per, pbv
 
 # FUNGSI PENYADAP BROKSUM STOCKBIT (AMAN DARI CRASH)
-def get_broksum_aman(ticker):
+def get_broksum_aman(ticker: str) -> str:
     if not TOKEN_CURIAN:
         return "Token Stockbit belum diatur"
+    if _stockbit_unauthorized.is_set():
+        return "Token Stockbit kedaluwarsa (HTTP 401)"
 
     url = f"https://exodus.stockbit.com/marketdetectors/{ticker}?transaction_type=TRANSACTION_TYPE_NET&market_board=MARKET_BOARD_REGULER&investor_type=INVESTOR_TYPE_ALL&limit=25"
     headers = {
@@ -130,6 +135,7 @@ def get_broksum_aman(ticker):
             return f"B: {', '.join(top_buy) if top_buy else '-'} | S: {', '.join(top_sell) if top_sell else '-'} | ({status_acc})"
         
         elif response.status_code == 401:
+            _stockbit_unauthorized.set()
             return "Token Stockbit kedaluwarsa (HTTP 401)"
         elif response.status_code == 403:
             return "Akses broker Stockbit ditolak (HTTP 403)"
