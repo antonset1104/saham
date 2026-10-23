@@ -538,6 +538,30 @@ if not df_hasil.empty and "Terakhir Update" in df_hasil.columns:
     """, unsafe_allow_html=True)
 
 LOCK_UPDATE_FILE = "sedang_update.lock"
+UPDATE_LOG_FILE = "Logs/update_data.log"
+
+
+def start_screener_update(command: list[str]) -> None:
+    os.makedirs("Logs", exist_ok=True)
+    with open(UPDATE_LOG_FILE, "a", encoding="utf-8") as output:
+        subprocess.Popen(
+            command,
+            stdout=output,
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+
+
+def recent_update_log() -> str:
+    try:
+        with open(UPDATE_LOG_FILE, "rb") as output:
+            output.seek(0, os.SEEK_END)
+            output.seek(max(0, output.tell() - 16384))
+            return "\n".join(output.read().decode("utf-8", errors="replace").splitlines()[-20:])
+    except OSError:
+        return "Log pembaruan belum tersedia."
+
+
 is_updating = os.path.exists(LOCK_UPDATE_FILE)
 
 # Hapusnya lock hanya menandakan proses berakhir; data harus benar-benar berganti.
@@ -588,12 +612,7 @@ if perlu_update_hari_baru and not CLOUD_MODE:
     st.session_state["auto_triggered_today"] = True
     py_bin = sys.executable or "./.venv/bin/python"
     try:
-        subprocess.Popen(
-            [py_bin, "update_data.py"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            start_new_session=True
-        )
+        start_screener_update([py_bin, "update_data.py"])
         st.session_state["update_started_mtime"] = (
             os.path.getmtime(FILE_HASIL) if os.path.exists(FILE_HASIL) else 0
         )
@@ -686,6 +705,8 @@ with st.sidebar.expander("⚡ Update Data Pasar (Stockbit & Yahoo)", expanded=Tr
                 st.success("✅ **Data Saham Selesai Diperbarui!**")
         elif st.session_state.get("update_failed"):
             st.error("Pembaruan berhenti tanpa menghasilkan data baru. Periksa sumber data atau log proses.")
+            with st.expander("Rincian kegagalan pembaruan"):
+                st.code(recent_update_log())
             
         if CLOUD_MODE:
             mode_opsi = "Seluruh IHSG (900+ Saham)"
@@ -751,6 +772,19 @@ with st.sidebar.expander("⚡ Update Data Pasar (Stockbit & Yahoo)", expanded=Tr
                     st.rerun()
 
         btn_run_update = st.button("🚀 Tarik Data Stockbit Sekarang", use_container_width=True, type="primary", key="btn_tarik_data_sb")
+        if CLOUD_MODE:
+            if st.button("🔍 Uji Koneksi Stockbit", use_container_width=True, key="btn_test_stockbit"):
+                try:
+                    from update_data import get_broksum_aman
+                    st.session_state["stockbit_probe"] = get_broksum_aman("BBCA")
+                except Exception:
+                    st.session_state["stockbit_probe"] = "Uji koneksi gagal. Periksa log aplikasi."
+            stockbit_probe = st.session_state.get("stockbit_probe")
+            if stockbit_probe:
+                if stockbit_probe.startswith("B: "):
+                    st.success("Koneksi Stockbit berhasil: broker summary BBCA tersedia.")
+                else:
+                    st.error(f"Koneksi Stockbit gagal: {stockbit_probe}")
         if btn_run_update:
             py_bin = sys.executable or "./.venv/bin/python"
             cmd = [py_bin, "update_data.py"]
@@ -759,12 +793,7 @@ with st.sidebar.expander("⚡ Update Data Pasar (Stockbit & Yahoo)", expanded=Tr
             
             try:
                 # Jalankan skrip di background secara asinkron
-                subprocess.Popen(
-                    cmd,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    start_new_session=True
-                )
+                start_screener_update(cmd)
                 st.session_state["update_started_mtime"] = (
                     os.path.getmtime(FILE_HASIL) if os.path.exists(FILE_HASIL) else 0
                 )

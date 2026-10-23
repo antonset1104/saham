@@ -525,8 +525,13 @@ def parse_args():
 def main():
     args = parse_args()
 
-    if os.path.exists(LOCK_FILE): os.remove(LOCK_FILE)
-    with open(LOCK_FILE, "w") as f: f.write("SEDANG PROSES")
+    try:
+        lock_fd = os.open(LOCK_FILE, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    except FileExistsError:
+        print("Pembaruan saham sudah berjalan.")
+        return
+    with os.fdopen(lock_fd, "w", encoding="utf-8") as lock_file:
+        lock_file.write("SEDANG PROSES")
 
     try:
         now = datetime.now(ZoneInfo("Asia/Jakarta")).replace(tzinfo=None)
