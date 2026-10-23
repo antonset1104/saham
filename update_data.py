@@ -100,6 +100,9 @@ def get_fundamental(ticker_jk):
 
 # FUNGSI PENYADAP BROKSUM STOCKBIT (AMAN DARI CRASH)
 def get_broksum_aman(ticker):
+    if not TOKEN_CURIAN:
+        return "Token Stockbit belum diatur"
+
     url = f"https://exodus.stockbit.com/marketdetectors/{ticker}?transaction_type=TRANSACTION_TYPE_NET&market_board=MARKET_BOARD_REGULER&investor_type=INVESTOR_TYPE_ALL&limit=25"
     headers = {
         "Authorization": f"Bearer {TOKEN_CURIAN}",
@@ -126,8 +129,10 @@ def get_broksum_aman(ticker):
             
             return f"B: {', '.join(top_buy) if top_buy else '-'} | S: {', '.join(top_sell) if top_sell else '-'} | ({status_acc})"
         
-        elif response.status_code in [401, 403]:
-            return "Token Mati (Perlu Update)"
+        elif response.status_code == 401:
+            return "Token Stockbit kedaluwarsa (HTTP 401)"
+        elif response.status_code == 403:
+            return "Akses broker Stockbit ditolak (HTTP 403)"
         else:
             return f"Error HTTP {response.status_code}"
     except requests.exceptions.Timeout:

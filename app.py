@@ -550,6 +550,7 @@ if (st.session_state.get("is_updating_saham") and not is_updating
     st.session_state["just_completed_update"] = succeeded
     st.session_state["update_failed"] = not succeeded
     st.cache_data.clear()
+    st.rerun()
 
 if is_updating:
     st.session_state["is_updating_saham"] = True
@@ -643,6 +644,20 @@ def sync_otomatis_data_web():
 
 sync_otomatis_data_web()
 
+broker_statuses = (
+    df_hasil["Broksum"].fillna("").astype(str)
+    if not df_hasil.empty and "Broksum" in df_hasil.columns
+    else pd.Series(dtype=str)
+)
+stockbit_auth_failed = broker_statuses.str.contains(
+    "Token Mati|Token Stockbit kedaluwarsa|Token Stockbit belum diatur",
+    case=False, regex=True,
+).any()
+stockbit_access_denied = broker_statuses.str.contains(
+    "Akses broker Stockbit ditolak", case=False, regex=False,
+).any()
+stockbit_broker_issue = stockbit_auth_failed or stockbit_access_denied
+
 with st.sidebar.expander("⚡ Update Data Pasar (Stockbit & Yahoo)", expanded=True):
     if is_updating:
         st.markdown("""
@@ -665,7 +680,10 @@ with st.sidebar.expander("⚡ Update Data Pasar (Stockbit & Yahoo)", expanded=Tr
                     st.rerun()
     else:
         if st.session_state.get("just_completed_update"):
-            st.success("✅ **Data Saham Selesai Diperbarui!**")
+            if stockbit_broker_issue:
+                st.warning("Data harga diperbarui, tetapi broker summary Stockbit gagal. Periksa token atau izin akses Stockbit.")
+            else:
+                st.success("✅ **Data Saham Selesai Diperbarui!**")
         elif st.session_state.get("update_failed"):
             st.error("Pembaruan berhenti tanpa menghasilkan data baru. Periksa sumber data atau log proses.")
             
@@ -977,7 +995,7 @@ def warna_tabel(val):
         return 'color: #22c55e; font-weight: 600;' if val > 0 else ('color: #ef4444; font-weight: 600;' if val < 0 else '')
     elif isinstance(val, str):
         if any(x in val for x in ["Positif", "Uptrend", "BELI", "Breakout Upper", "Bottom Rebound", "DALAM AKUISISI", "Rendah", "▲", "Golden Cross", "Bullish", "Tembus MA20", "Akumulasi", "Big Cap", "Gap Up", "Dominan Beli", "Undervalued", "Marubozu", "Dekat Support", "Hammer", "Di Atas VWAP", "Sultan", "Ledakan Ekstrem", "Solid", "Mark-Up", "Jarum Bawah", "Naik", "Open = Low", "Sangat Menarik", "Perfect Uptrend", "Awal Reversal", "Acc"]): return 'color: #22c55e; font-weight: 600;'
-        elif any(x in val for x in ["Negatif", "Downtrend", "WAIT & SEE", "Tinggi", "▼", "Death Cross", "Bearish", "Distribusi", "Small Cap", "Gap Down", "Dominan Jual", "Overvalued", "Rawan Pucuk", "Di Bawah VWAP", "Gorengan Sepi", "Sepi", "Tiang Jemuran", "Mark-Down", "Turun", "Open = High", "Tidak Ideal", "Strong Downtrend", "Dist", "Token Mati", "Gagal", "Timeout"]): return 'color: #ef4444; font-weight: 600;'
+        elif any(x in val for x in ["Negatif", "Downtrend", "WAIT & SEE", "Tinggi", "▼", "Death Cross", "Bearish", "Distribusi", "Small Cap", "Gap Down", "Dominan Jual", "Overvalued", "Rawan Pucuk", "Di Bawah VWAP", "Gorengan Sepi", "Sepi", "Tiang Jemuran", "Mark-Down", "Turun", "Open = High", "Tidak Ideal", "Strong Downtrend", "Dist", "Token Mati", "Token Stockbit", "Akses broker Stockbit ditolak", "Gagal", "Timeout"]): return 'color: #ef4444; font-weight: 600;'
         elif val == "> 1 Miliar": return 'color: #3b82f6; font-weight: 600;'
         elif any(x in val for x in ["Squeeze", "RENCANA AKUISISI", "Sedang", "Mid Cap", "Seimbang", "Fair Value", "Area Tengah", "Doji", "Ritel Aktif", "Anomali", "Accumulation", "Sideways", "Ideal", "Menengah", "Konsolidasi / Transisi", "Neutral"]): return 'color: #eab308; font-weight: 600;'
         elif "⭐" in val: return 'color: #22c55e;' if len(val) >= 6 else 'color: #ef4444;'
@@ -1033,8 +1051,11 @@ if is_updating:
 elif st.session_state.get("just_completed_update"):
     c_notif1, c_notif2 = st.columns([5, 1])
     with c_notif1:
-        st.balloons()
-        st.success("🎉 **Pembaruan Data Pasar Berhasil Selesai!** Seluruh indikator teknikal, broker summary Stockbit, dan Machine Learning telah diperbarui.")
+        if stockbit_broker_issue:
+            st.warning("Data harga selesai diperbarui, tetapi broker summary Stockbit gagal. Periksa token atau izin akses Stockbit sebelum memakai analisis broker.")
+        else:
+            st.balloons()
+            st.success("🎉 **Pembaruan Data Pasar Berhasil Selesai!** Seluruh indikator teknikal, broker summary Stockbit, dan Machine Learning telah diperbarui.")
     with c_notif2:
         if st.button("Tutup ✕", key="btn_close_notif_done"):
             st.session_state["just_completed_update"] = False
@@ -1044,6 +1065,10 @@ elif st.session_state.get("just_completed_update"):
 # RENDER 4 TABS UTAMA (VERSI BERSIH 100%)
 # ==============================================================================
 if not df_hasil.empty:
+    if stockbit_auth_failed:
+        st.error("Broker summary Stockbit tidak tersedia: token belum diatur atau kedaluwarsa. Perbarui STOCKBIT_TOKEN sebelum memakai analisis broker.")
+    elif stockbit_access_denied:
+        st.error("Broker summary Stockbit ditolak (HTTP 403). Periksa izin akun Stockbit dan akses endpoint broker.")
     now_jakarta = datetime.now(ZoneInfo("Asia/Jakarta"))
     expected_session = now_jakarta.date()
     if now_jakarta.weekday() >= 5 or now_jakarta.hour < 9:
