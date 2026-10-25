@@ -7,6 +7,12 @@ from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 from market_tls import configure_yahoo_tls
 
+try:
+    import truststore
+    truststore.inject_into_ssl()
+except ImportError:
+    pass
+
 configure_yahoo_tls()
 
 load_dotenv()
@@ -114,8 +120,8 @@ def kirim_pesan_telegram(pesan: str, token: str = None, chat_id: str = None) -> 
             return True
         print(f"⚠️ [Telegram] Gagal kirim (HTTP {resp.status_code}): {resp.text[:200]}")
         return False
-    except Exception as e:
-        print(f"⚠️ [Telegram] Error koneksi: {e}")
+    except requests.RequestException as error:
+        print(f"⚠️ [Telegram] Error koneksi: {type(error).__name__}")
         return False
 
 def kirim_alert_transaksi_bot(arena: str, ticker: str, aksi: str, harga: float, lot: int, profit_rp: float = 0, profit_pct: float = 0) -> bool:
