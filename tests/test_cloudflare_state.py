@@ -79,3 +79,12 @@ def test_cloudflare_state_excludes_credentials(tmp_path: Path, monkeypatch: Any)
     (database / "notes.txt").write_text("private", encoding="utf-8")
     assert state_module.data_files() == []
     assert not state_module.eligible("Database/../.env")
+
+
+def test_afternoon_delivery_marker_is_persistent(tmp_path: Path, monkeypatch: Any) -> None:
+    monkeypatch.setattr(state_module, "ROOT", tmp_path)
+    database = tmp_path / "Database"
+    database.mkdir()
+    marker = database / "telegram_1530_sent.json"
+    marker.write_text('{"last_sent_date":"2026-10-26"}', encoding="utf-8")
+    assert state_module.data_files() == [marker]

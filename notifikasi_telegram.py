@@ -2,13 +2,34 @@ import os
 import json
 import html
 import requests
-from datetime import datetime
+import pandas as pd
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 from market_tls import configure_yahoo_tls
 
 configure_yahoo_tls()
 
 load_dotenv()
+WIB = timezone(timedelta(hours=7))
+MIN_AFTERNOON_ROWS = 500
+
+def now_wib() -> datetime:
+    return datetime.now(WIB)
+
+def fresh_afternoon_rows(df_screener: pd.DataFrame | None, now: datetime) -> pd.DataFrame:
+    """Return only rows backed by today's price bar and an afternoon refresh."""
+    if df_screener is None or df_screener.empty:
+        return pd.DataFrame()
+    required = {"Terakhir Update", "Tanggal Data Harga"}
+    if not required.issubset(df_screener.columns):
+        return pd.DataFrame()
+    local_now = now.astimezone(WIB).replace(tzinfo=None) if now.tzinfo else now
+    updated = pd.to_datetime(df_screener["Terakhir Update"], errors="coerce")
+    bar_dates = pd.to_datetime(df_screener["Tanggal Data Harga"], errors="coerce").dt.date
+    cutoff = local_now.replace(hour=15, minute=0, second=0, microsecond=0)
+    fresh = (updated >= cutoff) & (updated <= local_now + timedelta(minutes=5))
+    fresh &= (local_now - updated <= timedelta(minutes=45)) & (bar_dates == local_now.date())
+    return df_screener.loc[fresh].copy()
 
 def get_telegram_config():
     """Mengambil konfigurasi Telegram dinamis dari session_state, secrets, atau env."""
@@ -169,7 +190,8 @@ FILE_LAST_SENT_1530 = "Database/telegram_1530_sent.json"
 FILE_LAST_SENT_1000 = "Database/telegram_1000_sent.json"
 FILE_LAST_SENT_JUMAT_2000 = "Database/last_sent_jumat_2000.json"
 
-def kirim_rekomendasi_rumus_2_dan_9(df_screener=None, force=False) -> tuple[bool, str]:
+def kirim_rekomendasi_rumus_2_dan_9(df_screener: pd.DataFrame | None = None, force: bool = False,
+                                    require_fresh: bool = False, now: datetime | None = None) -> tuple[bool, str]:
     """
     Mengirimkan daftar rekomendasi saham Beli Sore (BSJP) khusus Rumus 2 & Rumus 9
     ke Telegram bot secara otomatis pada jam 15:30 WIB.
@@ -177,7 +199,8 @@ def kirim_rekomendasi_rumus_2_dan_9(df_screener=None, force=False) -> tuple[bool
     if not is_telegram_configured():
         return False, "Bot Telegram belum terkonfigurasi (Token/Chat ID kosong)."
 
-    today_str = datetime.now().strftime("%Y-%m-%d")
+    current = now or now_wib()
+    today_str = current.strftime("%Y-%m-%d")
     
     # Cek agar tidak mengirim dobel di hari yang sama (kecuali force=True)
     if not force and os.path.exists(FILE_LAST_SENT_1530):
@@ -214,11 +237,17 @@ def kirim_rekomendasi_rumus_2_dan_9(df_screener=None, force=False) -> tuple[bool
     if df_screener is None or df_screener.empty:
         return False, "Database hasil screener belum tersedia."
 
+    if require_fresh:
+        minimum = max(MIN_AFTERNOON_ROWS, int(len(df_screener) * 0.7))
+        df_screener = fresh_afternoon_rows(df_screener, current)
+        if len(df_screener) < minimum:
+            return False, "Data harga hari ini pukul 15:00 WIB atau lebih baru belum cukup; rekomendasi dibatalkan."
+
     hasil_rumus = tracker_ai.filter_saham_9_rumus(df_screener)
     df_r2 = hasil_rumus.get("R2", pd.DataFrame())
     df_r9 = hasil_rumus.get("R9", pd.DataFrame())
 
-    waktu_str = datetime.now().strftime("%d/%m/%Y %H:%M WIB")
+    waktu_str = current.strftime("%d/%m/%Y %H:%M WIB")
 
     lines = [
         "🦅 <b>REKOMENDASI BELI SORE (BSJP) 15:30 WIB</b>",
@@ -323,7 +352,7 @@ def kirim_rekomendasi_rumus_2_dan_9(df_screener=None, force=False) -> tuple[bool
             with open(FILE_LAST_SENT_1530, "w") as f:
                 json.dump({
                     "last_sent_date": today_str,
-                    "waktu": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "waktu": current.strftime("%Y-%m-%d %H:%M:%S"),
                     "total_emiten": total_emiten,
                     "rekomendasi": rekomendasi_list
                 }, f, indent=2)
@@ -340,7 +369,9 @@ def cek_dan_kirim_jadwal_1530(df_screener=None, now=None):
     serta belum pernah kirim hari ini -> kirim otomatis!
     """
     if now is None:
-        now = datetime.now()
+        now = now_wib()
+    elif now.tzinfo is not None:
+        now = now.astimezone(WIB)
         
     if now.weekday() >= 5:
         return False, "Bukan hari bursa (Weekend)"
@@ -350,7 +381,9 @@ def cek_dan_kirim_jadwal_1530(df_screener=None, now=None):
     target_end = 20 * 60 + 0    # 20:00 WIB (Fleksibel hingga malam hari bursa jika PC/aplikasi baru aktif)
     
     if target_start <= total_minutes <= target_end:
-        return kirim_rekomendasi_rumus_2_dan_9(df_screener=df_screener, force=False)
+        return kirim_rekomendasi_rumus_2_dan_9(
+            df_screener=df_screener, force=False, require_fresh=True, now=now,
+        )
     if total_minutes < target_start:
         return False, "Belum jam 15:30 WIB"
     return False, "Lewat jam 20:00 WIB"

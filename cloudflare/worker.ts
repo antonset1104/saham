@@ -45,6 +45,17 @@ export class SahamContainer extends Container<ContainerEnv> {
       throw new Error(`EOD container failed: ${response.status}: ${detail}`);
     }
   }
+
+  async runAfternoonJob(job: "refresh" | "alert"): Promise<void> {
+    await this.ensureReady();
+    const response = await this.containerFetch(`http://localhost/run/afternoon/${job}`, {
+      method: "POST",
+    }, 8503);
+    if (!response.ok) {
+      const detail = (await response.text()).slice(0, 1000);
+      throw new Error(`Afternoon ${job} failed: ${response.status}: ${detail}`);
+    }
+  }
 }
 
 SahamContainer.outboundByHost = {
@@ -58,7 +69,16 @@ export default {
     if (url.hostname !== "saham.vijeron.com") return new Response("Not found", { status: 404 });
     return getContainer(env.SAHAM_CONTAINER, "saham-main").fetch(request);
   },
-  async scheduled(_event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    ctx.waitUntil(getContainer(env.SAHAM_CONTAINER, "saham-main").runEod());
+  async scheduled(event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    const container = getContainer(env.SAHAM_CONTAINER, "saham-main");
+    if (event.cron === "10,25 8 * * MON-FRI") {
+      ctx.waitUntil(container.runAfternoonJob("refresh"));
+    } else if (event.cron === "30,35,40,45 8 * * MON-FRI") {
+      ctx.waitUntil(container.runAfternoonJob("alert"));
+    } else if (event.cron === "30 11 * * MON-FRI") {
+      ctx.waitUntil(container.runEod());
+    } else {
+      console.error("Unknown scheduled trigger", event.cron);
+    }
   },
 } satisfies ExportedHandler<Env>;

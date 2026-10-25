@@ -590,6 +590,10 @@ def main():
                             return None
 
                         ind = hitung_semua_indikator(df_saham, ticker, aman_session)
+                        bar_timestamp = pd.Timestamp(df_saham.index[-1])
+                        if bar_timestamp.tzinfo is not None:
+                            bar_timestamp = bar_timestamp.tz_convert("Asia/Jakarta")
+                        bar_date = bar_timestamp.date().isoformat()
                         kat, per, pbv = get_fundamental(t_jk)
                         
                         # --- 2. FILTER BROKSUM PINTAR ---
@@ -622,6 +626,7 @@ def main():
                         
                         data_akhir = {
                             "Waktu Update": waktu_sekarang, 
+                            "Tanggal Data Harga": bar_date,
                             "Ticker": ticker, 
                             "Broksum": broksum_info,
                             "Kategori": kat, 

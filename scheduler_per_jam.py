@@ -1,5 +1,8 @@
 import os
 import sys
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
 import time
 import json
 import signal
@@ -140,7 +143,7 @@ def jalankan_satu_siklus(limit=None):
         if sukses_tg:
             print(f"📲 [15:30 WIB] Alert Telegram BSJP Rumus 2 & 9 terkirim: {msg_tg}")
     except Exception as e_tg:
-        pass
+        print(f"Alert 15:30 gagal: {e_tg}", file=sys.stderr)
 
     # 4. Kirim update realtime BSJP 10:00 WIB otomatis jika jadwal tiba
     try:
@@ -323,8 +326,8 @@ def loop_scheduler_utama():
                 try:
                     from notifikasi_telegram import cek_dan_kirim_jadwal_1530
                     cek_dan_kirim_jadwal_1530()
-                except Exception:
-                    pass
+                except Exception as error:
+                    print(f"Alert 15:30 gagal: {error}", file=sys.stderr)
 
             # Pengecekan berkala pemicu update realtime BSJP pagi (09:55 - 11:45 WIB)
             if now_cek.weekday() < 5 and (now_cek.hour == 10 or (now_cek.hour == 9 and now_cek.minute >= 55) or (now_cek.hour == 11 and now_cek.minute <= 45)):

@@ -13,6 +13,8 @@ import threading
 import time
 
 from state_client import ROOT, StateClient
+sys.path.insert(0, str(ROOT))
+from notifikasi_telegram import MIN_AFTERNOON_ROWS, cek_dan_kirim_jadwal_1530, fresh_afternoon_rows, now_wib
 
 
 LOG = logging.getLogger(__name__)
@@ -31,13 +33,60 @@ class ControlHandler(BaseHTTPRequestHandler):
         self.wfile.write(b"ok")
 
     def do_POST(self) -> None:
-        if self.path != "/run/eod":
+        if self.path not in {"/run/eod", "/run/afternoon/refresh", "/run/afternoon/alert"}:
             self.send_error(404)
             return
         if not JOB_LOCK.acquire(blocking=False):
             self.send_error(409, "job already running")
             return
         try:
+            if self.path == "/run/afternoon/alert":
+                success, detail = cek_dan_kirim_jadwal_1530()
+                if not success and "sudah pernah terkirim" not in detail:
+                    LOG.warning("Afternoon alert skipped: %s", detail)
+                    self.send_error(503, detail)
+                    return
+                if success:
+                    CLIENT.sync()
+                LOG.info("Afternoon alert: %s", detail)
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b"ok")
+                return
+
+            if self.path == "/run/afternoon/refresh":
+                import pandas as pd
+                result_file = ROOT / "Database" / "hasil_screener.csv"
+                if result_file.is_file():
+                    existing = pd.read_csv(result_file)
+                    existing_count = len(fresh_afternoon_rows(existing, now_wib()))
+                    if existing_count >= max(MIN_AFTERNOON_ROWS, int(len(existing) * 0.7)):
+                        LOG.info("Afternoon refresh already current: %d rows", existing_count)
+                        self.send_response(200)
+                        self.end_headers()
+                        self.wfile.write(b"already current")
+                        return
+                result = subprocess.run(
+                    [sys.executable, "update_data.py"],
+                    cwd=ROOT, timeout=720, check=False, capture_output=True, text=True,
+                )
+                if result.returncode != 0:
+                    LOG.error("Afternoon refresh failed: %s", result.stderr[-1000:])
+                    self.send_error(500, "Afternoon refresh failed")
+                    return
+                screener = pd.read_csv(result_file)
+                fresh_count = len(fresh_afternoon_rows(screener, now_wib()))
+                if fresh_count < max(MIN_AFTERNOON_ROWS, int(len(screener) * 0.7)):
+                    LOG.warning("Afternoon refresh has only %d current rows", fresh_count)
+                    self.send_error(503, "Fresh price data unavailable")
+                    return
+                CLIENT.sync()
+                LOG.info("Afternoon refresh completed: %d current rows", fresh_count)
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b"ok")
+                return
+
             result = subprocess.run(
                 [sys.executable, "trading_pipeline.py", "--skip-if-current-eod"],
                 cwd=ROOT, timeout=840, check=False, capture_output=True, text=True,
@@ -51,9 +100,9 @@ class ControlHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.end_headers()
             self.wfile.write(b"ok")
-        except (subprocess.TimeoutExpired, OSError):
-            LOG.exception("EOD execution failed")
-            self.send_error(500, "EOD failed")
+        except Exception:
+            LOG.exception("Scheduled execution failed: %s", self.path)
+            self.send_error(500, "Scheduled execution failed")
         finally:
             JOB_LOCK.release()
 

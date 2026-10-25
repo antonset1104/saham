@@ -26,7 +26,7 @@ MAX_FILE_SIZE = 64 * 1024 * 1024
 ROOT = Path(__file__).resolve().parents[1]
 ROOT_FILES = ("config_web.json", "preset_kustom.json")
 DATA_DIRS = ("Database", "Arsip_Data_Harian")
-IGNORED_NAMES = {"scheduler_status.json", "telegram_1000_sent.json", "telegram_1530_sent.json", "last_sent_jumat_2000.json"}
+IGNORED_NAMES = {"scheduler_status.json", "telegram_1000_sent.json", "last_sent_jumat_2000.json"}
 
 
 def eligible(relative: str) -> bool:
