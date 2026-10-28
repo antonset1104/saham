@@ -572,6 +572,7 @@ def kirim_update_realtime_pagi_1000(df_screener=None, force=False, now: datetime
                 rekomendasi = []
         except ValueError:
             rekomendasi = []
+    rekomendasi = rekomendasi[:10]
 
     # Ambil data harga realtime terkini
     tickers = list(set(item["ticker"] for item in rekomendasi if item.get("ticker")))
