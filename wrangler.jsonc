@@ -25,6 +25,7 @@
     "database_id": "d4b491b8-9e87-4913-b221-25bf85625285"
   }],
   "triggers": { "crons": [
+    "0,5,10,15 3 * * MON-FRI",
     "10,25 8 * * MON-FRI",
     "30,35,40,45 8 * * MON-FRI",
     "30 11 * * MON-FRI"

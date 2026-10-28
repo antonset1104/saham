@@ -14,7 +14,7 @@ import time
 
 from state_client import ROOT, StateClient
 sys.path.insert(0, str(ROOT))
-from notifikasi_telegram import MIN_AFTERNOON_ROWS, cek_dan_kirim_jadwal_1530, fresh_afternoon_rows, now_wib
+from notifikasi_telegram import MIN_AFTERNOON_ROWS, cek_dan_kirim_jadwal_1000, cek_dan_kirim_jadwal_1530, fresh_afternoon_rows, now_wib
 
 
 LOG = logging.getLogger(__name__)
@@ -33,13 +33,27 @@ class ControlHandler(BaseHTTPRequestHandler):
         self.wfile.write(b"ok")
 
     def do_POST(self) -> None:
-        if self.path not in {"/run/eod", "/run/afternoon/refresh", "/run/afternoon/alert"}:
+        if self.path not in {"/run/eod", "/run/morning/alert", "/run/afternoon/refresh", "/run/afternoon/alert"}:
             self.send_error(404)
             return
         if not JOB_LOCK.acquire(blocking=False):
             self.send_error(409, "job already running")
             return
         try:
+            if self.path == "/run/morning/alert":
+                success, detail = cek_dan_kirim_jadwal_1000()
+                if not success and "sudah pernah terkirim" not in detail:
+                    LOG.warning("Morning alert skipped: %s", detail)
+                    self.send_error(503, detail)
+                    return
+                if success:
+                    CLIENT.sync()
+                LOG.info("Morning alert: %s", detail)
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b"ok")
+                return
+
             if self.path == "/run/afternoon/alert":
                 success, detail = cek_dan_kirim_jadwal_1530()
                 if not success and "sudah pernah terkirim" not in detail:

@@ -425,7 +425,8 @@ def _ambil_data_realtime_emiten(tickers: list, df_screener=None) -> dict:
                     "price": p,
                     "open": o,
                     "high": max(h, p),
-                    "low": l if l > 0 else p
+                    "low": l if l > 0 else p,
+                    "date": str(row.get("Tanggal Data Harga", ""))[:10],
                 }
 
     # 2. Ambil update live intraday via yfinance (satu kali batch download cepat)
@@ -450,12 +451,13 @@ def _ambil_data_realtime_emiten(tickers: list, df_screener=None) -> dict:
                             l = float(df_yf["Low"][sym].iloc[-1])
                         
                         if not np.isnan(c) and c > 0:
-                            prev_high = data_lookup.get(t, {}).get("high", 0)
+                            bar_date = pd.Timestamp(df_yf.index[-1]).date().isoformat()
                             data_lookup[t] = {
                                 "price": c,
                                 "open": o,
-                                "high": max(h, prev_high, c),
-                                "low": l if (not np.isnan(l) and l > 0) else c
+                                "high": max(h, c),
+                                "low": l if (not np.isnan(l) and l > 0) else c,
+                                "date": bar_date,
                             }
                     except Exception:
                         pass
@@ -464,7 +466,7 @@ def _ambil_data_realtime_emiten(tickers: list, df_screener=None) -> dict:
 
     return data_lookup
 
-def kirim_update_realtime_pagi_1000(df_screener=None, force=False) -> tuple[bool, str]:
+def kirim_update_realtime_pagi_1000(df_screener=None, force=False, now: datetime | None = None) -> tuple[bool, str]:
     """
     Mengirimkan update harga realtime daftar saham BSJP (Rumus 2 & Rumus 9)
     yang dikirim pada hari/sore sebelumnya ke bot Telegram pada jam 10:00 WIB.
@@ -472,7 +474,9 @@ def kirim_update_realtime_pagi_1000(df_screener=None, force=False) -> tuple[bool
     if not is_telegram_configured():
         return False, "Bot Telegram belum terkonfigurasi (Token/Chat ID kosong)."
 
-    today_str = datetime.now().strftime("%Y-%m-%d")
+    current = now or now_wib()
+    current = current.astimezone(WIB) if current.tzinfo else current.replace(tzinfo=WIB)
+    today_str = current.strftime("%Y-%m-%d")
 
     # Cek apakah sudah pernah kirim update pagi hari ini
     if not force and os.path.exists(FILE_LAST_SENT_1000):
@@ -515,7 +519,7 @@ def kirim_update_realtime_pagi_1000(df_screener=None, force=False) -> tuple[bool
                     try:
                         dt_w = datetime.strptime(wkt_sent, "%Y-%m-%d %H:%M:%S")
                         # Jika dikirim sebelum jam 09:00 hari ini, berarti itu emiten sesi sore sebelumnya
-                        if dt_w.date() < datetime.now().date() or dt_w.hour < 9:
+                        if dt_w.date() < current.date() or dt_w.hour < 9:
                             is_valid_kemarin = True
                     except Exception:
                         pass
@@ -566,46 +570,22 @@ def kirim_update_realtime_pagi_1000(df_screener=None, force=False) -> tuple[bool
         except Exception:
             pass
 
-    # 3. Fallback kedua: Jika masih kosong (misal database baru direset), ambil dari screener aktif
-    if not rekomendasi:
-        if df_screener is None or df_screener.empty:
-            file_hasil = "Database/hasil_screener.csv"
-            if os.path.exists(file_hasil):
-                try:
-                    df_screener = pd.read_csv(file_hasil)
-                except Exception:
-                    pass
-        if df_screener is not None and not df_screener.empty:
-            hasil_rumus = tracker_ai.filter_saham_9_rumus(df_screener)
-            for rid, rnama in [("R2", "Rumus 2 (Anomali ML)"), ("R9", "Rumus 9 (Risk/Reward > 1:3)")]:
-                df_sub = hasil_rumus.get(rid, pd.DataFrame())
-                for _, r in df_sub.head(3).iterrows():
-                    t = str(r.get("Ticker", "")).strip().upper()
-                    p = float(r.get("Harga (Rp)", 0))
-                    tp = round(p * 1.05)
-                    cl = round(p * 0.97)
-                    rekomendasi.append({
-                        "ticker": t,
-                        "rumus_id": rid,
-                        "rumus_nama": rnama,
-                        "harga_entry": p,
-                        "target_tp": tp,
-                        "stop_loss": cl,
-                        "score": int(r.get("Total Score", 0)) if pd.notnull(r.get("Total Score")) else 0,
-                        "plan": r.get("Auto Trading Plan", f"TP Rp {tp:,} (+5%) | CL Rp {cl:,} (-3%)")
-                    })
-
-    if not rekomendasi:
-        return False, "Tidak ditemukan daftar saham BSJP yang direkomendasikan pada sesi sebelumnya."
+    # The morning report must not present a current screener row as a prior-session pick.
+    if rekomendasi and tgl_rekomendasi[:10].count("-") == 2:
+        try:
+            if (current.date() - datetime.strptime(tgl_rekomendasi[:10], "%Y-%m-%d").date()).days > 7:
+                rekomendasi = []
+        except ValueError:
+            rekomendasi = []
 
     # Ambil data harga realtime terkini
     tickers = list(set(item["ticker"] for item in rekomendasi if item.get("ticker")))
     market_data = _ambil_data_realtime_emiten(tickers, df_screener=df_screener)
 
-    waktu_str = datetime.now().strftime("%d/%m/%Y %H:%M WIB")
+    waktu_str = current.strftime("%d/%m/%Y %H:%M WIB")
     lines = [
         "🌅 <b>UPDATE REALTIME BSJP PAGI (10:00 WIB)</b>",
-        f"📊 <i>Realisasi Saham Rekomendasi Sore ({tgl_rekomendasi})</i>",
+        f"📊 <i>Realisasi Saham Rekomendasi Sore ({html.escape(tgl_rekomendasi)})</i>",
         f"📅 <i>{waktu_str}</i>",
         "━━━━━━━━━━━━━━━━━━━━"
     ]
@@ -623,6 +603,10 @@ def kirim_update_realtime_pagi_1000(df_screener=None, force=False) -> tuple[bool
             entry = float(item.get("harga_entry", 0))
             quote = market_data.get(tkr, {})
             
+            if quote.get("date") != today_str:
+                lines.append(f"<b>{idx}. #{html.escape(tkr)}</b> (Beli: Rp {entry:,.0f})")
+                lines.append("   Harga pagi belum tersedia; performa belum dapat dihitung.")
+                continue
             cur_price = quote.get("price", entry)
             high_price = max(quote.get("high", cur_price), cur_price)
             
@@ -645,7 +629,7 @@ def kirim_update_realtime_pagi_1000(df_screener=None, force=False) -> tuple[bool
             tp_target = item.get("target_tp", round(entry * 1.05))
             cl_target = item.get("stop_loss", round(entry * 0.97))
 
-            lines.append(f"<b>{idx}. #{tkr}</b> (Beli: Rp {entry:,.0f})")
+            lines.append(f"<b>{idx}. #{html.escape(tkr)}</b> (Beli: Rp {entry:,.0f})")
             lines.append(f"   💰 <b>Sekarang:</b> Rp {cur_price:,.0f} ({cur_gain:+.2f}%)")
             lines.append(f"   🏔️ <b>High Sesi 1:</b> Rp {high_price:,.0f} ({max_gain:+.2f}%)")
             lines.append(f"   🎯 <code>Target: TP Rp {tp_target:,} | CL Rp {cl_target:,}</code>")
@@ -658,6 +642,10 @@ def kirim_update_realtime_pagi_1000(df_screener=None, force=False) -> tuple[bool
     if lain_items:
         _render_kelompok("⚡ <b>REKOMENDASI BSJP LAINNYA</b>", lain_items)
 
+    if not rekomendasi:
+        lines.append("\nTidak ada daftar BSJP sesi sebelumnya yang masih berlaku.")
+    from global_indices import morning_index_lines
+    lines.extend(morning_index_lines(current))
     lines.append("\n━━━━━━━━━━━━━━━━━━━━")
     lines.append("💡 <i>Panduan Sesi 1: Jika sudah mencapai target TP (+1.5% s/d +5.0%), amankan profit bertahap (taking profit). Pasang trailing stop atau disiplin cut loss bila harga tembus batas risiko.</i>")
 
@@ -670,13 +658,13 @@ def kirim_update_realtime_pagi_1000(df_screener=None, force=False) -> tuple[bool
             with open(FILE_LAST_SENT_1000, "w") as f:
                 json.dump({
                     "last_sent_date": today_str,
-                    "waktu": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "waktu": current.strftime("%Y-%m-%d %H:%M:%S"),
                     "total_emiten": len(rekomendasi),
                     "tgl_rekomendasi_asal": tgl_rekomendasi
                 }, f, indent=2)
         except Exception:
             pass
-        return True, f"Berhasil mengirim update realtime 10:00 WIB ({len(rekomendasi)} saham dipantau)."
+        return True, f"Berhasil mengirim update 10:00 WIB ({len(rekomendasi)} saham dipantau dan indeks dunia)."
     else:
         return False, "Gagal mengirim pesan ke Telegram API."
 
@@ -687,7 +675,9 @@ def cek_dan_kirim_jadwal_1000(df_screener=None, now=None):
     serta belum pernah kirim update pagi hari ini -> kirim otomatis!
     """
     if now is None:
-        now = datetime.now()
+        now = now_wib()
+    elif now.tzinfo is not None:
+        now = now.astimezone(WIB)
 
     if now.weekday() >= 5:
         return False, "Bukan hari bursa (Weekend)"
@@ -697,7 +687,7 @@ def cek_dan_kirim_jadwal_1000(df_screener=None, now=None):
     target_end = 12 * 60 + 30   # 12:30 WIB (Sepanjang Sesi 1 Bursa s/d istirahat siang)
 
     if target_start <= total_minutes <= target_end:
-        return kirim_update_realtime_pagi_1000(df_screener=df_screener, force=False)
+        return kirim_update_realtime_pagi_1000(df_screener=df_screener, force=False, now=now)
     return False, "Di luar jam Sesi 1 bursa (09:55 - 12:30 WIB)"
 
 def kirim_alert_screener_fundamental_jumat(df_lolos=None, force=False):
