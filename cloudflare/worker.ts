@@ -67,6 +67,10 @@ export class SahamContainer extends Container<ContainerEnv> {
       throw new Error(`Morning alert failed: ${response.status}: ${detail}`);
     }
   }
+
+  async warmMorning(): Promise<void> {
+    await this.ensureReady();
+  }
 }
 
 SahamContainer.outboundByHost = {
@@ -82,7 +86,9 @@ export default {
   },
   async scheduled(event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
     const container = getContainer(env.SAHAM_CONTAINER, "saham-main");
-    if (event.cron === "0,5,10,15 3 * * MON-FRI") {
+    if (event.cron === "50 2 * * MON-FRI") {
+      ctx.waitUntil(container.warmMorning());
+    } else if (event.cron === "0,5,10,15 3 * * MON-FRI") {
       ctx.waitUntil(container.runMorningAlert());
     } else if (event.cron === "10,25 8 * * MON-FRI") {
       ctx.waitUntil(container.runAfternoonJob("refresh"));
