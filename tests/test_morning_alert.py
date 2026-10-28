@@ -5,6 +5,7 @@ from typing import Any
 
 import global_indices
 import notifikasi_telegram as telegram
+import pandas as pd
 import tracker_ai
 
 
@@ -32,3 +33,19 @@ def test_morning_report_sends_indices_without_stale_picks_and_deduplicates(
     assert not success
     assert "sudah pernah terkirim" in detail
     assert len(sent) == 1
+
+
+def test_single_ticker_multiindex_yahoo_quote(monkeypatch: Any) -> None:
+    import yfinance as yf
+
+    columns = pd.MultiIndex.from_product(
+        [["Close", "High", "Open", "Low"], ["BBCA.JK"]]
+    )
+    rows = pd.DataFrame(
+        [[5025.0, 5100.0, 4920.0, 4900.0]],
+        index=pd.to_datetime(["2026-10-28"]), columns=columns,
+    )
+    monkeypatch.setattr(yf, "download", lambda *args, **kwargs: rows)
+    result = telegram._ambil_data_realtime_emiten(["BBCA"], pd.DataFrame())
+    assert result["BBCA"]["price"] == 5025.0
+    assert result["BBCA"]["date"] == "2026-10-28"

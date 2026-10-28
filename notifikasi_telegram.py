@@ -434,21 +434,16 @@ def _ambil_data_realtime_emiten(tickers: list, df_screener=None) -> dict:
         try:
             import yfinance as yf
             symbols = [f"{t}.JK" for t in tickers]
-            df_yf = yf.download(symbols, period="2d", progress=False)
+            df_yf = yf.download(symbols, period="2d", auto_adjust=False, progress=False, timeout=12)
             if not df_yf.empty:
                 for t in tickers:
                     sym = f"{t}.JK"
                     try:
-                        if len(symbols) == 1:
-                            c = float(df_yf["Close"].iloc[-1])
-                            h = float(df_yf["High"].iloc[-1])
-                            o = float(df_yf["Open"].iloc[-1])
-                            l = float(df_yf["Low"].iloc[-1])
-                        else:
-                            c = float(df_yf["Close"][sym].iloc[-1])
-                            h = float(df_yf["High"][sym].iloc[-1])
-                            o = float(df_yf["Open"][sym].iloc[-1])
-                            l = float(df_yf["Low"][sym].iloc[-1])
+                        def value(field: str) -> float:
+                            series = df_yf[field][sym] if isinstance(df_yf.columns, pd.MultiIndex) else df_yf[field]
+                            return float(series.iloc[-1])
+
+                        c, h, o, l = (value(field) for field in ("Close", "High", "Open", "Low"))
                         
                         if not np.isnan(c) and c > 0:
                             bar_date = pd.Timestamp(df_yf.index[-1]).date().isoformat()
